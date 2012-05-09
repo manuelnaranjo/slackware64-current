@@ -1,5 +1,5 @@
-This is the beta release of binutils 2.22.52.0.1 for Linux, which is
-based on binutils 2012 0131 in CVS on sourceware.org plus various
+This is the beta release of binutils 2.22.52.0.2 for Linux, which is
+based on binutils 2012 0424 in CVS on sourceware.org plus various
 changes. It is purely for Linux.
 
 All relevant patches in patches have been applied to the source tree.
@@ -115,7 +115,7 @@ endif
 
 to arch/ia64/Makefile in your kernel source tree.
 
-Please report any bugs related to binutils 2.22.52.0.1 to
+Please report any bugs related to binutils 2.22.52.0.2 to
 hjl.tools@gmail.com
 
 and
@@ -123,6 +123,31 @@ and
 http://www.sourceware.org/bugzilla/
 
 Changes from binutils 2.22.52.0.1:
+
+1. Update from binutils 2012 0424.
+2. Support Intel HLE and RTM extension.
+3. Add NACL support.
+4. Fix -Bsymbolic with protected function pointer.  PR 13880.
+5. Fix an IFUNC regression.  PR 13817.
+6. Fix x86 NOP fill regression.  PR 13675.
+7. Fix a linker regression.  PR 13991. 
+8. Fix dangling global hidden symbol in symtab.  PR 13621.
+9. Fix objcopy, strip and ld for --emit-relocs.  PR 13947.
+10. Improve gold.
+11. Improve mach support.
+12. Improve vms support.
+13. Improve windows support.
+14. Improve arm support.
+15. Improve avr support.
+16. Improve mips support.
+17. Improve ppc support.
+18. Improve rx support.
+19. Improve s390 support.
+20. Improve sh support.
+21. Improve sparc support.
+22. Improve tile support.
+
+Changes from binutils 2.22.51.0.1:
 
 1. Update from binutils 2012 0131.
 2. Add x32 support to gold.
@@ -465,13 +490,13 @@ already been defined.  PR 12001.
 
 The file list:
 
-1. binutils-2.22.52.0.1.tar.bz2. Source code.
+1. binutils-2.22.52.0.2.tar.bz2. Source code.
 
 The primary sites for the beta Linux binutils are:
 
 1. http://www.kernel.org/pub/linux/devel/binutils/
 
-It is also available on linux/release/2.22.52.0.1 branch at
+It is also available on linux/release/2.22.52.0.2 branch at
 
 http://git.kernel.org/?p=linux/kernel/git/hjl/binutils.git;a=summary
 
@@ -480,4 +505,4 @@ Thanks.
 
 H.J. Lu
 hjl.tools@gmail.com
-01/31/2012
+04/25/2012
