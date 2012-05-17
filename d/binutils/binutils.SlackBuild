@@ -24,7 +24,7 @@
 
 
 PKGNAM=binutils
-VERSION=${VERSION:-$(echo $PKGNAM-*.tar.xz | rev | cut -f 3- -d . | cut -f 1 -d - | rev)}
+VERSION=${VERSION:-$(find $PKGNAM-*.tar.?z* | rev | cut -f 3- -d . | cut -f 1 -d - | rev)}
 BUILD=${BUILD:-1}
 
 # Automatically determine the architecture we're building on:
@@ -87,6 +87,19 @@ case "$ARCH" in
     *)    TARGET=$ARCH-slackware-linux ;;
 esac
 
+if [ "${BUILD}" != "${HST}" ]; then
+  if [ "${HST}" = "i686-w64-mingw32" ]; then
+    SLKCFLAGS="-O2"
+    LIBDIRSUFFIX=""
+    WERROR="--enable-werror=no"
+  elif [ "${HST}" = "x86_64-w64-mingw32" ]; then
+    SLKCFLAGS="-O2"
+    LIBDIRSUFFIX="64"
+  fi
+fi
+
+WERROR="--enable-werror=no"
+
 CWD=$(pwd)
 TMP=${TMP:-/tmp}
 PKG=$TMP/package-binutils
@@ -121,15 +134,16 @@ CFLAGS="$SLKCFLAGS" \
   --infodir=/usr/info \
   --with-docdir=/usr/doc/binutils-$VERSION \
   --enable-shared \
-  --enable-multilib \
+  --disable-multilib \
   --enable-64-bit-bfd \
   --enable-plugins \
   --enable-threads \
-  --enable-targets=$TARGET \
+  --enable-targets=${TGT},${HST} \
+  --build=${BUILD} \
+  --host=${HST} \
   $GOLD \
   $NO_INITFINI \
   $WERROR \
-  --build=$TARGET \
   || exit 1
 
 make clean || exit 1
@@ -144,11 +158,11 @@ cp -a include/libiberty.h $PKG/usr/include/libiberty.h
 ( cd $PKG/usr/man/man1 ; mv strings.1 strings-GNU.1 )
 
 # Move ldscripts to /usr/lib${LIBDIRSUFFIX}, and then put symlinks in place
-mv $PKG/usr/${TARGET}/lib/ldscripts $PKG/usr/lib${LIBDIRSUFFIX}
-( cd $PKG/usr/${TARGET}
+mv $PKG/usr/${HST}/lib/ldscripts $PKG/usr/lib${LIBDIRSUFFIX}
+( cd $PKG/usr/${HST}
   ln -s /usr/lib${LIBDIRSUFFIX}/ldscripts lib/ldscripts
   for FILE in ar as ld ld.bfd ld.gold nm objcopy objdump ranlib strip ; do
-    if [ -r "/usr/bin/$FILE" ]; then
+    if [ -r "usr/bin/$FILE" ]; then
       rm -f bin/$FILE
       ln -s /usr/bin/$FILE bin/$FILE
     fi
@@ -162,7 +176,7 @@ if [ -r $PKG/usr/bin/$DEFAULT_LD ]; then
 fi
       
 find $PKG | xargs file | grep -e "executable" -e "shared object" \
-  | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
+  | grep ${EXE_FORMAT} | cut -f 1 -d : | xargs ${STRIP} --strip-unneeded 2> /dev/null
 
 # Remove some unneeded man pages, and then compress the rest
 rm -f $PKG/usr/man/man1/{dlltool,windres}.1
@@ -195,8 +209,11 @@ chown -R root:root $PKG/usr/doc/binutils-$VERSION
 mkdir -p $PKG/install
 cat $CWD/slack-desc > $PKG/install/slack-desc
 
-cd $PKG
-/sbin/makepkg -l y -c n $TMP/binutils-$VERSION-$ARCH-$BUILD.txz
+cat ${CWD}/binutils.yypkg.meta | sed \
+  -e "s/%{HST}/${HST}/" \
+  -e "s/%{TGT}/${TGT}/" \
+  -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
+  | makeypkg.native -o ${YYOUTPUT} -meta - ${PKG}
 
 cat << EOF
 
