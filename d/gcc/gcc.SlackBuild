@@ -367,8 +367,8 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
       $PKG_GCC/usr/lib${LIBDIRSUFFIX}/gcc/${TARGET}/${VERSION}/specs
   fi
 
-  #  make ada.install-common DESTDIR=$PKG1
-  #  make install-gnatlib DESTDIR=$PKG1
+  #  make ada.install-common DESTDIR=$PKG_GCC
+  #  make install-gnatlib DESTDIR=$PKG_GCC
   make -i install-info DESTDIR=$PKG_GCC
 
   chmod 755 $PKG_GCC/usr/lib${LIBDIRSUFFIX}/libgcc_s.so.1
@@ -437,199 +437,199 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
 # OK, time to split the big package where needed:
 
 # gcc-g++:
-( cd $PKG2
+( cd $PKG_GCC_GPP
   mkdir -p usr/bin
-  mv $PKG1/usr/bin/*++* usr/bin
+  mv $PKG_GCC/usr/bin/*++* usr/bin
   mkdir -p usr/include
-  mv $PKG1/usr/include/c++ usr/include
+  mv $PKG_GCC/usr/include/c++ usr/include
   mkdir -p usr/lib${LIBDIRSUFFIX}
-  mv $PKG1/usr/lib${LIBDIRSUFFIX}/*++* usr/lib${LIBDIRSUFFIX}
+  mv $PKG_GCC/usr/lib${LIBDIRSUFFIX}/*++* usr/lib${LIBDIRSUFFIX}
   mkdir -p usr/libexec/gcc/$TARGET/$VERSION
-  mv $PKG1/usr/libexec/gcc/$TARGET/$VERSION/cc1plus usr/libexec/gcc/$TARGET/$VERSION/cc1plus
+  mv $PKG_GCC/usr/libexec/gcc/$TARGET/$VERSION/cc1plus usr/libexec/gcc/$TARGET/$VERSION/cc1plus
   mkdir -p usr/man/man1
-  mv $PKG1/usr/man/man1/*++* usr/man/man1
+  mv $PKG_GCC/usr/man/man1/*++* usr/man/man1
 )
 
 # gcc-gfortran:
-( cd $PKG3
+( cd $PKG_GCC_GFORTRAN
   mkdir -p usr/bin
-  mv $PKG1/usr/bin/*gfortran* usr/bin
-  mv $PKG1/usr/bin/*95* usr/bin
-  mv $PKG1/usr/bin/*77* usr/bin
+  mv $PKG_GCC/usr/bin/*gfortran* usr/bin
+  mv $PKG_GCC/usr/bin/*95* usr/bin
+  mv $PKG_GCC/usr/bin/*77* usr/bin
   # Doesn't this seem like a logical idea?
   ( cd usr/bin ; ln -sf gfortran-gcc-${VERSION} fortran )
   mkdir -p usr/info
-  mv $PKG1/usr/info/gfortran* usr/info
+  mv $PKG_GCC/usr/info/gfortran* usr/info
   mkdir -p usr/lib${LIBDIRSUFFIX}
-  mv $PKG1/usr/lib${LIBDIRSUFFIX}/libgfortran* usr/lib${LIBDIRSUFFIX}
+  mv $PKG_GCC/usr/lib${LIBDIRSUFFIX}/libgfortran* usr/lib${LIBDIRSUFFIX}
   mkdir -p usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION
-  mv $PKG1/usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/finclude usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION
-  mv $PKG1/usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/libgfortran* usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION
+  mv $PKG_GCC/usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/finclude usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION
+  mv $PKG_GCC/usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/libgfortran* usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION
   mkdir -p usr/libexec/gcc/$TARGET/$VERSION
-  mv $PKG1/usr/libexec/gcc/$TARGET/$VERSION/f951 usr/libexec/gcc/$TARGET/$VERSION/f951
-  mv $PKG1/usr/libexec/gcc/$TARGET/$VERSION/libgfortran* usr/libexec/gcc/$TARGET/$VERSION
+  mv $PKG_GCC/usr/libexec/gcc/$TARGET/$VERSION/f951 usr/libexec/gcc/$TARGET/$VERSION/f951
+  mv $PKG_GCC/usr/libexec/gcc/$TARGET/$VERSION/libgfortran* usr/libexec/gcc/$TARGET/$VERSION
   mkdir -p usr/man/man1
-  mv $PKG1/usr/man/man1/gfortran* usr/man/man1
+  mv $PKG_GCC/usr/man/man1/gfortran* usr/man/man1
 )
 
 # gcc-gnat:
 # First, relocate usr/bin/gnative2ascii to the gcc-java package so it
 # isn't matched and accidentally put in gcc-gnat:
-mkdir -p $PKG5/usr/bin
-mv $PKG1/usr/bin/gnative2ascii $PKG5/usr/bin
+mkdir -p $PKG_GCC_JAVA/usr/bin
+mv $PKG_GCC/usr/bin/gnative2ascii $PKG_GCC_JAVA/usr/bin
 # Now make the gcc-gnat package tree:
-( cd $PKG4
+( cd $PKG_GCC_GNAT
   mkdir -p usr/bin
-  mv $PKG1/usr/bin/gnat* usr/bin
-  mv $PKG1/usr/bin/gpr* usr/bin
+  mv $PKG_GCC/usr/bin/gnat* usr/bin
+  mv $PKG_GCC/usr/bin/gpr* usr/bin
   mkdir -p usr/info
-  mv $PKG1/usr/info/gnat* usr/info
+  mv $PKG_GCC/usr/info/gnat* usr/info
   mkdir -p usr/libexec/gcc/$TARGET/$VERSION
-  mv $PKG1/usr/libexec/gcc/$TARGET/$VERSION/gnat1 usr/libexec/gcc/$TARGET/$VERSION
+  mv $PKG_GCC/usr/libexec/gcc/$TARGET/$VERSION/gnat1 usr/libexec/gcc/$TARGET/$VERSION
   mkdir -p usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION
-  mv $PKG1/usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/adainclude usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION
-  mv $PKG1/usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/adalib usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION
+  mv $PKG_GCC/usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/adainclude usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION
+  mv $PKG_GCC/usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/adalib usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION
 )
 
 # gcc-java:
-( cd $PKG5
+( cd $PKG_GCC_JAVA
   mkdir -p usr/bin
-  mv $PKG1/usr/bin/aot-compile usr/bin
-  mv $PKG1/usr/bin/addr2name.awk usr/bin
-  # mv $PKG1/usr/bin/fastjar usr/bin
-  mv $PKG1/usr/bin/gappletviewer usr/bin
-  mv $PKG1/usr/bin/gc-analyze usr/bin
-  mv $PKG1/usr/bin/*gcj* usr/bin
-  mv $PKG1/usr/bin/gij usr/bin
-  mv $PKG1/usr/bin/gjar usr/bin
-  mv $PKG1/usr/bin/gjarsigner usr/bin
-  mv $PKG1/usr/bin/gkeytool usr/bin
-  mv $PKG1/usr/bin/grepjar usr/bin
-  mv $PKG1/usr/bin/grmid usr/bin
-  mv $PKG1/usr/bin/grmic usr/bin
-  mv $PKG1/usr/bin/grmiregistry usr/bin
-  mv $PKG1/usr/bin/gserialver usr/bin
-  mv $PKG1/usr/bin/gtnameserv usr/bin
-  mv $PKG1/usr/bin/gjavah usr/bin
-  mv $PKG1/usr/bin/gorbd usr/bin
-  mv $PKG1/usr/bin/jar usr/bin
-  mv $PKG1/usr/bin/jcf-dump usr/bin
-  mv $PKG1/usr/bin/jv-* usr/bin
-  mv $PKG1/usr/bin/rmi* usr/bin
+  mv $PKG_GCC/usr/bin/aot-compile usr/bin
+  mv $PKG_GCC/usr/bin/addr2name.awk usr/bin
+  # mv $PKG_GCC/usr/bin/fastjar usr/bin
+  mv $PKG_GCC/usr/bin/gappletviewer usr/bin
+  mv $PKG_GCC/usr/bin/gc-analyze usr/bin
+  mv $PKG_GCC/usr/bin/*gcj* usr/bin
+  mv $PKG_GCC/usr/bin/gij usr/bin
+  mv $PKG_GCC/usr/bin/gjar usr/bin
+  mv $PKG_GCC/usr/bin/gjarsigner usr/bin
+  mv $PKG_GCC/usr/bin/gkeytool usr/bin
+  mv $PKG_GCC/usr/bin/grepjar usr/bin
+  mv $PKG_GCC/usr/bin/grmid usr/bin
+  mv $PKG_GCC/usr/bin/grmic usr/bin
+  mv $PKG_GCC/usr/bin/grmiregistry usr/bin
+  mv $PKG_GCC/usr/bin/gserialver usr/bin
+  mv $PKG_GCC/usr/bin/gtnameserv usr/bin
+  mv $PKG_GCC/usr/bin/gjavah usr/bin
+  mv $PKG_GCC/usr/bin/gorbd usr/bin
+  mv $PKG_GCC/usr/bin/jar usr/bin
+  mv $PKG_GCC/usr/bin/jcf-dump usr/bin
+  mv $PKG_GCC/usr/bin/jv-* usr/bin
+  mv $PKG_GCC/usr/bin/rmi* usr/bin
   mkdir -p usr/include/c++/$VERSION
   # Move some Java only C++ headers from the C++ package:
-  mv $PKG2/usr/include/c++/$VERSION/{gcj,gnu,java,javax,org,sun} usr/include/c++/$VERSION
-  mv $PKG1/usr/include/ffi.h usr/include
+  mv $PKG_GCC_GPP/usr/include/c++/$VERSION/{gcj,gnu,java,javax,org,sun} usr/include/c++/$VERSION
+  mv $PKG_GCC_JAVA/usr/include/ffi.h usr/include
   mkdir -p usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include
-  mv $PKG1/usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/jawt.h usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include
-  mv $PKG1/usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/ffi.h usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include
-  mv $PKG1/usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/ffitarget.h usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include
-  mv $PKG1/usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/jawt_md.h usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include
-  mv $PKG1/usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/jni.h usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include
-  mv $PKG1/usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/jni_md.h usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include
-  mv $PKG1/usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/jvmpi.h usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include
-  mv $PKG1/usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/libffi usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include
+  mv $PKG_GCC_JAVA/usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/jawt.h usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include
+  mv $PKG_GCC_JAVA/usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/ffi.h usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include
+  mv $PKG_GCC_JAVA/usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/ffitarget.h usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include
+  mv $PKG_GCC_JAVA/usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/jawt_md.h usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include
+  mv $PKG_GCC_JAVA/usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/jni.h usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include
+  mv $PKG_GCC_JAVA/usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/jni_md.h usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include
+  mv $PKG_GCC_JAVA/usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/jvmpi.h usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include
+  mv $PKG_GCC_JAVA/usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/libffi usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include
   # aot-compile Python plugins:
-  if [ ! -d $PKG1/usr/lib${LIBDIRSUFFIX}/python2.6 ]; then
-    echo "NO $PKG1/usr/lib${LIBDIRSUFFIX}/python2.6 !"
+  if [ ! -d $PKG_GCC/usr/lib${LIBDIRSUFFIX}/python2.6 ]; then
+    echo "NO $PKG_GCC/usr/lib${LIBDIRSUFFIX}/python2.6 !"
     exit 1
   fi
-  mv $PKG1/usr/lib${LIBDIRSUFFIX}/python2.6 usr/lib${LIBDIRSUFFIX}
+  mv $PKG_GCC/usr/lib${LIBDIRSUFFIX}/python2.6 usr/lib${LIBDIRSUFFIX}
   mkdir -p usr/info
-  mv $PKG1/usr/info/gcj.* usr/info
-  # mv $PKG1/usr/info/fastjar.* usr/info
+  mv $PKG_GCC/usr/info/gcj.* usr/info
+  # mv $PKG_GCC/usr/info/fastjar.* usr/info
   mkdir -p usr/lib${LIBDIRSUFFIX}
-  mv $PKG1/usr/lib${LIBDIRSUFFIX}/libffi* usr/lib${LIBDIRSUFFIX}
-  mv $PKG1/usr/lib${LIBDIRSUFFIX}/logging.properties usr/lib${LIBDIRSUFFIX}
-  mv $PKG1/usr/lib${LIBDIRSUFFIX}/gcj* usr/lib${LIBDIRSUFFIX}
-  mv $PKG1/usr/lib${LIBDIRSUFFIX}/libgcj* usr/lib${LIBDIRSUFFIX}
-  mv $PKG1/usr/lib${LIBDIRSUFFIX}/libgij* usr/lib${LIBDIRSUFFIX}
-  mv $PKG1/usr/lib${LIBDIRSUFFIX}/lib-org* usr/lib${LIBDIRSUFFIX}
-  mv $PKG1/usr/lib${LIBDIRSUFFIX}/security usr/lib${LIBDIRSUFFIX}
+  mv $PKG_GCC/usr/lib${LIBDIRSUFFIX}/libffi* usr/lib${LIBDIRSUFFIX}
+  mv $PKG_GCC/usr/lib${LIBDIRSUFFIX}/logging.properties usr/lib${LIBDIRSUFFIX}
+  mv $PKG_GCC/usr/lib${LIBDIRSUFFIX}/gcj* usr/lib${LIBDIRSUFFIX}
+  mv $PKG_GCC/usr/lib${LIBDIRSUFFIX}/libgcj* usr/lib${LIBDIRSUFFIX}
+  mv $PKG_GCC/usr/lib${LIBDIRSUFFIX}/libgij* usr/lib${LIBDIRSUFFIX}
+  mv $PKG_GCC/usr/lib${LIBDIRSUFFIX}/lib-org* usr/lib${LIBDIRSUFFIX}
+  mv $PKG_GCC/usr/lib${LIBDIRSUFFIX}/security usr/lib${LIBDIRSUFFIX}
   mkdir -p usr/lib${LIBDIRSUFFIX}/pkgconfig
-  mv $PKG1/usr/lib${LIBDIRSUFFIX}/pkgconfig/libgcj*.pc usr/lib${LIBDIRSUFFIX}/pkgconfig
-  rmdir $PKG1/usr/lib${LIBDIRSUFFIX}/pkgconfig 2> /dev/null
+  mv $PKG_GCC/usr/lib${LIBDIRSUFFIX}/pkgconfig/libgcj*.pc usr/lib${LIBDIRSUFFIX}/pkgconfig
+  rmdir $PKG_GCC/usr/lib${LIBDIRSUFFIX}/pkgconfig 2> /dev/null
   mkdir -p usr/libexec/gcc/$TARGET/$VERSION
-  mv $PKG1/usr/libexec/gcc/$TARGET/$VERSION/jc1 usr/libexec/gcc/$TARGET/$VERSION
-  mv $PKG1/usr/libexec/gcc/$TARGET/$VERSION/ecj1 usr/libexec/gcc/$TARGET/$VERSION
-  mv $PKG1/usr/libexec/gcc/$TARGET/$VERSION/jvgenmain usr/libexec/gcc/$TARGET/$VERSION
+  mv $PKG_GCC/usr/libexec/gcc/$TARGET/$VERSION/jc1 usr/libexec/gcc/$TARGET/$VERSION
+  mv $PKG_GCC/usr/libexec/gcc/$TARGET/$VERSION/ecj1 usr/libexec/gcc/$TARGET/$VERSION
+  mv $PKG_GCC/usr/libexec/gcc/$TARGET/$VERSION/jvgenmain usr/libexec/gcc/$TARGET/$VERSION
   mkdir -p usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include
-  mv $PKG1/usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/gcj usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include
+  mv $PKG_GCC/usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/gcj usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include
   mkdir -p usr/man/man1
-  mv $PKG1/usr/man/man1/aot-compile.1.gz usr/man/man1
-  mv $PKG1/usr/man/man1/gappletviewer.1.gz usr/man/man1
-  mv $PKG1/usr/man/man1/gc-analyze.1.gz usr/man/man1
-  mv $PKG1/usr/man/man1/gcj.1.gz usr/man/man1
-  mv $PKG1/usr/man/man1/gcjh.1.gz usr/man/man1
-  mv $PKG1/usr/man/man1/gcj-dbtool.1.gz usr/man/man1
-  mv $PKG1/usr/man/man1/gij.1.gz usr/man/man1
-  mv $PKG1/usr/man/man1/gjar.1.gz usr/man/man1
-  mv $PKG1/usr/man/man1/gjarsigner.1.gz usr/man/man1
-  mv $PKG1/usr/man/man1/gjavah.1.gz usr/man/man1
-  mv $PKG1/usr/man/man1/gjdoc.1.gz usr/man/man1
-  mv $PKG1/usr/man/man1/gjnih.1.gz usr/man/man1
-  mv $PKG1/usr/man/man1/gkeytool.1.gz usr/man/man1
-  mv $PKG1/usr/man/man1/gnative2ascii.1.gz usr/man/man1
-  mv $PKG1/usr/man/man1/gorbd.1.gz usr/man/man1
-  mv $PKG1/usr/man/man1/grmic.1.gz usr/man/man1
-  mv $PKG1/usr/man/man1/grmid.1.gz usr/man/man1
-  mv $PKG1/usr/man/man1/grmiregistry.1.gz usr/man/man1
-  mv $PKG1/usr/man/man1/gserialver.1.gz usr/man/man1
-  mv $PKG1/usr/man/man1/gtnameserv.1.gz usr/man/man1
-  mv $PKG1/usr/man/man1/jcf-dump.1.gz usr/man/man1
-  mv $PKG1/usr/man/man1/jv-convert.1.gz usr/man/man1
-  mv $PKG1/usr/man/man1/jv-scan.1.gz usr/man/man1
-  mv $PKG1/usr/man/man1/rebuild-gcj-db.1.gz usr/man/man1
+  mv $PKG_GCC/usr/man/man1/aot-compile.1.gz usr/man/man1
+  mv $PKG_GCC/usr/man/man1/gappletviewer.1.gz usr/man/man1
+  mv $PKG_GCC/usr/man/man1/gc-analyze.1.gz usr/man/man1
+  mv $PKG_GCC/usr/man/man1/gcj.1.gz usr/man/man1
+  mv $PKG_GCC/usr/man/man1/gcjh.1.gz usr/man/man1
+  mv $PKG_GCC/usr/man/man1/gcj-dbtool.1.gz usr/man/man1
+  mv $PKG_GCC/usr/man/man1/gij.1.gz usr/man/man1
+  mv $PKG_GCC/usr/man/man1/gjar.1.gz usr/man/man1
+  mv $PKG_GCC/usr/man/man1/gjarsigner.1.gz usr/man/man1
+  mv $PKG_GCC/usr/man/man1/gjavah.1.gz usr/man/man1
+  mv $PKG_GCC/usr/man/man1/gjdoc.1.gz usr/man/man1
+  mv $PKG_GCC/usr/man/man1/gjnih.1.gz usr/man/man1
+  mv $PKG_GCC/usr/man/man1/gkeytool.1.gz usr/man/man1
+  mv $PKG_GCC/usr/man/man1/gnative2ascii.1.gz usr/man/man1
+  mv $PKG_GCC/usr/man/man1/gorbd.1.gz usr/man/man1
+  mv $PKG_GCC/usr/man/man1/grmic.1.gz usr/man/man1
+  mv $PKG_GCC/usr/man/man1/grmid.1.gz usr/man/man1
+  mv $PKG_GCC/usr/man/man1/grmiregistry.1.gz usr/man/man1
+  mv $PKG_GCC/usr/man/man1/gserialver.1.gz usr/man/man1
+  mv $PKG_GCC/usr/man/man1/gtnameserv.1.gz usr/man/man1
+  mv $PKG_GCC/usr/man/man1/jcf-dump.1.gz usr/man/man1
+  mv $PKG_GCC/usr/man/man1/jv-convert.1.gz usr/man/man1
+  mv $PKG_GCC/usr/man/man1/jv-scan.1.gz usr/man/man1
+  mv $PKG_GCC/usr/man/man1/rebuild-gcj-db.1.gz usr/man/man1
   mkdir -p usr/share
-  mv $PKG1/usr/share/java usr/share
+  mv $PKG_GCC/usr/share/java usr/share
   # The ecj wrapper script:
   cat $CWD/ecj.sh | sed -e "s,@JAVADIR@,/usr/share/java," > usr/bin/ecj
   chmod 755 usr/bin/ecj
   # The JAVA_HOME compatibility links.
   # Caution: non-multilib arch-independent stuff! No lib64 here.
   mkdir -p usr/lib$LIBDIRSUFFIX
-  mv $PKG1/usr/lib$LIBDIRSUFFIX/jvm* usr/lib$LIBDIRSUFFIX
+  mv $PKG_GCC/usr/lib$LIBDIRSUFFIX/jvm* usr/lib$LIBDIRSUFFIX
   # And add the missing javac symlink:
   ln -s ../../../bin/ecj usr/lib$LIBDIRSUFFIX/jvm/bin/javac
 )
 
 # gcc-objc:
-( cd $PKG6
+( cd $PKG_GCC_OBJC
   mkdir -p usr/lib${LIBDIRSUFFIX}
-  mv $PKG1/usr/lib${LIBDIRSUFFIX}/libobjc* usr/lib${LIBDIRSUFFIX}
+  mv $PKG_GCC/usr/lib${LIBDIRSUFFIX}/libobjc* usr/lib${LIBDIRSUFFIX}
   mkdir -p usr/libexec/gcc/$TARGET/$VERSION
-  mv $PKG1/usr/libexec/gcc/$TARGET/$VERSION/cc1obj usr/libexec/gcc/$TARGET/$VERSION
+  mv $PKG_GCC/usr/libexec/gcc/$TARGET/$VERSION/cc1obj usr/libexec/gcc/$TARGET/$VERSION
   mkdir -p usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include
-  mv $PKG1/usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/objc usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include
+  mv $PKG_GCC/usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/objc usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include
 )
 
 ## NOTE: Thought about this, because the precompiled headers are so large.
 ## Probably easier to keep everything together, though.
 ## gcc-g++-gch (precompiled c++ headers)
-#( cd $PKG7
+#( cd $PKG_GCC_GPP_GCH
 #  mkdir -p usr/include/c++/$VERSION/$TARGET/bits
-#  mv $PKG2/usr/include/c++/$VERSION/$TARGET/bits/stdc++.h.gch usr/include/c++/$VERSION/$TARGET/bits
+#  mv $PKG_GPP/usr/include/c++/$VERSION/$TARGET/bits/stdc++.h.gch usr/include/c++/$VERSION/$TARGET/bits
 #)
 
 # gcc-go:
-( cd $PKG8
+( cd $PKG_GCC_GO
   mkdir -p usr/bin
-  mv $PKG1/usr/bin/*gccgo* usr/bin
+  mv $PKG_GCC/usr/bin/*gccgo* usr/bin
   mkdir -p usr/libexec/gcc/$TARGET/$VERSION
-  mv $PKG1/usr/libexec/gcc/$TARGET/$VERSION/go1 usr/libexec/gcc/$TARGET/$VERSION/go1
+  mv $PKG_GCC/usr/libexec/gcc/$TARGET/$VERSION/go1 usr/libexec/gcc/$TARGET/$VERSION/go1
   mkdir -p usr/info
-  mv $PKG1/usr/info/gccgo.info.gz usr/info
+  mv $PKG_GCC/usr/info/gccgo.info.gz usr/info
   mkdir -p usr/lib${LIBDIRSUFFIX}
-  mv $PKG1/usr/lib${LIBDIRSUFFIX}/go usr/lib${LIBDIRSUFFIX}
-  mv $PKG1/usr/lib${LIBDIRSUFFIX}/{libgo.la,libgo.so.0.*,libgobegin.a} usr/lib${LIBDIRSUFFIX} || exit 1
+  mv $PKG_GCC/usr/lib${LIBDIRSUFFIX}/go usr/lib${LIBDIRSUFFIX}
+  mv $PKG_GCC/usr/lib${LIBDIRSUFFIX}/{libgo.la,libgo.so.0.*,libgobegin.a} usr/lib${LIBDIRSUFFIX} || exit 1
   # Ordinarily Slackware doesn't package static libraries, but in this case
   # it is useful for deploying compiled binaries on machines that do not yet
   # have libgo.so.0.0.0.
-  mv $PKG1/usr/lib${LIBDIRSUFFIX}/libgo.a usr/lib${LIBDIRSUFFIX}
+  mv $PKG_GCC/usr/lib${LIBDIRSUFFIX}/libgo.a usr/lib${LIBDIRSUFFIX}
   mkdir -p usr/libexec/gcc/$TARGET/$VERSION
-  mv $PKG1/usr/libexec/gcc/$TARGET/$VERSION/go usr/libexec/gcc/$TARGET/$VERSION/go
+  mv $PKG_GCC/usr/libexec/gcc/$TARGET/$VERSION/go usr/libexec/gcc/$TARGET/$VERSION/go
   mkdir -p usr/man/man1
-  mv $PKG1/usr/man/man1/gccgo.1.gz usr/man/man1
+  mv $PKG_GCC/usr/man/man1/gccgo.1.gz usr/man/man1
 ) || exit 1
 
 # Filter all .la files (thanks much to Mark Post for the sed script):
@@ -642,7 +642,7 @@ mv $PKG1/usr/bin/gnative2ascii $PKG5/usr/bin
 )
 
 ## Strip bloated binaries and libraries:
-for dir in $PKG{1,2,3,4,5,6,8}; do
+for dir in ${ALL_PKGS}; do
   ( cd $dir
     find . -name "lib*so*" -exec strip --strip-unneeded "{}" \;
     find . -name "lib*a" -exec strip -g "{}" \;
@@ -652,22 +652,9 @@ for dir in $PKG{1,2,3,4,5,6,8}; do
   )
 done
 
-( cd $PKG1
-  makepkg -l y -c n $TMP/gcc-$VERSION-$ARCH-$BUILD.txz )
-( cd $PKG2
-  makepkg -l y -c n $TMP/gcc-g++-$VERSION-$ARCH-$BUILD.txz )
-( cd $PKG3
-  makepkg -l y -c n $TMP/gcc-gfortran-$VERSION-$ARCH-$BUILD.txz )
-( cd $PKG4
-  makepkg -l y -c n $TMP/gcc-gnat-$VERSION-$ARCH-$BUILD.txz )
-( cd $PKG5
-  makepkg -l y -c n $TMP/gcc-java-$VERSION-$ARCH-$BUILD.txz )
-( cd $PKG6
-  makepkg -l y -c n $TMP/gcc-objc-$VERSION-$ARCH-$BUILD.txz )
-#( cd $PKG7
-#  makepkg -l y -c n $TMP/gcc-g++-gch-$VERSION-$ARCH-$BUILD.txz )
-( cd $PKG8
-  makepkg -l y -c n $TMP/gcc-go-$VERSION-$ARCH-$BUILD.txz )
+for LANG in ${ALL_LANGS}; do
+  ( cd "$(pkg_of_element "${LANG}")"
+    makepkg -l y -c n $TMP/${LANG}-${VERSION}-${ARCH}-${BUILD}.txz )
 
 echo
 echo "Slackware GCC package build complete!"
