@@ -395,28 +395,19 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
     mv g++ g++-gcc-$VERSION
     mv gcc gcc-$VERSION
     mv ${TARGET}-gfortran gfortran-gcc-$VERSION
-    ln -sf g++-gcc-$VERSION g++
-    ln -sf gcc-$VERSION gcc
-    ln -sf g++ c++
-    ln -sf gcc cc
-    ln -sf gcc-$VERSION ${TARGET}-gcc
-    ln -sf gcc-$VERSION ${TARGET}-gcc-$VERSION
-    ln -sf gcc-ar ${TARGET}-gcc-ar
-    ln -sf gcc-nm ${TARGET}-gcc-nm
-    ln -sf gcc-ranlib ${TARGET}-gcc-ranlib
-    ln -sf gcj ${TARGET}-gcj
-    ln -sf gcjh ${TARGET}-gcjh
-    ln -sf g++-gcc-$VERSION ${TARGET}-c++
-    ln -sf g++-gcc-$VERSION ${TARGET}-g++
-    ln -sf gfortran-gcc-$VERSION gfortran
-    ln -sf gfortran-gcc-$VERSION ${TARGET}-gfortran
-    ln -sf gfortran-gcc-$VERSION ${TARGET}-gfortran-$VERSION
-    ln -sf gfortran-gcc-$VERSION ${TARGET}-g95
-    ln -sf gfortran g95
-    ln -sf gfortran f95
-    ln -sf gfortran-gcc-$VERSION ${TARGET}-g77
-    ln -sf gfortran g77
-    ln -sf gfortran f77
+    for bin in gcc-${VERSION} gcc-ar gcc-nm gcc-ranlib gcj gcjh; do
+      ln -sf ${bin} ${TARGET}-${bin}
+    done
+    symlink_to() {
+      LINK_TARGET="$1"
+      shift
+      for bin in $*; do
+        ln -sf "${LINK_TARGET}" "${bin}"
+      done
+    }
+    symlink_to "gcc-${VERSION}" gcc ${TARGET}-gcc cc
+    symlink_to "g++-gcc-${VERSION}" g++ c++ ${TARGET}-{c++,g++}
+    symlink_to "gfortran-gcc-${VERSION}" gfortran ${TARGET}-{gfortran,gfortran-${VERSION},g95,g77} {f,g}{95,77}
   )
 
   ( cd $PKG_GCC/usr/man
