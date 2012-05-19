@@ -42,7 +42,7 @@ fi
 NUMJOBS=${NUMJOBS:-" -j7 "}
 
 # Uncomment this to include the experimental gold linker:
-GOLD=" --enable-gold=yes --enable-ld=default "
+# GOLD=" --enable-gold=yes --enable-ld=default "
 
 # Set to ld.gold or ld.bfd:
 DEFAULT_LD=ld.bfd
@@ -128,17 +128,17 @@ fi
 # Build for an x86 glibc2-based Linux system:
 CFLAGS="$SLKCFLAGS" \
 ./configure \
-  --prefix=/usr \
-  --libdir=/usr/lib${LIBDIRSUFFIX} \
-  --mandir=/usr/man \
-  --infodir=/usr/info \
-  --with-docdir=/usr/doc/binutils-$VERSION \
+  --prefix=${YYPREFIX} \
+  --libdir=${YYPREFIX}/lib${LIBDIRSUFFIX} \
+  --mandir=${YYPREFIX}/man \
+  --infodir=${YYPREFIX}/info \
+  --with-docdir=${YYPREFIX}/doc/binutils-$VERSION \
   --enable-shared \
   --disable-multilib \
   --enable-64-bit-bfd \
   --enable-plugins \
   --enable-threads \
-  --enable-targets=${TGT},${HST} \
+  --enable-targets=${TGT} \
   --build=${BUILD} \
   --host=${HST} \
   $GOLD \
@@ -151,59 +151,59 @@ make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG || exit 1
 
 # "make install" skips this, but binutils.spec doesn't.  Sneaky, huh?
-cp -a include/libiberty.h $PKG/usr/include/libiberty.h
+cp -a include/libiberty.h $PKG${YYPREFIX}/include/libiberty.h
 
 # Differentiate between BSD strings and GNU strings
-( cd $PKG/usr/bin ; mv strings strings-GNU )
-( cd $PKG/usr/man/man1 ; mv strings.1 strings-GNU.1 )
+( cd $PKG${YYPREFIX}/bin ; mv strings strings-GNU )
+( cd $PKG${YYPREFIX}/man/man1 ; mv strings.1 strings-GNU.1 )
 
-# Move ldscripts to /usr/lib${LIBDIRSUFFIX}, and then put symlinks in place
-mv $PKG/usr/${HST}/lib/ldscripts $PKG/usr/lib${LIBDIRSUFFIX}
-( cd $PKG/usr/${HST}
-  ln -s /usr/lib${LIBDIRSUFFIX}/ldscripts lib/ldscripts
+# Move ldscripts to ${YYPREFIX}/lib${LIBDIRSUFFIX}, and then put symlinks in place
+mv $PKG${YYPREFIX}/${HST}/lib/ldscripts $PKG${YYPREFIX}/lib${LIBDIRSUFFIX}
+( cd $PKG${YYPREFIX}/${HST}
+  ln -s ${YYPREFIX}/lib${LIBDIRSUFFIX}/ldscripts lib/ldscripts
   for FILE in ar as ld ld.bfd ld.gold nm objcopy objdump ranlib strip ; do
-    if [ -r "usr/bin/$FILE" ]; then
+    if [ -r "$PKG${YYPREFIX}bin/$FILE" ]; then
       rm -f bin/$FILE
-      ln -s /usr/bin/$FILE bin/$FILE
+      ln -s ${YYPREFIX}/bin/$FILE bin/$FILE
     fi
   done
 )
 
 # If the requested default linker is present, make it the default:
 # Set the link differently on the system to change the default at runtime.
-if [ -r $PKG/usr/bin/$DEFAULT_LD ]; then
-  ( cd $PKG/usr/bin ; rm -f ld ; ln -sf $DEFAULT_LD ld )
+if [ -r $PKG${YYPREFIX}/bin/$DEFAULT_LD ]; then
+  ( cd $PKG${YYPREFIX}/bin ; rm -f ld ; ln -sf $DEFAULT_LD ld )
 fi
       
 find $PKG | xargs file | grep -e "executable" -e "shared object" \
   | grep ${EXE_FORMAT} | cut -f 1 -d : | xargs ${STRIP} --strip-unneeded 2> /dev/null
 
 # Remove some unneeded man pages, and then compress the rest
-rm -f $PKG/usr/man/man1/{dlltool,windres}.1
-( cd $PKG/usr/man
+rm -f $PKG${YYPREFIX}/man/man1/{dlltool,windres}.1
+( cd $PKG${YYPREFIX}/man
   find . -type f -exec gzip -9 {} \;
   for i in $(find . -type l) ; do ln -s $( readlink $i ).gz $i.gz ; rm $i ; done
 )
 
 # Compress info pages
-rm -f $PKG/usr/info/dir
-gzip -9 $PKG/usr/info/*
+rm -f $PKG${YYPREFIX}/info/dir
+gzip -9 $PKG${YYPREFIX}/info/*
 
-mkdir -p $PKG/usr/doc/binutils-$VERSION
+mkdir -p $PKG${YYPREFIX}/doc/binutils-$VERSION
 cp \
   $CWD/release.binutils-* \
   COPYING* ChangeLog.linux MAI* README* \
-  $PKG/usr/doc/binutils-$VERSION
+  $PKG${YYPREFIX}/doc/binutils-$VERSION
 
 # If there's a ChangeLog, installing at least part of the recent history
 # is useful, but don't let it get totally out of control:
 if [ -r ChangeLog ]; then
-  DOCSDIR=$(echo $PKG/usr/doc/*-$VERSION)
+  DOCSDIR=$(echo $PKG${YYPREFIX}/doc/*-$VERSION)
   cat ChangeLog | head -n 1000 > $DOCSDIR/ChangeLog
   touch -r ChangeLog $DOCSDIR/ChangeLog
 fi
 
-chown -R root:root $PKG/usr/doc/binutils-$VERSION
+chown -R root:root $PKG${YYPREFIX}/doc/binutils-$VERSION
 
 # Add slack-desc:
 mkdir -p $PKG/install
@@ -213,7 +213,7 @@ cat ${CWD}/binutils.yypkg.meta | sed \
   -e "s/%{HST}/${HST}/" \
   -e "s/%{TGT}/${TGT}/" \
   -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
-  | makeypkg.native -o ${YYOUTPUT} -meta - ${PKG}
+  | makeypkg.native -o ${YYOUTPUT} -meta - ${PKG}${YYPREFIX}
 
 cat << EOF
 
