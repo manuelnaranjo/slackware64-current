@@ -146,6 +146,17 @@ cp $CWD/ecj-4.5.jar gcc-$VERSION/ecj.jar
 #https://oss.sonatype.org/content/repositories/releases/org/antlr/antlr-runtime/
 ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
 
+# If there's a new file, installing at least part of the recent history
+# is useful, but don't let it get totally out of control:
+install_with_length_limit() {
+  FILE="$1"
+  DOCSDIR="$2"
+  if [ -r "$FILE" ]; then
+    cat "$FILE" | head -n 1000 > "$DOCSDIR/$FILE"
+    touch -r "$FILE" "$DOCSDIR/$FILE"
+  fi
+}
+
 # install docs
 ( cd gcc-$VERSION
   # Smite the fixincludes:
@@ -164,16 +175,8 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
   $PKG1/usr/doc/gcc-$VERSION
 
   # We will keep part of these, but they are really big...
-  if [ -r ChangeLog ]; then
-    DOCSDIR=$(echo $PKG1/usr/doc/gcc-$VERSION)
-    cat ChangeLog | head -n 1000 > $DOCSDIR/ChangeLog
-    touch -r ChangeLog $DOCSDIR/ChangeLog
-  fi
-  if [ -r NEWS ]; then
-    DOCSDIR=$(echo $PKG1/usr/doc/gcc-$VERSION)
-    cat NEWS | head -n 1000 > $DOCSDIR/NEWS
-    touch -r NEWS $DOCSDIR/NEWS
-  fi
+  install_with_length_limit "ChangeLog" "$PKG1/usr/doc/gcc-$VERSION)"
+  install_with_length_limit "NEWS" "$PKG1/usr/doc/gcc-$VERSION)"
 
   mkdir -p $PKG1/usr/doc/gcc-${VERSION}/gcc
   ( cd gcc
@@ -183,10 +186,7 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
          
     mkdir -p $PKG3/usr/doc/gcc-${VERSION}/gcc/fortran
     ( cd fortran
-      if [ -r ChangeLog ]; then
-        cat ChangeLog | head -n 1000 > $PKG3/usr/doc/gcc-$VERSION/gcc/fortran/ChangeLog
-        touch -r ChangeLog $PKG3/usr/doc/gcc-$VERSION/gcc/fortran/ChangeLog
-      fi
+      install_with_length_limit "ChangeLog" "PKG3/usr/doc/gcc-$VERSION/gcc/fortran"
     )
 
     mkdir -p $PKG4/usr/doc/gcc-${VERSION}/gcc/ada
@@ -194,10 +194,7 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
       cp -a \
         ChangeLog.tree-ssa \
       $PKG4/usr/doc/gcc-$VERSION/gcc/ada
-      if [ -r ChangeLog ]; then
-        cat ChangeLog | head -n 1000 > $PKG4/usr/doc/gcc-$VERSION/gcc/ada/ChangeLog
-        touch -r ChangeLog $PKG4/usr/doc/gcc-$VERSION/gcc/ada/ChangeLog
-      fi
+      install_with_length_limit "ChangeLog" "PKG4/usr/doc/gcc-$VERSION/gcc/ada"
     )
 
     mkdir -p $PKG5/usr/doc/gcc-${VERSION}/gcc/java
@@ -205,10 +202,7 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
       cp -a \
         ChangeLog.tree-ssa \
       $PKG5/usr/doc/gcc-${VERSION}/gcc/java
-      if [ -r ChangeLog ]; then
-        cat ChangeLog | head -n 1000 > $PKG5/usr/doc/gcc-${VERSION}/gcc/java/ChangeLog
-        touch -r ChangeLog $PKG5/usr/doc/gcc-${VERSION}/gcc/java/ChangeLog
-      fi
+      install_with_length_limit "ChangeLog" "PKG5/usr/doc/gcc-$VERSION/gcc/java"
     )
   
     mkdir -p $PKG6/usr/doc/gcc-${VERSION}/gcc/objc
@@ -216,18 +210,12 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
       cp -a \
         README* \
       $PKG6/usr/doc/gcc-${VERSION}/gcc/objc
-      if [ -r ChangeLog ]; then
-        cat ChangeLog | head -n 1000 > $PKG6/usr/doc/gcc-${VERSION}/gcc/objc/ChangeLog
-        touch -r ChangeLog $PKG6/usr/doc/gcc-${VERSION}/gcc/objc/ChangeLog
-      fi
+      install_with_length_limit "ChangeLog" "PKG6/usr/doc/gcc-$VERSION/gcc/objc"
     )
 
     mkdir -p $PKG8/usr/doc/gcc-${VERSION}/gcc/go
     ( cd go
-      if [ -r ChangeLog ]; then
-        cat ChangeLog | head -n 1000 > $PKG8/usr/doc/gcc-${VERSION}/gcc/go/ChangeLog
-        touch -r ChangeLog $PKG8/usr/doc/gcc-${VERSION}/gcc/go/ChangeLog
-      fi
+      install_with_length_limit "ChangeLog" "PKG8/usr/doc/gcc-$VERSION/gcc/go"
       cp -a \
         README* THREADS* \
         gofrontend/{LICENSE,PATENTS,README} \
@@ -238,18 +226,12 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
 
   mkdir -p $PKG3/usr/doc/gcc-${VERSION}/libgfortran
   ( cd libgfortran
-    if [ -r ChangeLog ]; then
-      cat ChangeLog | head -n 1000 > $PKG3/usr/doc/gcc-${VERSION}/libgfortran/ChangeLog
-      touch -r ChangeLog $PKG3/usr/doc/gcc-${VERSION}/libgfortran/ChangeLog
-    fi
+    install_with_length_limit "ChangeLog" "PKG3/usr/doc/gcc-$VERSION/gcc/libgfortran"
   )
 
   mkdir -p $PKG4/usr/doc/gcc-${VERSION}/libada
   ( cd libada
-    if [ -r ChangeLog ]; then
-      cat ChangeLog | head -n 1000 > $PKG4/usr/doc/gcc-${VERSION}/libada/ChangeLog
-      touch -r ChangeLog $PKG4/usr/doc/gcc-${VERSION}/libada/ChangeLog
-    fi
+    install_with_length_limit "ChangeLog" "PKG4/usr/doc/gcc-$VERSION/gcc/libada"
   )
 
   mkdir -p $PKG5/usr/doc/gcc-${VERSION}/libffi
@@ -258,10 +240,7 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
       ChangeLog.libgcj ChangeLog.v1 \
       LICENSE* README* \
     $PKG5/usr/doc/gcc-${VERSION}/libffi
-    if [ -r ChangeLog ]; then
-      cat ChangeLog | head -n 1000 > $PKG5/usr/doc/gcc-${VERSION}/libffi/ChangeLog
-      touch -r ChangeLog $PKG5/usr/doc/gcc-${VERSION}/libffi/ChangeLog
-    fi
+    install_with_length_limit "ChangeLog" "PKG5/usr/doc/gcc-$VERSION/gcc/libffi"
   )
 
   mkdir -p $PKG5/usr/doc/gcc-${VERSION}/libjava
@@ -270,34 +249,22 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
       COPYING* HACKING LIBGCJ_LICENSE \
       NEWS README* THANKS \
     $PKG5/usr/doc/gcc-${VERSION}/libjava
-    if [ -r ChangeLog ]; then
-      cat ChangeLog | head -n 1000 > $PKG5/usr/doc/gcc-${VERSION}/libjava/ChangeLog
-      touch -r ChangeLog $PKG5/usr/doc/gcc-${VERSION}/libjava/ChangeLog
-    fi
+    install_with_length_limit "ChangeLog" "PKG5/usr/doc/gcc-$VERSION/gcc/libjava"
   )
 
   mkdir -p $PKG1/usr/doc/gcc-${VERSION}/libmudflap
   ( cd libmudflap
-    if [ -r ChangeLog ]; then
-      cat ChangeLog | head -n 1000 > $PKG1/usr/doc/gcc-${VERSION}/libmudflap/ChangeLog
-      touch -r ChangeLog $PKG1/usr/doc/gcc-${VERSION}/libmudflap/ChangeLog
-    fi
+    install_with_length_limit "ChangeLog" "PKG1/usr/doc/gcc-$VERSION/gcc/libmudflap"
   )
 
   mkdir -p $PKG1/usr/doc/gcc-${VERSION}/libgomp
   ( cd libgomp
-    if [ -r ChangeLog ]; then
-      cat ChangeLog | head -n 1000 > $PKG1/usr/doc/gcc-${VERSION}/libgomp/ChangeLog
-      touch -r ChangeLog $PKG1/usr/doc/gcc-${VERSION}/libgomp/ChangeLog
-    fi
+    install_with_length_limit "ChangeLog" "PKG1/usr/doc/gcc-$VERSION/gcc/libgomp"
   )
   
   mkdir -p $PKG6/usr/doc/gcc-${VERSION}/libobjc
   ( cd libobjc
-    if [ -r ChangeLog ]; then
-      cat ChangeLog | head -n 1000 > $PKG6/usr/doc/gcc-${VERSION}/libobjc/ChangeLog
-      touch -r ChangeLog $PKG6/usr/doc/gcc-${VERSION}/libobjc/ChangeLog
-    fi
+    install_with_length_limit "ChangeLog" "PKG6/usr/doc/gcc-$VERSION/gcc/libobjc"
     cp -a \
       README* THREADS* \
     $PKG6/usr/doc/gcc-${VERSION}/libobjc
@@ -309,10 +276,7 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
       README* \
       doc/html/faq.html \
     $PKG2/usr/doc/gcc-${VERSION}/libstdc++-v3
-    if [ -r ChangeLog ]; then
-      cat ChangeLog | head -n 1000 > $PKG2/usr/doc/gcc-${VERSION}/libstdc++-v3/ChangeLog
-      touch -r ChangeLog $PKG2/usr/doc/gcc-${VERSION}/libstdc++-v3/ChangeLog
-    fi
+    install_with_length_limit "ChangeLog" "PKG2/usr/doc/gcc-$VERSION/gcc/libstdc++-v3"
   )
 
 )
@@ -349,13 +313,7 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
   cp -a \
     AUTHORS CHANGES COPYING* INSTALL NEWS README* TODO \
     $PKG5/usr/doc/fastjar-$FASTJARVER
-  # If there's a ChangeLog, installing at least part of the recent history
-  # is useful, but don't let it get totally out of control:
-  if [ -r ChangeLog ]; then
-    DOCSDIR=$(echo $PKG5/usr/doc/fastjar-$FASTJARVER)
-    cat ChangeLog | head -n 1000 > $DOCSDIR/ChangeLog
-    touch -r ChangeLog $DOCSDIR/ChangeLog
-  fi
+  install_with_length_limit "ChangeLog" "PKG5/usr/doc/fastjar-${FASTJARVER}"
   find $PKG5 | xargs file | grep -e "executable" -e "shared object" | grep ELF \
     | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
   # Compress and if needed symlink the man pages:
