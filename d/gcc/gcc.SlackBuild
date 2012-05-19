@@ -107,32 +107,75 @@ CWD=$(pwd)
 TMP=${TMP:-"/gcc-$(mcookie)"}
 
 # This is the main DESTDIR target:
-PKG1=$TMP/package-gcc
+PKG_GCC=$TMP/package-gcc
 # These are the directories to build other packages in:
-PKG2=$TMP/package-gcc-g++
-PKG3=$TMP/package-gcc-gfortran
-PKG4=$TMP/package-gcc-gnat
-PKG5=$TMP/package-gcc-java
-PKG6=$TMP/package-gcc-objc
-PKG7=$TMP/package-gcc-g++-gch
-PKG8=$TMP/package-gcc-go
+PKG_GCC_GPP=$TMP/package-gcc-g++
+PKG_GCC_GFORTRAN=$TMP/package-gcc-gfortran
+PKG_GCC_GNAT=$TMP/package-gcc-gnat
+PKG_GCC_JAVA=$TMP/package-gcc-java
+PKG_GCC_OBJC=$TMP/package-gcc-objc
+PKG_GCC_GPP_GCH=$TMP/package-gcc-g++-gch
+PKG_GCC_GO=$TMP/package-gcc-go
+
+ALL_PKGS="${PKG_GCC}" "${PKG_GPP}" "${PKG_GFORTRAN}" "${PKG_GNAT}" "${PKG_JAVA}" "${PKG_OBJC}" "${PKG_GPP_GCH}" "${PKG_GO}"
+ALL_LANGS="gcc gcc-g++ gcc-fortran gcc-gnat gcc-java gcc-objc gcc-g++-gch gcc-go"
+ALL_LIBS="libgfortran" "libada" "libffi" "libjava" "libmudflap" "libgomp" "libobjc" "libstdc++-v3"
+ALL_ELEMENTS="main" ${ALL_LANGS} ${ALL_LIBS}
+
+pkg_of_element() {
+  case "$1" in
+    gcc | libmudflap | libgomp | main) echo "${PKG_GCC}";;
+    gcc-g++ | libstdc++-v3) echo "${PKG_GPP}" ;;
+    gcc-fortran | libgfortran) echo "${PKG_GCC_GFORTRAN}" ;;
+    gcc-gnat | libada) echo "${PKG_GCC_GNAT}" ;;
+    gcc-java | libffi | libjava) echo "${PKG_GCC_JAVA}" ;;
+    gcc-objc | libobjc) echo "${PKG_GCC_OBJC}" ;;
+    gcc-g++-gch) echo "${PKG_GCC_GPP_GCH}" ;;
+    gcc-go) echo "${PKG_GCC_GO}" ;;
+  esac
+}
+
+doc_dir_of_element() {
+  case "$1" in
+    main) echo ""
+    gcc | libmudflap) echo "gcc" ;;
+    gcc-g++ | libstdc++-v3) echo "gcc/g++" ;;
+    gcc-fortran | libgfortran) echo "gcc/fortran" ;;
+    gcc-gnat | libada) echo "gcc/gnat" ;;
+    gcc-java | libffi | libjava) echo "gcc/java" ;;
+    gcc-objc | libobjc) echo "gcc/objc" ;;
+    gcc-g++-gch) echo "gcc/g++-gch" ;;
+    gcc-go) echo "gcc/gcc-go" ;;
+  esac
+}
+
+# If there's a new file, installing at least part of the recent history
+# is useful, but don't let it get totally out of control:
+install_with_length_limit() {
+  FILE="$1"
+  DOCSDIR="$2"
+  if [ -r "$FILE" ]; then
+    cat "$FILE" | head -n 1000 > "${DOCSDIR}/${FILE}"
+    touch -r "$FILE" "${DOCSDIR}/${FILE}"
+  fi
+}
 
 # Clear the build locations:
 if [ -d $TMP ]; then
   rm -rf $TMP
 fi
-mkdir -p $PKG{1,2,3,4,5,6,7,8}/usr/doc/gcc-$VERSION
+for PKG in ${ALL_PKGS}; do
+  mkdir -p ${PKG}/usr/doc/gcc-${VERSION}
+done
 
 # Insert package descriptions:
-mkdir -p $PKG{1,2,3,4,5,6,7,8}/install
-cat $CWD/slack-desc.gcc > $PKG1/install/slack-desc
-cat $CWD/slack-desc.gcc-g++ > $PKG2/install/slack-desc
-cat $CWD/slack-desc.gcc-gfortran > $PKG3/install/slack-desc
-cat $CWD/slack-desc.gcc-gnat > $PKG4/install/slack-desc
-cat $CWD/slack-desc.gcc-java > $PKG5/install/slack-desc
-cat $CWD/slack-desc.gcc-objc > $PKG6/install/slack-desc
-# cat $CWD/slack-desc.gcc-g++-gch > $PKG7/install/slack-desc
-cat $CWD/slack-desc.gcc-go > $PKG8/install/slack-desc
+for LANG in ${ALL_LANGS}; do
+  PKG="$(pkg_of_element "${LANG}")"
+  if [ -e "slack-desc-${LANG}" ];
+    mkdir -p ${PKG}/install
+    cat $CWD/slack-desc-${LANG} > $PKG/install/slack-desc
+  fi
+done
 
 cd $TMP
 tar xvf $CWD/gcc-$VERSION.tar.?z*
@@ -146,17 +189,6 @@ cp $CWD/ecj-4.5.jar gcc-$VERSION/ecj.jar
 #https://oss.sonatype.org/content/repositories/releases/org/antlr/antlr-runtime/
 ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
 
-# If there's a new file, installing at least part of the recent history
-# is useful, but don't let it get totally out of control:
-install_with_length_limit() {
-  FILE="$1"
-  DOCSDIR="$2"
-  if [ -r "$FILE" ]; then
-    cat "$FILE" | head -n 1000 > "$DOCSDIR/$FILE"
-    touch -r "$FILE" "$DOCSDIR/$FILE"
-  fi
-}
-
 # install docs
 ( cd gcc-$VERSION
   # Smite the fixincludes:
@@ -167,118 +199,21 @@ install_with_length_limit() {
   find . -perm 775 -exec chmod 755 {} \;
   find . -perm 754 -exec chmod 755 {} \;
   find . -perm 664 -exec chmod 644 {} \;
-  mkdir -p $PKG1/usr/doc/gcc-$VERSION
-  cp -a \
-    COPYING* ChangeLog* FAQ INSTALL \
-    LAST_UPDATED MAINTAINERS NEWS \
-    README* *.html \
-  $PKG1/usr/doc/gcc-$VERSION
 
-  # We will keep part of these, but they are really big...
-  install_with_length_limit "ChangeLog" "$PKG1/usr/doc/gcc-$VERSION)"
-  install_with_length_limit "NEWS" "$PKG1/usr/doc/gcc-$VERSION)"
-
-  mkdir -p $PKG1/usr/doc/gcc-${VERSION}/gcc
-  ( cd gcc
-    cp -a \
-      ABOUT* COPYING* DATESTAMP DEV-PHASE LANG* ONEWS README* SERVICE \
-    $PKG1/usr/doc/gcc-$VERSION/gcc
-         
-    mkdir -p $PKG3/usr/doc/gcc-${VERSION}/gcc/fortran
-    ( cd fortran
-      install_with_length_limit "ChangeLog" "PKG3/usr/doc/gcc-$VERSION/gcc/fortran"
-    )
-
-    mkdir -p $PKG4/usr/doc/gcc-${VERSION}/gcc/ada
-    ( cd ada
-      cp -a \
-        ChangeLog.tree-ssa \
-      $PKG4/usr/doc/gcc-$VERSION/gcc/ada
-      install_with_length_limit "ChangeLog" "PKG4/usr/doc/gcc-$VERSION/gcc/ada"
-    )
-
-    mkdir -p $PKG5/usr/doc/gcc-${VERSION}/gcc/java
-    ( cd java
-      cp -a \
-        ChangeLog.tree-ssa \
-      $PKG5/usr/doc/gcc-${VERSION}/gcc/java
-      install_with_length_limit "ChangeLog" "PKG5/usr/doc/gcc-$VERSION/gcc/java"
-    )
-  
-    mkdir -p $PKG6/usr/doc/gcc-${VERSION}/gcc/objc
-    ( cd objc
-      cp -a \
-        README* \
-      $PKG6/usr/doc/gcc-${VERSION}/gcc/objc
-      install_with_length_limit "ChangeLog" "PKG6/usr/doc/gcc-$VERSION/gcc/objc"
-    )
-
-    mkdir -p $PKG8/usr/doc/gcc-${VERSION}/gcc/go
-    ( cd go
-      install_with_length_limit "ChangeLog" "PKG8/usr/doc/gcc-$VERSION/gcc/go"
-      cp -a \
-        README* THREADS* \
-        gofrontend/{LICENSE,PATENTS,README} \
-      $PKG8/usr/doc/gcc-${VERSION}/gcc/go
-    )
-
-  ) || exit 1
-
-  mkdir -p $PKG3/usr/doc/gcc-${VERSION}/libgfortran
-  ( cd libgfortran
-    install_with_length_limit "ChangeLog" "PKG3/usr/doc/gcc-$VERSION/gcc/libgfortran"
-  )
-
-  mkdir -p $PKG4/usr/doc/gcc-${VERSION}/libada
-  ( cd libada
-    install_with_length_limit "ChangeLog" "PKG4/usr/doc/gcc-$VERSION/gcc/libada"
-  )
-
-  mkdir -p $PKG5/usr/doc/gcc-${VERSION}/libffi
-  ( cd libffi
-    cp -a \
-      ChangeLog.libgcj ChangeLog.v1 \
-      LICENSE* README* \
-    $PKG5/usr/doc/gcc-${VERSION}/libffi
-    install_with_length_limit "ChangeLog" "PKG5/usr/doc/gcc-$VERSION/gcc/libffi"
-  )
-
-  mkdir -p $PKG5/usr/doc/gcc-${VERSION}/libjava
-  ( cd libjava
-    cp -a \
-      COPYING* HACKING LIBGCJ_LICENSE \
-      NEWS README* THANKS \
-    $PKG5/usr/doc/gcc-${VERSION}/libjava
-    install_with_length_limit "ChangeLog" "PKG5/usr/doc/gcc-$VERSION/gcc/libjava"
-  )
-
-  mkdir -p $PKG1/usr/doc/gcc-${VERSION}/libmudflap
-  ( cd libmudflap
-    install_with_length_limit "ChangeLog" "PKG1/usr/doc/gcc-$VERSION/gcc/libmudflap"
-  )
-
-  mkdir -p $PKG1/usr/doc/gcc-${VERSION}/libgomp
-  ( cd libgomp
-    install_with_length_limit "ChangeLog" "PKG1/usr/doc/gcc-$VERSION/gcc/libgomp"
-  )
-  
-  mkdir -p $PKG6/usr/doc/gcc-${VERSION}/libobjc
-  ( cd libobjc
-    install_with_length_limit "ChangeLog" "PKG6/usr/doc/gcc-$VERSION/gcc/libobjc"
-    cp -a \
-      README* THREADS* \
-    $PKG6/usr/doc/gcc-${VERSION}/libobjc
-  )
-    
-  mkdir -p $PKG2/usr/doc/gcc-${VERSION}/libstdc++-v3
-  ( cd libstdc++-v3
-    cp -a \
-      README* \
-      doc/html/faq.html \
-    $PKG2/usr/doc/gcc-${VERSION}/libstdc++-v3
-    install_with_length_limit "ChangeLog" "PKG2/usr/doc/gcc-$VERSION/gcc/libstdc++-v3"
-  )
-
+  for ELEMENT in ${ALL_ELEMENTS}; do
+    PKG="$(pkg_of_element "${ELEMENTS}")"
+    DOC_DIR="$(doc_dir_of_element "${ELEMENTS}")"
+    mkdir -p "${PKG}/usr/doc/gcc-${VERSION}/${DOC_DIR}"
+    (cd ${DOC_DIR}
+      for FILE in "ChangeLog" "ChangeLog.tree-ssa" "ChangeLog.v1" "ChangeLog.libgcj" "NEWS"; do
+        install_with_length_limit "${FILE}" "${PKG}/usr/doc/gcc-$VERSION/${DOC_DIR}"
+      done
+      for FILE in ABOUT* COPYING* DATESTAMP DEV-PHASE LANG* LICENSE* ONEWS FAQ HACKING INSTALL LAST_UPDATED LIBGCJ_LICENSE MAINTAINERS README* SERVICE doc/html/faq.html *.html THANKS THREADS* gofrontend/{LICENSE,PATENTS,README}; do
+        if [ -e "${FILE}" ]; then
+          cp -a "${FILE}" ${PKG}/usr/doc/gcc-$VERSION/gcc/${DIR}
+        fi
+      done)
+  done
 )
 
 # Add fastjar to the gcc-java package:
