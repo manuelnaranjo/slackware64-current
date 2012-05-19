@@ -354,44 +354,44 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
   # These *gdb.py files are causing ldconfig to complain, so they are going
   # to be REMOVED for now...  at some point, they might be moved somewhere
   # else, in which case things should Just Work(tm).  Keep an eye on it.
-  rm -f $PKG1/usr/lib${LIBDIRSUFFIX}/*gdb.py
+  rm -f $PKG_GCC/usr/lib${LIBDIRSUFFIX}/*gdb.py
 
   # Be sure the "specs" file is installed.
-  if [ ! -r $PKG1/usr/lib${LIBDIRSUFFIX}/gcc/${TARGET}/${VERSION}/specs ]; then
-    cat stage1-gcc/specs > $PKG1/usr/lib${LIBDIRSUFFIX}/gcc/${TARGET}/${VERSION}/specs
+  if [ ! -r $PKG_GCC/usr/lib${LIBDIRSUFFIX}/gcc/${TARGET}/${VERSION}/specs ]; then
+    cat stage1-gcc/specs > $PKG_GCC/usr/lib${LIBDIRSUFFIX}/gcc/${TARGET}/${VERSION}/specs
   fi
 
   # Make our 64bit gcc look for 32bit gcc binaries in ./32 subdirectory:
   if [ "$ARCH" = "x86_64" ]; then
     sed -i 's#;.\(:../lib !m64 m32;\)$#;32\1#' \
-      $PKG1/usr/lib${LIBDIRSUFFIX}/gcc/${TARGET}/${VERSION}/specs
+      $PKG_GCC/usr/lib${LIBDIRSUFFIX}/gcc/${TARGET}/${VERSION}/specs
   fi
 
   #  make ada.install-common DESTDIR=$PKG1
   #  make install-gnatlib DESTDIR=$PKG1
-  make -i install-info DESTDIR=$PKG1
+  make -i install-info DESTDIR=$PKG_GCC
 
-  chmod 755 $PKG1/usr/lib${LIBDIRSUFFIX}/libgcc_s.so.1
+  chmod 755 $PKG_GCC/usr/lib${LIBDIRSUFFIX}/libgcc_s.so.1
 
   # The (huge) static GNU java libraries are not packaged.  In nearly all
   # cases one or more dependencies will not be available as static anyway.
-  rm -f $PKG1/usr/lib${LIBDIRSUFFIX}/libgcj.a
-  rm -f $PKG1/usr/lib${LIBDIRSUFFIX}/libgcj-tools.a
+  rm -f $PKG_GCC/usr/lib${LIBDIRSUFFIX}/libgcj.a
+  rm -f $PKG_GCC/usr/lib${LIBDIRSUFFIX}/libgcj-tools.a
 
   # This is provided by binutils, so delete it here:
-  rm -f $PKG1/usr/lib${LIBDIRSUFFIX}/libiberty.a
-  rm -f $PKG1/usr/lib/libiberty.a # catch-all
+  rm -f $PKG_GCC/usr/lib${LIBDIRSUFFIX}/libiberty.a
+  rm -f $PKG_GCC/usr/lib/libiberty.a # catch-all
 
   # Fix stuff up:
-  ( cd $PKG1/usr/info ; rm dir ; gzip -9 * )
-  ( cd $PKG1
+  ( cd $PKG_GCC/usr/info ; rm dir ; gzip -9 * )
+  ( cd $PKG_GCC
     # *not* ${LIBDIRSUFFIX}
     mkdir -p lib
     cd lib
     ln -sf /usr/bin/cpp .
   )
 
-  ( cd $PKG1/usr/bin
+  ( cd $PKG_GCC/usr/bin
     mv g++ g++-gcc-$VERSION
     mv gcc gcc-$VERSION
     mv ${TARGET}-gfortran gfortran-gcc-$VERSION
@@ -419,7 +419,7 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
     ln -sf gfortran f77
   )
 
-  ( cd $PKG1/usr/man
+  ( cd $PKG_GCC/usr/man
     gzip -9 */*
     cd man1
     ln -sf g++.1.gz c++.1.gz
@@ -428,11 +428,11 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
 
   ## build the txz package
   #(
-  #  cd $PKG1;
+  #  cd $PKG_GCC;
   #  makepkg -l y -c n $TMP/gcc-$VERSION-$ARCH-$BUILD.txz
   #)
   # keep a log
-  ) 2>&1 | tee $TMP/gcc.build.log
+) 2>&1 | tee $TMP/gcc.build.log
 
 # OK, time to split the big package where needed:
 
