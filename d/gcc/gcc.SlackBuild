@@ -62,11 +62,7 @@ if [ -z "$ARCH" ]; then
   export ARCH
 fi
 
-if [ "$ARCH" = "i386" ]; then
-  SLKCFLAGS="-O2 -march=i386 -mcpu=i686"
-  LIBDIRSUFFIX=""
-  LIB_ARCH=i386
-elif [ "$ARCH" = "i486" ]; then
+if [ "$ARCH" = "i486" ]; then
   SLKCFLAGS="-O2 -march=i486 -mtune=i686"
   LIBDIRSUFFIX=""
   LIB_ARCH=i386
