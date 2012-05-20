@@ -175,6 +175,11 @@ symlink_to() {
   done
 }
 
+compress_info_files() {
+  # Compress info files, if any:
+  [ -d $1/usr/info ] && ( cd $1/usr/info && rm -f dir && gzip -9 *)
+}
+
 # Clear the build locations:
 if [ -d $TMP ]; then
   rm -rf $TMP
@@ -210,9 +215,7 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
   zcat $CWD/gcc-no_fixincludes.diff.gz | patch -p1 --verbose --backup --suffix=.orig || exit 1
   # Fix perms/owners
   chown -R root:root .
-  find . -perm 777 -exec chmod 755 {} \;
-  find . -perm 775 -exec chmod 755 {} \;
-  find . -perm 754 -exec chmod 755 {} \;
+  find . -perm 777 -o perm 775 -o perm 754 -exec chmod 755 {} \;
   find . -perm 664 -exec chmod 644 {} \;
 
   for ELEMENT in ${ALL_ELEMENTS}; do
@@ -280,13 +283,7 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
       done
     )
   fi
-  # Compress info files, if any:
-  if [ -d ${PKG_GCC_JAVA}/usr/info ]; then
-    ( cd ${PKG_GCC_JAVA}/usr/info
-      rm -f dir
-      gzip -9 *
-    )
-  fi
+  compress_info_files ${PKG_GCC_JAVA}
   echo
 ) || exit 1
 
@@ -398,7 +395,7 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
   rm -f $PKG_GCC/usr/lib/libiberty.a # catch-all
 
   # Fix stuff up:
-  ( cd $PKG_GCC/usr/info ; rm dir ; gzip -9 * )
+  compress_info_files ${PKG_GCC}
   ( cd $PKG_GCC
     # *not* ${LIBDIRSUFFIX}
     mkdir -p lib
@@ -406,8 +403,8 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
   )
 
   ( cd $PKG_GCC/usr/bin
-    mv g++ g++-gcc-$VERSION
     mv gcc gcc-$VERSION
+    mv g++ g++-gcc-$VERSION
     mv ${TARGET}-gfortran gfortran-gcc-$VERSION
     for bin in gcc-${VERSION} gcc-ar gcc-nm gcc-ranlib gcj gcjh; do
       ln -sf ${bin} ${TARGET}-${bin}
