@@ -402,8 +402,7 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
   ( cd $PKG_GCC
     # *not* ${LIBDIRSUFFIX}
     mkdir -p lib
-    cd lib
-    ln -sf /usr/bin/cpp .
+    ln -sf /usr/bin/cpp lib/cpp
   )
 
   ( cd $PKG_GCC/usr/bin
@@ -415,7 +414,7 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
     done
     symlink_to "gcc-${VERSION}" gcc ${TARGET}-gcc cc
     symlink_to "g++-gcc-${VERSION}" g++ c++ ${TARGET}-{c++,g++}
-    symlink_to "gfortran-gcc-${VERSION}" gfortran ${TARGET}-{gfortran,gfortran-${VERSION},g95,g77} {f,g}{95,77}
+    symlink_to "gfortran-gcc-${VERSION}" gfortran fortran ${TARGET}-{gfortran,gfortran-${VERSION},g95,g77} {f,g}{95,77}
   )
 
   ( cd $PKG_GCC/usr/man
@@ -448,8 +447,7 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
 ( cd $PKG_GCC_GFORTRAN
   move_from_pkg_gcc usr/bin/{*gfortran*,*95*,*77*}
   # Does not this seem like a logical idea?
-  ( cd usr/bin ; ln -sf gfortran-gcc-${VERSION} fortran )
-  move_from_pkg_gcc usr/info/gfortran*
+  move_from_pkg_gcc usr/info/{gfortran*,fortran}
   move_from_pkg_gcc usr/lib${LIBDIRSUFFIX}/libgfortran*
   move_from_pkg_gcc usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/{fixincludes,libgfortran*}
   move_from_pkg_gcc usr/libexec/gcc/$TARGET/$VERSION/{f951,libgfortran*}
@@ -490,7 +488,6 @@ mv $PKG_GCC/usr/bin/gnative2ascii $PKG_GCC_JAVA/usr/bin
   rmdir $PKG_GCC/usr/lib${LIBDIRSUFFIX}/pkgconfig 2> /dev/null
   move_from_pkg_gcc usr/libexec/gcc/$TARGET/$VERSION/{jc1,ecj1,jvgenmain}
   move_from_pkg_gcc usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/gcj
-  mkdir -p usr/man/man1
   move_from_pkg_gcc usr/man/man1/{aot-compile,gappletviewer,gc-analyze,gcj,gcjh,gjc-dbtool,gij,gjar,gjarsigner,gjavah,gjdoc,gjnih,gkeytool,gnative2ascii,gorbd,grmic,grmid,grmiregistry,gserialver,gtnameserv,jcf-dump,jv-convert,jv-scan,rebuild-gcj-db}.1.gz
   move_from_pkg_gcc usr/share/java
   # The ecj wrapper script:
