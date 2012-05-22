@@ -520,8 +520,8 @@ find $TMP -type f -name "*.la" | xargs sed -i -e 's%-L/gcc-[[:graph:]]* % %g'
 ## Strip bloated binaries and libraries:
 for dir in ${ALL_PKGS}; do
   ( cd $dir
-    find . -name "lib*\.so*" -exec strip --strip-unneeded "{}" \;
-    find . -name "lib*\.a" -exec strip -g "{}" \;
+    find . -type f -name "lib*\.so*" -exec strip --strip-unneeded "{}" \;
+    find . -type f -name "lib*\.a" -exec strip -g "{}" \;
     strip --strip-unneeded usr/bin/* 2> /dev/null
     find . | xargs file | grep "executable" | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
     find . | xargs file | grep "shared object" | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
