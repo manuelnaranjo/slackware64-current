@@ -149,7 +149,7 @@ install_with_length_limit() {
 }
 
 move_from_pkg_gcc() {
-  SRC_DIR="$(basename "$1")"
+  SRC_DIR="$(dirname "$1")"
   mkdir -p "${SRC_DIR}"
   DEST_DIR="$(cd "${SRC_DIR}" && pwd)"
   (cd "${PKG_GCC}" && mv $* "${DEST_DIR}")
