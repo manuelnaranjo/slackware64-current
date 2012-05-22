@@ -421,22 +421,21 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
 
 # gcc-g++:
 ( cd $PKG_GCC_GPP
-  move_from_pkg_gcc usr/bin/*++*
-  move_from_pkg_gcc usr/include/c++
-  move_from_pkg_gcc usr/lib${LIBDIRSUFFIX}/*++*
-  move_from_pkg_gcc usr/libexec/gcc/$TARGET/$VERSION/cc1plus
-  move_from_pkg_gcc usr/man/man1/*++*
+  move_from_pkg_gcc "usr/bin/*++*"
+  move_from_pkg_gcc "usr/include/c++"
+  move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/*++*"
+  move_from_pkg_gcc "usr/libexec/gcc/$TARGET/$VERSION/cc1plus"
+  move_from_pkg_gcc "usr/man/man1/*++*"
 )
 
 # gcc-gfortran:
 ( cd $PKG_GCC_GFORTRAN
-  move_from_pkg_gcc usr/bin/{*gfortran*,*95*,*77*}
-  # Does not this seem like a logical idea?
-  move_from_pkg_gcc usr/info/{gfortran*,fortran}
-  move_from_pkg_gcc usr/lib${LIBDIRSUFFIX}/libgfortran*
-  move_from_pkg_gcc usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/{fixincludes,libgfortran*}
-  move_from_pkg_gcc usr/libexec/gcc/$TARGET/$VERSION/{f951,libgfortran*}
-  move_from_pkg_gcc usr/man/man1/gfortran*
+  move_from_pkg_gcc "usr/bin/{*gfortran*,*95*,*77*}"
+  move_from_pkg_gcc "usr/info/{gfortran*,fortran}"
+  move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/libgfortran*"
+  move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/{fixincludes,libgfortran*}"
+  move_from_pkg_gcc "usr/libexec/gcc/$TARGET/$VERSION/{f951,libgfortran*}"
+  move_from_pkg_gcc "usr/man/man1/gfortran*"
 )
 
 # gcc-gnat:
@@ -446,35 +445,35 @@ mkdir -p $PKG_GCC_JAVA/usr/bin
 mv $PKG_GCC/usr/bin/gnative2ascii $PKG_GCC_JAVA/usr/bin
 # Now make the gcc-gnat package tree:
 ( cd $PKG_GCC_GNAT
-  move_from_pkg_gcc usr/bin/{gnat*,gpr*}
-  move_from_pkg_gcc usr/info/gnat*
-  move_from_pkg_gcc usr/libexec/gcc/$TARGET/$VERSION/gnat1
-  move_from_pkg_gcc usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/ada{include,lib}
+  move_from_pkg_gcc "usr/bin/{gnat*,gpr*}"
+  move_from_pkg_gcc "usr/info/gnat*"
+  move_from_pkg_gcc "usr/libexec/gcc/$TARGET/$VERSION/gnat1"
+  move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/ada{include,lib}"
 )
 
 # gcc-java:
 ( cd $PKG_GCC_JAVA
   # used to mv fastjar too
-  move_from_pkg_gcc usr/bin/{aot-compile,addr2name.awk,gappletviewer,gc-analyze,*gcj*,gij,gjar,gjarsigner,gkeytool,grepjar,grmid,grmic,grmiregistry,gserialver,gtnameserv,gjavah,gorbd,jar,jcf-dump,jv-*,rmi*}
+  move_from_pkg_gcc "usr/bin/{aot-compile,addr2name.awk,gappletviewer,gc-analyze,*gcj*,gij,gjar,gjarsigner,gkeytool,grepjar,grmid,grmic,grmiregistry,gserialver,gtnameserv,gjavah,gorbd,jar,jcf-dump,jv-*,rmi*}"
   # Move some Java only C++ headers from the C++ package:
-  move_from_pkg_gcc usr/include/c++/$VERSION/{gcj,gnu,java,javax,org,sun} 
-  move_from_pkg_gcc usr/include/ffi.h
-  move_from_pkg_gcc usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/{jawt,ffi,ffitarget,jawt_md,jni,jni_md,jvmpi,libffi}.h
+  move_from_pkg_gcc "usr/include/c++/$VERSION/{gcj,gnu,java,javax,org,sun} "
+  move_from_pkg_gcc "usr/include/ffi.h"
+  move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/{jawt,ffi,ffitarget,jawt_md,jni,jni_md,jvmpi,libffi}.h"
   # aot-compile Python plugins:
   if [ ! -d $PKG_GCC/usr/lib${LIBDIRSUFFIX}/python2.6 ]; then
     echo "NO $PKG_GCC/usr/lib${LIBDIRSUFFIX}/python2.6 !"
     exit 1
   fi
   mv $PKG_GCC/usr/lib${LIBDIRSUFFIX}/python2.6 usr/lib${LIBDIRSUFFIX}
-  move_from_pkg_gcc usr/info/gcj.*
-  # move_from_pkg_gcc usr/info/fastjar.*
-  move_from_pkg_gcc usr/lib${LIBDIRSUFFIX}/{libffi*,logging.properties,gcj*,libgcj*,libgij*,lib-org*,security}
-  move_from_pkg_gcc usr/lib${LIBDIRSUFFIX}/pkgconfig/libgcj*.pc
+  move_from_pkg_gcc "usr/info/gcj.*"
+  # move_from_pkg_gcc usr/info/fastjar.*"
+  move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/{libffi*,logging.properties,gcj*,libgcj*,libgij*,lib-org*,security}"
+  move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/pkgconfig/libgcj*.pc"
   rmdir $PKG_GCC/usr/lib${LIBDIRSUFFIX}/pkgconfig 2> /dev/null
-  move_from_pkg_gcc usr/libexec/gcc/$TARGET/$VERSION/{jc1,ecj1,jvgenmain}
-  move_from_pkg_gcc usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/gcj
-  move_from_pkg_gcc usr/man/man1/{aot-compile,gappletviewer,gc-analyze,gcj,gcjh,gjc-dbtool,gij,gjar,gjarsigner,gjavah,gjdoc,gjnih,gkeytool,gnative2ascii,gorbd,grmic,grmid,grmiregistry,gserialver,gtnameserv,jcf-dump,jv-convert,jv-scan,rebuild-gcj-db}.1.gz
-  move_from_pkg_gcc usr/share/java
+  move_from_pkg_gcc "usr/libexec/gcc/$TARGET/$VERSION/{jc1,ecj1,jvgenmain}"
+  move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/gcj"
+  move_from_pkg_gcc "usr/man/man1/{aot-compile,gappletviewer,gc-analyze,gcj,gcjh,gjc-dbtool,gij,gjar,gjarsigner,gjavah,gjdoc,gjnih,gkeytool,gnative2ascii,gorbd,grmic,grmid,grmiregistry,gserialver,gtnameserv,jcf-dump,jv-convert,jv-scan,rebuild-gcj-db}.1.gz"
+  move_from_pkg_gcc "usr/share/java"
   # The ecj wrapper script:
   cat $CWD/ecj.sh | sed -e "s,@JAVADIR@,/usr/share/java," > usr/bin/ecj
   chmod 755 usr/bin/ecj
@@ -487,9 +486,9 @@ mv $PKG_GCC/usr/bin/gnative2ascii $PKG_GCC_JAVA/usr/bin
 
 # gcc-objc:
 ( cd $PKG_GCC_OBJC
-  move_from_pkg_gcc usr/lib${LIBDIRSUFFIX}/libobjc*
-  move_from_pkg_gcc usr/libexec/gcc/$TARGET/$VERSION/cc1obj
-  move_from_pkg_gcc usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/objc
+  move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/libobjc*"
+  move_from_pkg_gcc "usr/libexec/gcc/$TARGET/$VERSION/cc1obj"
+  move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/objc"
 )
 
 ## NOTE: Thought about this, because the precompiled headers are so large.
@@ -502,17 +501,17 @@ mv $PKG_GCC/usr/bin/gnative2ascii $PKG_GCC_JAVA/usr/bin
 
 # gcc-go:
 ( cd $PKG_GCC_GO
-  move_from_pkg_gcc usr/bin/*gccgo*
-  move_from_pkg_gcc usr/libexec/gcc/$TARGET/$VERSION/go1
-  move_from_pkg_gcc usr/info/gccgo.info.gz
-  move_from_pkg_gcc usr/lib${LIBDIRSUFFIX}/{go,libgo.la,libgo.so.0.*,libgobegin.a}
-  [ -e usr/lib${LIBDIRSUFFIX}/{libgo.la,libgo.so.0.*,libgobegin.a} ] || exit 1
+  move_from_pkg_gcc "usr/bin/*gccgo*"
+  move_from_pkg_gcc "usr/libexec/gcc/$TARGET/$VERSION/go1"
+  move_from_pkg_gcc "usr/info/gccgo.info.gz"
+  move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/{go,libgo.la,libgo.so.0.*,libgobegin.a}"
+  (cd usr/lib${LIBDIRSUFFIX} && [ -e libgo.la -a -e libgo.so.0.* -a -e libgobegin.a ]) || exit 1
   # Ordinarily Slackware does not package static libraries, but in this case
   # it is useful for deploying compiled binaries on machines that do not yet
   # have libgo.so.0.0.0.
-  move_from_pkg_gcc usr/lib${LIBDIRSUFFIX}/libgo.a
-  move_from_pkg_gcc usr/libexec/gcc/$TARGET/$VERSION/go
-  move_from_pkg_gcc usr/man/man1/gccgo.1.gz
+  move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/libgo.a"
+  move_from_pkg_gcc "usr/libexec/gcc/$TARGET/$VERSION/go"
+  move_from_pkg_gcc "usr/man/man1/gccgo.1.gz"
 ) || exit 1
 
 # Filter all .la files (thanks much to Mark Post for the sed script):
