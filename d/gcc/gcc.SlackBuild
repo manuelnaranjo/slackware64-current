@@ -179,9 +179,9 @@ done
 # Insert package descriptions:
 for LANG in ${ALL_LANGS}; do
   PKG="$(pkg_of_element "${LANG}")"
-  if [ -e "slack-desc-${LANG}" ];
+  if [ -e "slack-desc.${LANG}" ]; then
     mkdir -p ${PKG}/install
-    cat $CWD/slack-desc-${LANG} > $PKG/install/slack-desc
+    cat $CWD/slack-desc.${LANG} > $PKG/install/slack-desc
   fi
 done
 
