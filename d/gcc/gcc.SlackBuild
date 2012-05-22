@@ -434,7 +434,7 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
   move_from_pkg_gcc "usr/info/{gfortran*,fortran}"
   move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/libgfortran*"
   move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/{fixincludes,libgfortran*}"
-  move_from_pkg_gcc "usr/libexec/gcc/$TARGET/$VERSION/{f951,libgfortran*}"
+  move_from_pkg_gcc "usr/libexec/gcc/$TARGET/$VERSION/f951"
   move_from_pkg_gcc "usr/man/man1/gfortran*"
 )
 
