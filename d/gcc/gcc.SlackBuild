@@ -445,7 +445,7 @@ mkdir -p $PKG_GCC_JAVA/usr/bin
 mv $PKG_GCC/usr/bin/gnative2ascii $PKG_GCC_JAVA/usr/bin
 # Now make the gcc-gnat package tree:
 ( cd $PKG_GCC_GNAT
-  move_from_pkg_gcc "usr/bin/{gnat*,gpr*}"
+  move_from_pkg_gcc "usr/bin/gnat*"
   move_from_pkg_gcc "usr/info/gnat*"
   move_from_pkg_gcc "usr/libexec/gcc/$TARGET/$VERSION/gnat1"
   move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/ada{include,lib}"
