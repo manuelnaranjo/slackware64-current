@@ -290,7 +290,7 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
     AUTHORS CHANGES COPYING* INSTALL NEWS README* TODO \
     ${PKG_GCC_JAVA}/usr/doc/fastjar-$FASTJARVER
   install_with_length_limit "ChangeLog" "${PKG_GCC_JAVA}/usr/doc/fastjar-${FASTJARVER}"
-  find ${PKG_GCC_JAVA} | xargs file | grep -e "executable" -e "shared object" | grep ELF \
+  find ${PKG_GCC_JAVA} -type f | xargs file | grep -e "executable" -e "shared object" | grep ELF \
     | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
   # Compress and if needed symlink the man pages:
   if [ -d ${PKG_GCC_JAVA}/usr/man ]; then
