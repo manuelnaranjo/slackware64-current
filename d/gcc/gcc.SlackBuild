@@ -461,9 +461,9 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
 # gcc-gfortran:
 ( cd $PKG_GCC_GFORTRAN
   move_from_pkg_gcc "usr/bin/{*gfortran*,*95*,*77*}"
-  move_from_pkg_gcc "usr/info/{gfortran*,fortran}"
+  move_from_pkg_gcc "usr/info/gfortran*"
+  move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/{finclude,libgfortran*}"
   move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/libgfortran*"
-  move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/libgfortran*"
   move_from_pkg_gcc "usr/libexec/gcc/$TARGET/$VERSION/f951"
   move_from_pkg_gcc "usr/man/man1/gfortran*"
 )
@@ -484,11 +484,10 @@ mv $PKG_GCC/usr/bin/gnative2ascii $PKG_GCC_JAVA/usr/bin
 # gcc-java:
 ( cd $PKG_GCC_JAVA
   # used to mv fastjar too
-  move_from_pkg_gcc "usr/bin/{aot-compile,addr2name.awk,gappletviewer,gc-analyze,*gcj*,gij,gjar,gjarsigner,gkeytool,grepjar,grmid,grmic,grmiregistry,gserialver,gtnameserv,gjavah,gorbd,jar,jcf-dump,jv-*,rmi*}"
+  move_from_pkg_gcc "usr/bin/{aot-compile,gappletviewer,gc-analyze,*gcj*,gij,gjar,gjarsigner,gkeytool,grmid,grmic,grmiregistry,gserialver,gtnameserv,gjavah,gorbd,jcf-dump,jv-*}"
   # Move some Java only C++ headers from the C++ package:
-  move_from_pkg_gcc "usr/include/c++/$VERSION/{gcj,gnu,java,javax,org,sun} "
-  move_from_pkg_gcc "usr/include/ffi.h"
-  move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/{jawt,ffi,ffitarget,jawt_md,jni,jni_md,jvmpi,libffi}.h"
+  (DIR="usr/include/c++/$VERSION"; mkdir -p ${DIR} && mv $PKG_GCC_GPP/$DIR/{gcj,gnu,java,javax,org,sun} $DIR)
+  move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/{jawt,ffi,ffitarget,jawt_md,jni,jni_md,jvmpi}.h"
   # aot-compile Python plugins:
   if [ ! -d $PKG_GCC/usr/lib${LIBDIRSUFFIX}/python2.6 ]; then
     echo "NO $PKG_GCC/usr/lib${LIBDIRSUFFIX}/python2.6 !"
@@ -497,12 +496,12 @@ mv $PKG_GCC/usr/bin/gnative2ascii $PKG_GCC_JAVA/usr/bin
   mv $PKG_GCC/usr/lib${LIBDIRSUFFIX}/python2.6 usr/lib${LIBDIRSUFFIX}
   move_from_pkg_gcc "usr/info/gcj.*"
   # move_from_pkg_gcc usr/info/fastjar.*"
-  move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/{libffi*,logging.properties,gcj*,libgcj*,libgij*,lib-org*,security}"
+  move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/{libffi*,logging.properties,gcj*,libgcj*,libgij*,security}"
   move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/pkgconfig/libgcj*.pc"
   rmdir $PKG_GCC/usr/lib${LIBDIRSUFFIX}/pkgconfig 2> /dev/null
   move_from_pkg_gcc "usr/libexec/gcc/$TARGET/$VERSION/{jc1,ecj1,jvgenmain}"
   move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/gcj"
-  move_from_pkg_gcc "usr/man/man1/{aot-compile,gappletviewer,gc-analyze,gcj,gcjh,gjc-dbtool,gij,gjar,gjarsigner,gjavah,gjdoc,gjnih,gkeytool,gnative2ascii,gorbd,grmic,grmid,grmiregistry,gserialver,gtnameserv,jcf-dump,jv-convert,jv-scan,rebuild-gcj-db}.1.gz"
+  move_from_pkg_gcc "usr/man/man1/{aot-compile,gappletviewer,gc-analyze,gcj,gcjh,gcj-dbtool,gij,gjar,gjarsigner,gjavah,gjdoc,gkeytool,gnative2ascii,gorbd,grmic,grmid,grmiregistry,gserialver,gtnameserv,jcf-dump,jv-convert,rebuild-gcj-db}.1.gz"
   move_from_pkg_gcc "usr/share/java"
   # The ecj wrapper script:
   cat $CWD/ecj.sh | sed -e "s,@JAVADIR@,/usr/share/java," > usr/bin/ecj
@@ -540,7 +539,6 @@ mv $PKG_GCC/usr/bin/gnative2ascii $PKG_GCC_JAVA/usr/bin
   # it is useful for deploying compiled binaries on machines that do not yet
   # have libgo.so.0.0.0.
   move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/libgo.a"
-  move_from_pkg_gcc "usr/libexec/gcc/$TARGET/$VERSION/go"
   move_from_pkg_gcc "usr/man/man1/gccgo.1.gz"
 ) || exit 1
 
