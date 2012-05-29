@@ -498,7 +498,7 @@ mv $PKG_GCC/usr/bin/gnative2ascii $PKG_GCC_JAVA/usr/bin
     echo "NO $PKG_GCC/usr/lib${LIBDIRSUFFIX}/python2.6 !"
     exit 1
   fi
-  mv $PKG_GCC/usr/lib${LIBDIRSUFFIX}/python2.6 usr/lib${LIBDIRSUFFIX}
+  move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/python2.6"
   move_from_pkg_gcc "usr/info/gcj.*"
   # move_from_pkg_gcc usr/info/fastjar.*"
   move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/{libffi*,logging.properties,gcj*,libgcj*,libgij*,security}"
