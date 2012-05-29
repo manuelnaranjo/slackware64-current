@@ -209,17 +209,45 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
   find . -perm 664 -exec chmod 644 {} \;
 
   for ELEMENT in ${ALL_ELEMENTS}; do
-    PKG="$(pkg_of_element "${ELEMENTS}")"
-    DOC_DIR="$(doc_dir_of_element "${ELEMENTS}")"
-    mkdir -p "${PKG}/usr/doc/gcc-${VERSION}/${DOC_DIR}"
+    DOC_DIR="$(doc_dir_of_element "${ELEMENT}")"
+    if [ "${DOC_DIR}" = "NONE" ]; then
+      continue
+    fi
+    PKG="$(pkg_of_element "${ELEMENT}")"
+    PKG_DOC_DIR="${PKG}/usr/doc/gcc-${VERSION}/${DOC_DIR}"
+    unset FULL_FILES
+    LIMITED_FILES=ChangeLog
+    case "${ELEMENT}" in
+      main)
+        FULL_FILES="COPYING* ChangeLog* INSTALL LAST_UPDATED MAINTAINERS README*"
+        LIMITED_FILES="${LIMITED_FILES} NEWS"
+        ;;
+      gcc)
+        FULL_FILES="ABOUT* COPYING* DATESTAMP DEV-PHASE LANG* ONEWS README*"
+        ;;
+      gcc-gnat | gcc-java)
+        FULL_FILES="ChangeLog.tree-ssa"
+        ;;
+      gcc-go)
+        FULL_FILES="README* gofrontend/{LICENSE,PATENTS,README}"
+        ;;
+      libffi)
+        FULL_FILES="ChangeLog.libgcj ChangeLog.v1 LICENSE* README*"
+        ;;
+      libjava)
+        FULL_FILES="COPYING* HACKING LIBGCJ_LICENSE NEWS README* THANKS"
+        ;;
+      libstdc++-v3)
+        FULL_FILES="README* doc/html/faq.html"
+        ;;
+    esac
+    mkdir -p "${PKG_DOC_DIR}"
     (cd ${DOC_DIR}
-      for FILE in "ChangeLog" "ChangeLog.tree-ssa" "ChangeLog.v1" "ChangeLog.libgcj" "NEWS"; do
-        install_with_length_limit "${FILE}" "${PKG}/usr/doc/gcc-$VERSION/${DOC_DIR}"
-      done
-      for FILE in ABOUT* COPYING* DATESTAMP DEV-PHASE LANG* LICENSE* ONEWS FAQ HACKING INSTALL LAST_UPDATED LIBGCJ_LICENSE MAINTAINERS README* SERVICE doc/html/faq.html *.html THANKS THREADS* gofrontend/{LICENSE,PATENTS,README}; do
-        if [ -e "${FILE}" ]; then
-          cp -a "${FILE}" ${PKG}/usr/doc/gcc-$VERSION/gcc/${DIR}
-        fi
+      if [ -n "${FULL_FILES}" ]; then
+        eval cp -a "${FULL_FILES}" "${PKG_DOC_DIR}"
+      fi
+      for FILE in $(eval echo "${LIMITED_FILES}"); do
+        install_with_length_limit "${FILE}" "${PKG_DOC_DIR}"
       done)
   done
 )
