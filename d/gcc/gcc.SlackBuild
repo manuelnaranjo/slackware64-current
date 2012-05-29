@@ -110,6 +110,10 @@ ALL_LANGS="gcc gcc-g++ gcc-gfortran gcc-gnat gcc-java gcc-objc gcc-go"
 ALL_LIBS="libgfortran libada libffi libjava libmudflap libgomp libobjc libstdc++-v3"
 ALL_ELEMENTS="main ${ALL_LANGS} ${ALL_LIBS}"
 
+
+# pkg_of_element "${ELEMENT}"
+# Given an "element" (which is a member of ${ALL_ELEMENTS}), return its
+# destination package
 pkg_of_element() {
   case "$1" in
     gcc | libmudflap | libgomp | main) echo "${PKG_GCC}";;
@@ -123,6 +127,9 @@ pkg_of_element() {
   esac
 }
 
+# doc_dir_of_element "${ELEMENT}"
+# Given an "element" (which is a member of ${ALL_ELEMENTS}", return the path
+# to the corresponding documentation inside the build directory
 doc_dir_of_element() {
   case "$1" in
     main) echo "." ;;
@@ -134,8 +141,9 @@ doc_dir_of_element() {
     gcc-objc | libobjc) echo "gcc/objc" ;;
     # gcc-g++-gch) echo "gcc/g++-gch" ;;
     gcc-go) echo "gcc/go" ;;
-    # lib{omp,mudflap,java,ffi,ada,gfortran,stdc++-v3,objc}) echo "$1" ;;
     lib*) echo "$1" ;;
+    # I would have liked to write the following but it's not valid syntax:
+    # lib{omp,mudflap,java,ffi,ada,gfortran,stdc++-v3,objc}) echo "$1" ;;
   esac
 }
 
@@ -150,6 +158,11 @@ install_with_length_limit() {
   fi
 }
 
+# move_from_pkg_gcc "${GLOB}"
+# When issuing "make install", everything gets installed in a single directory
+# and then moved to the corresponding package. This function moves files
+# matching a glob (given as $1) from ${PKG_GCC} to the current package
+# directory.
 move_from_pkg_gcc() {
   SRC_DIR="$(dirname "$1")"
   mkdir -p "${SRC_DIR}"
@@ -157,6 +170,9 @@ move_from_pkg_gcc() {
   (cd "${PKG_GCC}" && eval mv $* "${DEST_DIR}")
 }
 
+# symlink_to "${LINK_TARGET}" file1 file2 file3
+# A common operation is to symlink several files to one in order to be able to
+# use several names for it: gcc, x86_64-slackware-linux-gcc, cc, ...
 symlink_to() {
   LINK_TARGET="$1"
   shift
@@ -165,8 +181,9 @@ symlink_to() {
   done
 }
 
+# compress_info_files ${PREFIX}
+# Compress info files in ${PREFIX}/usr/info if any.
 compress_info_files() {
-  # Compress info files, if any:
   [ -d $1/usr/info ] && ( cd $1/usr/info && rm -f dir && gzip -9 *)
 }
 
