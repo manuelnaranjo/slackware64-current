@@ -125,15 +125,17 @@ pkg_of_element() {
 
 doc_dir_of_element() {
   case "$1" in
-    main) echo "" ;;
-    gcc | libmudflap) echo "gcc" ;;
-    gcc-g++ | libstdc++-v3) echo "gcc/g++" ;;
-    gcc-gfortran | libgfortran) echo "gcc/fortran" ;;
-    gcc-gnat | libada) echo "gcc/gnat" ;;
-    gcc-java | libffi | libjava) echo "gcc/java" ;;
+    main) echo "." ;;
+    gcc) echo "gcc" ;;
+    gcc-g++) echo "NONE" ;;
+    gcc-gfortran) echo "gcc/fortran" ;;
+    gcc-gnat) echo "gcc/ada" ;;
+    gcc-java) echo "gcc/java" ;;
     gcc-objc | libobjc) echo "gcc/objc" ;;
-    gcc-g++-gch) echo "gcc/g++-gch" ;;
-    gcc-go) echo "gcc/gcc-go" ;;
+    # gcc-g++-gch) echo "gcc/g++-gch" ;;
+    gcc-go) echo "gcc/go" ;;
+    # lib{omp,mudflap,java,ffi,ada,gfortran,stdc++-v3,objc}) echo "$1" ;;
+    lib*) echo "$1" ;;
   esac
 }
 
