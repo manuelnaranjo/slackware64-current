@@ -239,24 +239,12 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
         FULL_FILES="COPYING* ChangeLog* INSTALL LAST_UPDATED MAINTAINERS README*"
         LIMITED_FILES="${LIMITED_FILES} NEWS"
         ;;
-      gcc)
-        FULL_FILES="ABOUT* COPYING* DATESTAMP DEV-PHASE LANG* ONEWS README*"
-        ;;
-      gcc-gnat | gcc-java)
-        FULL_FILES="ChangeLog.tree-ssa"
-        ;;
-      gcc-go)
-        FULL_FILES="README* gofrontend/{LICENSE,PATENTS,README}"
-        ;;
-      libffi)
-        FULL_FILES="ChangeLog.libgcj ChangeLog.v1 LICENSE* README*"
-        ;;
-      libjava)
-        FULL_FILES="COPYING* HACKING LIBGCJ_LICENSE NEWS README* THANKS"
-        ;;
-      libstdc++-v3)
-        FULL_FILES="README* doc/html/faq.html"
-        ;;
+      gcc) FULL_FILES="ABOUT* COPYING* DATESTAMP DEV-PHASE LANG* ONEWS README*" ;;
+      gcc-gnat | gcc-java) FULL_FILES="ChangeLog.tree-ssa" ;;
+      gcc-go) FULL_FILES="README* gofrontend/{LICENSE,PATENTS,README}" ;;
+      libffi) FULL_FILES="ChangeLog.libgcj ChangeLog.v1 LICENSE* README*" ;;
+      libjava) FULL_FILES="COPYING* HACKING LIBGCJ_LICENSE NEWS README* THANKS" ;;
+      libstdc++-v3) FULL_FILES="README* doc/html/faq.html" ;;
     esac
     mkdir -p "${PKG_DOC_DIR}"
     (cd ${DOC_DIR}
