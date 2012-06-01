@@ -551,15 +551,11 @@ mv $PKG_GCC/usr/bin/gnative2ascii $PKG_GCC_JAVA/usr/bin
 find $TMP -type f -name "*.la" | xargs sed -i -e 's%-L/gcc-[[:graph:]]* % %g'
 
 ## Strip bloated binaries and libraries:
-for dir in ${ALL_PKGS}; do
-  ( cd $dir
-    find . -type f -name "lib*\.so*" -exec strip --strip-unneeded "{}" \;
-    find . -type f -name "lib*\.a" -exec strip -g "{}" \;
-    strip --strip-unneeded usr/bin/* 2> /dev/null
-    find . -type f | xargs file | grep "executable" | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
-    find . -type f | xargs file | grep "shared object" | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
-  )
-done
+find ${ALL_PKGS} -type f -name "lib*\.so*" -exec strip --strip-unneeded "{}" \;
+find ${ALL_PKGS} -type f -name "lib*\.a" -exec strip -g "{}" \;
+strip --strip-unneeded usr/bin/* 2> /dev/null
+find ${ALL_PKGS} -type f | xargs file | grep "executable" | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
+find ${ALL_PKGS} -type f | xargs file | grep "shared object" | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
 
 for LANG in ${ALL_LANGS}; do
   ( cd "$(pkg_of_element "${LANG}")"
