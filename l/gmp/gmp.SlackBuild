@@ -91,7 +91,6 @@ CFLAGS="$SLKCFLAGS" \
   --with-gnu-ld \
   --enable-cxx \
   --enable-mpbsd \
-  --enable-mpfr \
   --build=$TARGET
 
 make $NUMJOBS || make || exit 1
