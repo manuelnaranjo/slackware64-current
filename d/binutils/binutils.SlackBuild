@@ -204,10 +204,6 @@ if [ -r ChangeLog ]; then
   touch -r ChangeLog $DOCSDIR/ChangeLog
 fi
 
-
-# Add slack-desc:
-mkdir -p $PKG/install
-cat $CWD/slack-desc > $PKG/install/slack-desc
 chown -R root:root $PKG/${PREFIX}/doc/binutils-$VERSION
 
 cat ${CWD}/binutils.yypkg.meta | sed \
