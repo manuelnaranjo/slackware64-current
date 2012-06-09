@@ -338,7 +338,7 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
      --enable-shared \
      --enable-bootstrap \
      --enable-languages=ada,c,c++,fortran,go,java,lto,objc \
-     --enable-threads=posix \
+     --enable-threads \
      --enable-checking=release \
      --enable-objc-gc \
      --with-system-zlib \
