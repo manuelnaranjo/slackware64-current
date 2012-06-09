@@ -184,7 +184,7 @@ symlink_to() {
 # compress_info_files ${PREFIX}
 # Compress info files in ${PREFIX}/usr/info if any.
 compress_info_files() {
-  [ -d $1/usr/info ] && ( cd $1/usr/info && rm -f dir && gzip -9 *)
+  [ -d $1/${PREFIX}/info ] && ( cd $1/${PREFIX}/info && rm -f dir && gzip -9 *)
 }
 
 # Clear the build locations:
@@ -192,7 +192,7 @@ if [ -d $TMP ]; then
   rm -rf $TMP
 fi
 for PKG in ${ALL_PKGS}; do
-  mkdir -p ${PKG}/usr/doc/gcc-${VERSION}
+  mkdir -p ${PKG}/${PREFIX}/doc/gcc-${VERSION}
 done
 
 # Insert package descriptions:
@@ -231,7 +231,7 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
       continue
     fi
     PKG="$(pkg_of_element "${ELEMENT}")"
-    PKG_DOC_DIR="${PKG}/usr/doc/gcc-${VERSION}/${DOC_DIR}"
+    PKG_DOC_DIR="${PKG}/${PREFIX}/doc/gcc-${VERSION}/${DOC_DIR}"
     unset FULL_FILES
     LIMITED_FILES=ChangeLog
     case "${ELEMENT}" in
@@ -278,23 +278,23 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
   CFLAGS="$SLKCFLAGS" \
   CXXFLAGS="$SLKCFLAGS" \
   ./configure \
-     --prefix=/usr \
-     --libdir=/usr/lib$LIBDIRSUFFIX \
-     --mandir=/usr/man \
-     --infodir=/usr/info \
+     --prefix=/${PREFIX} \
+     --libdir=/${PREFIX}/lib$LIBDIRSUFFIX \
+     --mandir=/${PREFIX}/man \
+     --infodir=/${PREFIX}/info \
      --build=$TARGET
   make $NUMJOBS || exit 1
   make install DESTDIR=${PKG_GCC_JAVA} || exit 1
-  mkdir -p ${PKG_GCC_JAVA}/usr/doc/fastjar-$FASTJARVER
+  mkdir -p ${PKG_GCC_JAVA}/${PREFIX}/doc/fastjar-$FASTJARVER
   cp -a \
     AUTHORS CHANGES COPYING* INSTALL NEWS README* TODO \
-    ${PKG_GCC_JAVA}/usr/doc/fastjar-$FASTJARVER
-  install_with_length_limit "ChangeLog" "${PKG_GCC_JAVA}/usr/doc/fastjar-${FASTJARVER}"
+    ${PKG_GCC_JAVA}/${PREFIX}/doc/fastjar-$FASTJARVER
+  install_with_length_limit "ChangeLog" "${PKG_GCC_JAVA}/${PREFIX}/doc/fastjar-${FASTJARVER}"
   find ${PKG_GCC_JAVA} -type f | xargs file | grep -e "executable" -e "shared object" | grep ELF \
     | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
   # Compress and if needed symlink the man pages:
-  if [ -d ${PKG_GCC_JAVA}/usr/man ]; then
-    ( cd ${PKG_GCC_JAVA}/usr/man
+  if [ -d ${PKG_GCC_JAVA}/${PREFIX}/man ]; then
+    ( cd ${PKG_GCC_JAVA}/${PREFIX}/man
       for manpagedir in $(find . -type d -name "man*") ; do
         ( cd $manpagedir
           for eachpage in $( find . -type l -maxdepth 1) ; do
@@ -331,10 +331,10 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
  
   CFLAGS="$SLKCFLAGS" \
   CXXFLAGS="$SLKCFLAGS" \
-  ../gcc-$VERSION/configure --prefix=/usr \
-     --libdir=/usr/lib$LIBDIRSUFFIX \
-     --mandir=/usr/man \
-     --infodir=/usr/info \
+  ../gcc-$VERSION/configure --prefix=/${PREFIX} \
+     --libdir=/${PREFIX}/lib$LIBDIRSUFFIX \
+     --mandir=/${PREFIX}/man \
+     --infodir=/${PREFIX}/info \
      --enable-shared \
      --enable-bootstrap \
      --enable-languages=ada,c,c++,fortran,go,java,lto,objc \
@@ -350,9 +350,9 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
      --with-gnu-ld \
      --verbose \
      --enable-java-home \
-     --with-java-home=/usr/lib$LIBDIRSUFFIX/jvm/jre \
-     --with-jvm-root-dir=/usr/lib$LIBDIRSUFFIX/jvm \
-     --with-jvm-jar-dir=/usr/lib$LIBDIRSUFFIX/jvm/jvm-exports \
+     --with-java-home=/${PREFIX}/lib$LIBDIRSUFFIX/jvm/jre \
+     --with-jvm-root-dir=/${PREFIX}/lib$LIBDIRSUFFIX/jvm \
+     --with-jvm-jar-dir=/${PREFIX}/lib$LIBDIRSUFFIX/jvm/jvm-exports \
      --with-arch-directory=$LIB_ARCH \
      --with-antlr-jar=$ANTLJAR \
      --enable-java-awt=gtk \
@@ -389,7 +389,7 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
   # These *gdb.py files are causing ldconfig to complain, so they are going
   # to be REMOVED for now...  at some point, they might be moved somewhere
   # else, in which case things should Just Work(tm).  Keep an eye on it.
-  rm -f $PKG_GCC/usr/lib${LIBDIRSUFFIX}/*gdb.py
+  rm -f $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX}/*gdb.py
 
   # Be sure the "specs" file is installed.
   if [ ! -r $PKG_GCC/usr/lib${LIBDIRSUFFIX}/gcc/${TARGET}/${VERSION}/specs ]; then
@@ -399,30 +399,30 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
   # Make our 64bit gcc look for 32bit gcc binaries in ./32 subdirectory:
   if [ "$ARCH" = "x86_64" ]; then
     sed -i 's#;.\(:../lib !m64 m32;\)$#;32\1#' \
-      $PKG_GCC/usr/lib${LIBDIRSUFFIX}/gcc/${TARGET}/${VERSION}/specs
+      $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX}/gcc/${TARGET}/${VERSION}/specs
   fi
 
   #  make ada.install-common DESTDIR=$PKG_GCC
   #  make install-gnatlib DESTDIR=$PKG_GCC
   make -i install-info DESTDIR=$PKG_GCC
 
-  chmod 755 $PKG_GCC/usr/lib${LIBDIRSUFFIX}/libgcc_s.so.1
+  chmod 755 $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX}/libgcc_s.so.1
 
   # The (huge) static GNU java libraries are not packaged.  In nearly all
   # cases one or more dependencies will not be available as static anyway.
-  rm -f $PKG_GCC/usr/lib${LIBDIRSUFFIX}/libgcj.a
-  rm -f $PKG_GCC/usr/lib${LIBDIRSUFFIX}/libgcj-tools.a
+  rm -f $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX}/libgcj.a
+  rm -f $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX}/libgcj-tools.a
 
   # This is provided by binutils, so delete it here:
-  rm -f $PKG_GCC/usr/lib${LIBDIRSUFFIX}/libiberty.a
-  rm -f $PKG_GCC/usr/lib/libiberty.a # catch-all
+  rm -f $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX}/libiberty.a
+  rm -f $PKG_GCC/${PREFIX}/lib/libiberty.a # catch-all
 
   # Fix stuff up:
   compress_info_files ${PKG_GCC}
   ( cd $PKG_GCC
     # *not* ${LIBDIRSUFFIX}
     mkdir -p lib
-    ln -sf /usr/bin/cpp lib/cpp
+    ln -sf /${PREFIX}/bin/cpp lib/cpp
   )
 
   ( cd $PKG_GCC/usr/bin
@@ -437,7 +437,7 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
     symlink_to "gfortran-gcc-${VERSION}" gfortran fortran ${TARGET}-{gfortran,gfortran-${VERSION},g95,g77} {f,g}{95,77}
   )
 
-  ( cd $PKG_GCC/usr/man
+  ( cd $PKG_GCC/${PREFIX}/man
     gzip -9 */*
     cd man1
     ln -sf g++.1.gz c++.1.gz
@@ -456,96 +456,96 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
 
 # gcc-g++:
 ( cd $PKG_GCC_GPP
-  move_from_pkg_gcc "usr/bin/*++*"
-  move_from_pkg_gcc "usr/include/c++"
-  move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/*++*"
-  move_from_pkg_gcc "usr/libexec/gcc/$TARGET/$VERSION/cc1plus"
-  move_from_pkg_gcc "usr/man/man1/*++*"
+  move_from_pkg_gcc "${PREFIX}/bin/*++*"
+  move_from_pkg_gcc "${PREFIX}/include/c++"
+  move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX}/*++*"
+  move_from_pkg_gcc "${PREFIX}/libexec/gcc/$TARGET/$VERSION/cc1plus"
+  move_from_pkg_gcc "${PREFIX}/man/man1/*++*"
 )
 
 # gcc-gfortran:
 ( cd $PKG_GCC_GFORTRAN
-  move_from_pkg_gcc "usr/bin/{*gfortran*,*95*,*77*}"
-  move_from_pkg_gcc "usr/info/gfortran*"
-  move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/{finclude,libgfortran*}"
-  move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/libgfortran*"
-  move_from_pkg_gcc "usr/libexec/gcc/$TARGET/$VERSION/f951"
-  move_from_pkg_gcc "usr/man/man1/gfortran*"
-)
+  move_from_pkg_gcc "${PREFIX}/bin/{*gfortran*,*95*,*77*}"
+  move_from_pkg_gcc "${PREFIX}/info/gfortran*"
+  move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/{finclude,libgfortran*}"
+  move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX}/libgfortran*"
+  move_from_pkg_gcc "${PREFIX}/libexec/gcc/$TARGET/$VERSION/f951"
+  move_from_pkg_gcc "${PREFIX}/man/man1/gfortran*"
+); fi
 
 # gcc-gnat:
 # First, relocate usr/bin/gnative2ascii to the gcc-java package so it
 # isn't matched and accidentally put in gcc-gnat:
-mkdir -p $PKG_GCC_JAVA/usr/bin
-mv $PKG_GCC/usr/bin/gnative2ascii $PKG_GCC_JAVA/usr/bin
+mkdir -p $PKG_GCC_JAVA/${PREFIX}/bin
+mv $PKG_GCC/${PREFIX}/bin/gnative2ascii $PKG_GCC_JAVA/${PREFIX}/bin
 # Now make the gcc-gnat package tree:
 ( cd $PKG_GCC_GNAT
-  move_from_pkg_gcc "usr/bin/gnat*"
-  move_from_pkg_gcc "usr/info/gnat*"
-  move_from_pkg_gcc "usr/libexec/gcc/$TARGET/$VERSION/gnat1"
-  move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/ada{include,lib}"
-)
+  move_from_pkg_gcc "${PREFIX}/bin/*gnat*"
+  move_from_pkg_gcc "${PREFIX}/info/*gnat*"
+  move_from_pkg_gcc "${PREFIX}/libexec/gcc/$TARGET/$VERSION/gnat1"
+  move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/ada{include,lib}"
+); fi
 
 # gcc-java:
 ( cd $PKG_GCC_JAVA
   # used to mv fastjar too
-  move_from_pkg_gcc "usr/bin/{aot-compile,gappletviewer,gc-analyze,*gcj*,gij,gjar,gjarsigner,gkeytool,grmid,grmic,grmiregistry,gserialver,gtnameserv,gjavah,gorbd,jcf-dump,jv-*}"
+  move_from_pkg_gcc "${PREFIX}/bin/{aot-compile,gappletviewer,gc-analyze,*gcj*,gij,gjar,gjarsigner,gkeytool,grmid,grmic,grmiregistry,gserialver,gtnameserv,gjavah,gorbd,jcf-dump,jv-*}"
   # Move some Java only C++ headers from the C++ package:
-  (DIR="usr/include/c++/$VERSION"; mkdir -p ${DIR} && mv $PKG_GCC_GPP/$DIR/{gcj,gnu,java,javax,org,sun} $DIR)
-  move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/{jawt,ffi,ffitarget,jawt_md,jni,jni_md,jvmpi}.h"
+  (DIR="${PREFIX}/include/c++/$VERSION"; mkdir -p ${DIR} && mv $PKG_GCC_GPP/$DIR/{gcj,gnu,java,javax,org,sun} $DIR)
+  move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/{jawt,ffi,ffitarget,jawt_md,jni,jni_md,jvmpi}.h"
   # aot-compile Python plugins:
-  if [ ! -d $PKG_GCC/usr/lib${LIBDIRSUFFIX}/python2.6 ]; then
-    echo "NO $PKG_GCC/usr/lib${LIBDIRSUFFIX}/python2.6 !"
+  if [ ! -d $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX}/python2.6 ]; then
+    echo "NO $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX}/python2.6 !"
     exit 1
   fi
-  move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/python2.6"
-  move_from_pkg_gcc "usr/info/gcj.*"
-  # move_from_pkg_gcc usr/info/fastjar.*"
-  move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/{libffi*,logging.properties,gcj*,libgcj*,libgij*,security}"
-  move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/pkgconfig/libgcj*.pc"
-  rmdir $PKG_GCC/usr/lib${LIBDIRSUFFIX}/pkgconfig 2> /dev/null
-  move_from_pkg_gcc "usr/libexec/gcc/$TARGET/$VERSION/{jc1,ecj1,jvgenmain}"
-  move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/gcj"
-  move_from_pkg_gcc "usr/man/man1/{aot-compile,gappletviewer,gc-analyze,gcj,gcjh,gcj-dbtool,gij,gjar,gjarsigner,gjavah,gjdoc,gkeytool,gnative2ascii,gorbd,grmic,grmid,grmiregistry,gserialver,gtnameserv,jcf-dump,jv-convert,rebuild-gcj-db}.1.gz"
-  move_from_pkg_gcc "usr/share/java"
+  move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX}/python2.6"
+  move_from_pkg_gcc "${PREFIX}/info/gcj.*"
+  # move_from_pkg_gcc ${PREFIX}/info/fastjar.*"
+  move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX}/{libffi*,logging.properties,gcj*,libgcj*,libgij*,security}"
+  move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX}/pkgconfig/libgcj*.pc"
+  rmdir $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX}/pkgconfig 2> /dev/null
+  move_from_pkg_gcc "${PREFIX}/libexec/gcc/$TARGET/$VERSION/{jc1,ecj1,jvgenmain}"
+  move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/gcj"
+  move_from_pkg_gcc "${PREFIX}/man/man1/{aot-compile,gappletviewer,gc-analyze,gcj,gcjh,gcj-dbtool,gij,gjar,gjarsigner,gjavah,gjdoc,gkeytool,gnative2ascii,gorbd,grmic,grmid,grmiregistry,gserialver,gtnameserv,jcf-dump,jv-convert,rebuild-gcj-db}.1.gz"
+  move_from_pkg_gcc "${PREFIX}/share/java"
   # The ecj wrapper script:
-  cat $CWD/ecj.sh | sed -e "s,@JAVADIR@,/usr/share/java," > usr/bin/ecj
-  chmod 755 usr/bin/ecj
+  cat $CWD/ecj.sh | sed -e "s,@JAVADIR@,/${PREFIX}/share/java," > ${PREFIX}/bin/ecj
+  chmod 755 ${PREFIX}/bin/ecj
   # The JAVA_HOME compatibility links.
   # Caution: non-multilib arch-independent stuff! No lib64 here.
-  move_from_pkg_gcc usr/lib${LIBDIRSUFFIX}/jvm*
+  move_from_pkg_gcc ${PREFIX}/lib${LIBDIRSUFFIX}/jvm*
   # And add the missing javac symlink:
-  ln -s ../../../bin/ecj usr/lib$LIBDIRSUFFIX/jvm/bin/javac
+  ln -s ../../../bin/ecj ${PREFIX}/lib$LIBDIRSUFFIX/jvm/bin/javac
 )
 
 # gcc-objc:
 ( cd $PKG_GCC_OBJC
-  move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/libobjc*"
-  move_from_pkg_gcc "usr/libexec/gcc/$TARGET/$VERSION/cc1obj"
-  move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/objc"
+  move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX}/libobjc*"
+  move_from_pkg_gcc "${PREFIX}/libexec/gcc/$TARGET/$VERSION/cc1obj"
+  move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/objc"
 )
 
 ## NOTE: Thought about this, because the precompiled headers are so large.
 ## Probably easier to keep everything together, though.
 ## gcc-g++-gch (precompiled c++ headers)
 #( cd $PKG_GCC_GPP_GCH
-#  mkdir -p usr/include/c++/$VERSION/$TARGET/bits
-#  mv $PKG_GPP/usr/include/c++/$VERSION/$TARGET/bits/stdc++.h.gch usr/include/c++/$VERSION/$TARGET/bits
+#  mkdir -p ${PREFIX}/include/c++/$VERSION/$TARGET/bits
+#  mv $PKG_GPP/${PREFIX}/include/c++/$VERSION/$TARGET/bits/stdc++.h.gch ${PREFIX}/include/c++/$VERSION/$TARGET/bits
 #)
 
 # gcc-go:
 ( cd $PKG_GCC_GO
-  move_from_pkg_gcc "usr/bin/*gccgo*"
-  move_from_pkg_gcc "usr/libexec/gcc/$TARGET/$VERSION/go1"
-  move_from_pkg_gcc "usr/info/gccgo.info.gz"
-  move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/{go,libgo.la,libgo.so.0.*,libgobegin.a}"
-  (cd usr/lib${LIBDIRSUFFIX} && [ -e libgo.la -a -e libgo.so.0.* -a -e libgobegin.a ]) || exit 1
+  move_from_pkg_gcc "${PREFIX}/bin/*gccgo*"
+  move_from_pkg_gcc "${PREFIX}/libexec/gcc/$TARGET/$VERSION/go1"
+  move_from_pkg_gcc "${PREFIX}/info/gccgo.info.gz"
+  move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX}/{go,libgo.la,libgo.so.0.*,libgobegin.a}"
+  (cd ${PREFIX}/lib${LIBDIRSUFFIX} && [ -e libgo.la -a -e libgo.so.0.* -a -e libgobegin.a ])
   # Ordinarily Slackware does not package static libraries, but in this case
   # it is useful for deploying compiled binaries on machines that do not yet
   # have libgo.so.0.0.0.
-  move_from_pkg_gcc "usr/lib${LIBDIRSUFFIX}/libgo.a"
-  move_from_pkg_gcc "usr/man/man1/gccgo.1.gz"
-) || exit 1
+  move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX}/libgo.a"
+  move_from_pkg_gcc "${PREFIX}/man/man1/gccgo.1.gz"
+); fi
 
 # Filter all .la files (thanks much to Mark Post for the sed script):
 find $TMP -type f -name "*.la" | xargs sed -i -e 's%-L/gcc-[[:graph:]]* % %g'
