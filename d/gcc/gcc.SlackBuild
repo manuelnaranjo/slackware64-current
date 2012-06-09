@@ -383,8 +383,8 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
   rm -f $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX_HST}/*gdb.py
 
   # Be sure the "specs" file is installed.
-  if [ ! -r $PKG_GCC/usr/lib${LIBDIRSUFFIX_HST}/gcc/${TARGET}/${VERSION}/specs ]; then
-    cat stage1-gcc/specs > $PKG_GCC/usr/lib${LIBDIRSUFFIX_HST}/gcc/${TARGET}/${VERSION}/specs
+  if [ ! -r $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/${TARGET}/${VERSION}/specs ]; then
+    cat gcc/specs > $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/${TARGET}/${VERSION}/specs
   fi
 
   # Make our 64bit gcc look for 32bit gcc binaries in ./32 subdirectory:
@@ -416,7 +416,7 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
     ln -sf /${PREFIX}/bin/cpp lib/cpp
   )
 
-  ( cd $PKG_GCC/usr/bin
+  ( cd $PKG_GCC/${PREFIX}/bin
     mv gcc gcc-$VERSION
     mv g++ g++-gcc-$VERSION
     mv ${TARGET}-gfortran gfortran-gcc-$VERSION
@@ -544,7 +544,7 @@ find $TMP -type f -name "*.la" | xargs sed -i -e 's%-L/gcc-[[:graph:]]* % %g'
 ## Strip bloated binaries and libraries:
 find ${ALL_PKGS} -type f -name "lib*\.so*" -exec strip --strip-unneeded "{}" \;
 find ${ALL_PKGS} -type f -name "lib*\.a" -exec strip -g "{}" \;
-strip --strip-unneeded usr/bin/* 2> /dev/null
+strip --strip-unneeded ${PREFIX}/bin/* 2> /dev/null
 find ${ALL_PKGS} -type f | xargs file | grep "executable" | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
 find ${ALL_PKGS} -type f | xargs file | grep "shared object" | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
 
