@@ -177,7 +177,7 @@ symlink_to() {
   LINK_TARGET="$1"
   shift
   for bin in $*; do
-    ln -sf "${LINK_TARGET}" "${bin}"
+    ln -s "${LINK_TARGET}" "${bin}"
   done
 }
 
