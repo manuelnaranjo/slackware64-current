@@ -367,15 +367,6 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
   # Include all debugging info (for now):
   make $NUMJOBS bootstrap
 
-  ( cd gcc
-    make $NUMJOBS gnatlib GNATLIBCFLAGS="$SLKCFLAGS"
-    # This wants a shared -laddr2line?
-    #make gnatlib-shared
-    
-    CFLAGS="$SLKCFLAGS" \
-    CXXFLAGS="$SLKCFLAGS" \
-    make $NUMJOBS gnattools
-  )
   make info
 
   # Set GCCCHECK=something to run the tests
