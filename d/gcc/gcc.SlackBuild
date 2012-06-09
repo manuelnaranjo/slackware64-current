@@ -342,7 +342,7 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
      --enable-checking=release \
      --enable-objc-gc \
      --with-system-zlib \
-     --with-python-dir=/lib$LIBDIRSUFFIX/python2.6/site-packages \
+     --with-python-dir=/${PREFIX}/lib$LIBDIRSUFFIX/python2.6/site-packages \
      --disable-libunwind-exceptions \
      --enable-__cxa_atexit \
      --enable-libssp \
