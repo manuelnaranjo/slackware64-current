@@ -380,7 +380,7 @@ fi
      --infodir=/${PREFIX}/info \
      --enable-shared \
      --enable-bootstrap \
-     --enable-languages=ada,c,c++,fortran,go,java,lto,objc \
+     --enable-languages=${GCC_LANGUAGES} \
      --enable-threads \
      --enable-checking=release \
      --enable-objc-gc \
