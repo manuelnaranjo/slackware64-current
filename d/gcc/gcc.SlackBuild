@@ -408,16 +408,18 @@ fi
   # Start the build:
 
   # Include all debugging info (for now):
-  make $NUMJOBS bootstrap
-
-  make info
-
-  # Set GCCCHECK=something to run the tests
-  if [ ! -z $GCCCHECK ]; then
-    make $NUMJOBS check
+  if [ x"$GCC_CORE" = x"yes" ]; then
+    make all-gcc $NUMJOBS
+    make install-gcc DESTDIR=$PKG_GCC
+  else
+    make $NUMJOBS
+    make info
+    # Set GCCCHECK=something to run the tests
+    if [ ! -z $GCCCHECK ]; then
+      make $NUMJOBS check
+    fi
+    make install DESTDIR=$PKG_GCC
   fi
-
-  make install DESTDIR=$PKG_GCC
 
   # KLUDGE ALERT
   # These *gdb.py files are causing ldconfig to complain, so they are going
