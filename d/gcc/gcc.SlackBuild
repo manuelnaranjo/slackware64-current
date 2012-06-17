@@ -51,6 +51,16 @@ BUILD=${BUILD:-1}
 # How many jobs to run in parallel:
 NUMJOBS=" -j 7 "
 
+if [ x"$GCC_CORE" = x"yes" ]; then
+  GCC_LANGUAGES="c"
+else
+  if echo "$TGT" | grep -q -v mingw32; then
+    GCC_LANGUAGES=ada,c,c++,fortran,go,java,lto,objc
+  else
+    GCC_LANGUAGES=ada,c,c++,fortran,java,lto,objc
+  fi
+fi
+
 # Automatically determine the architecture we're building on:
 if [ -z "$ARCH" ]; then
   case "$(uname -m)" in
@@ -105,11 +115,42 @@ PKG_GCC_OBJC=$TMP/package-gcc-objc
 # PKG_GCC_GPP_GCH=$TMP/package-gcc-g++-gch
 PKG_GCC_GO=$TMP/package-gcc-go
 
-ALL_PKGS="${PKG_GCC} ${PKG_GPP} ${PKG_GFORTRAN} ${PKG_GNAT} ${PKG_JAVA} ${PKG_OBJC} ${PKG_GO}"
-ALL_COMPILERS="gcc gcc-g++ gcc-gfortran gcc-gnat gcc-java gcc-objc gcc-go"
-ALL_LIBS="libgfortran libada libffi libjava libmudflap libgomp libobjc libstdc++-v3"
-ALL_ELEMENTS="main ${ALL_COMPILERS} ${ALL_LIBS}"
+ALL_PKGS="${PKG_GCC}"
+ALL_COMPILERS="gcc"
+ALL_LIBS="libmudflap libgomp"
 
+if echo ${GCC_LANGUAGES} | grep -q 'c++'; then
+  ALL_PKGS+=" ${PKG_GPP}"
+  ALL_COMPILERS+=" gcc-g++"
+  ALL_LIBS+=" libstdc++-v3"
+fi
+if echo ${GCC_LANGUAGES} | grep -q 'fortran'; then
+  ALL_PKGS+=" ${PKG_GFORTRAN}"
+  ALL_COMPILERS+=" gcc-gfortran"
+  ALL_LIBS+=" libgfortran"
+fi
+if echo ${GCC_LANGUAGES} | grep -q 'ada'; then
+  ALL_PKGS+=" ${PKG_GNAT}"
+  ALL_COMPILERS+=" gcc-gnat"
+  ALL_LIBS+=" libada"
+fi
+if echo ${GCC_LANGUAGES} | grep -q 'java'; then
+  ALL_PKGS+=" ${PKG_JAVA}"
+  ALL_COMPILERS+=" gcc-java"
+  ALL_LIBS+=" libffi libjava"
+fi
+if echo ${GCC_LANGUAGES} | grep -q 'objc'; then
+  ALL_PKGS+=" ${PKG_OBJC}"
+  ALL_COMPILERS+=" gcc-objc"
+  ALL_LIBS+=" libobjc"
+fi
+if echo ${GCC_LANGUAGES} | grep -q 'go'; then
+  ALL_PKGS+=" ${PKG_GO}"
+  ALL_COMPILERS+=" gcc-go"
+  # ALL_LIBS+=" libgo"
+fi
+
+ALL_ELEMENTS="main ${ALL_COMPILERS} ${ALL_LIBS}"
 
 # pkg_of_element "${ELEMENT}"
 # Given an "element" (which is a member of ${ALL_ELEMENTS}), return its
