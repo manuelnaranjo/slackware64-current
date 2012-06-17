@@ -106,9 +106,9 @@ PKG_GCC_OBJC=$TMP/package-gcc-objc
 PKG_GCC_GO=$TMP/package-gcc-go
 
 ALL_PKGS="${PKG_GCC} ${PKG_GPP} ${PKG_GFORTRAN} ${PKG_GNAT} ${PKG_JAVA} ${PKG_OBJC} ${PKG_GO}"
-ALL_LANGS="gcc gcc-g++ gcc-gfortran gcc-gnat gcc-java gcc-objc gcc-go"
+ALL_COMPILERS="gcc gcc-g++ gcc-gfortran gcc-gnat gcc-java gcc-objc gcc-go"
 ALL_LIBS="libgfortran libada libffi libjava libmudflap libgomp libobjc libstdc++-v3"
-ALL_ELEMENTS="main ${ALL_LANGS} ${ALL_LIBS}"
+ALL_ELEMENTS="main ${ALL_COMPILERS} ${ALL_LIBS}"
 
 
 # pkg_of_element "${ELEMENT}"
@@ -196,11 +196,11 @@ for PKG in ${ALL_PKGS}; do
 done
 
 # Insert package descriptions:
-for LANG in ${ALL_LANGS}; do
-  PKG="$(pkg_of_element "${LANG}")"
-  if [ -e "slack-desc.${LANG}" ]; then
+for COMPILER in ${ALL_COMPILERS}; do
+  PKG="$(pkg_of_element "${COMPILER}")"
+  if [ -e "slack-desc.${COMPILER}" ]; then
     mkdir -p ${PKG}/install
-    cat $CWD/slack-desc.${LANG} > $PKG/install/slack-desc
+    cat $CWD/slack-desc.${COMPILER} > $PKG/install/slack-desc
   fi
 done
 
@@ -548,10 +548,11 @@ strip --strip-unneeded ${PREFIX}/bin/* 2> /dev/null
 find ${ALL_PKGS} -type f | xargs file | grep "executable" | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
 find ${ALL_PKGS} -type f | xargs file | grep "shared object" | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
 
-for LANG in ${ALL_LANGS}; do
-  ( cd "$(pkg_of_element "${LANG}")"
-    makepkg -l y -c n $TMP/${LANG}-${VERSION}-${ARCH}-${BUILD}.txz )
+for COMPILER in ${ALL_COMPILERS}; do
+  ( cd "$(pkg_of_element "${COMPILER}")"
+    makepkg -l y -c n $TMP/${COMPILER}-${VERSION}-${ARCH}-${BUILD}.txz )
 done
+
 
 echo
 echo "Slackware GCC package build complete!"
