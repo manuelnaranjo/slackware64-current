@@ -258,7 +258,7 @@ cp $CWD/ecj-4.5.jar gcc-$VERSION/ecj.jar
 ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
 
 # install docs
-( cd gcc-$VERSION
+if [ x"$GCC_CORE" != x"yes" ]; then ( cd gcc-$VERSION
   # Smite the fixincludes:
   zcat $CWD/gcc-no_fixincludes.diff.gz | patch -p1 --verbose --backup --suffix=.orig || exit 1
   # Fix perms/owners
@@ -297,9 +297,10 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
       done)
   done
 )
+fi
 
 # Add fastjar to the gcc-java package:
-( cd $TMP
+if [ -n "${PKG_GCC_JAVA}" ] ; then ( cd $TMP
   FASTJARVER=$(echo $CWD/fastjar-*.tar.xz | rev | cut -f 3- -d . | cut -f 1 -d - | rev)
   echo
   echo "Building fastjar-$FASTJARVER first"
@@ -350,6 +351,7 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
   compress_info_files ${PKG_GCC_JAVA}
   echo
 ) || exit 1
+fi
 
 # build gcc
 ( mkdir gcc.build.lnx;
@@ -487,16 +489,16 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
 # OK, time to split the big package where needed:
 
 # gcc-g++:
-( cd $PKG_GCC_GPP
+if [ -n "${PKG_GCC_GPP}" ]; then ( cd $PKG_GCC_GPP
   move_from_pkg_gcc "${PREFIX}/bin/*++*"
   move_from_pkg_gcc "${PREFIX}/include/c++"
   move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/*++*"
   move_from_pkg_gcc "${PREFIX}/libexec/gcc/$TARGET/$VERSION/cc1plus"
   move_from_pkg_gcc "${PREFIX}/man/man1/*++*"
-)
+); fi
 
 # gcc-gfortran:
-( cd $PKG_GCC_GFORTRAN
+if [ -n "${PKG_GCC_GFORTRAN}" ]; then ( cd $PKG_GCC_GFORTRAN
   move_from_pkg_gcc "${PREFIX}/bin/{*gfortran*,*95*,*77*}"
   move_from_pkg_gcc "${PREFIX}/info/gfortran*"
   move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/$TARGET/$VERSION/{finclude,libgfortran*}"
@@ -511,7 +513,7 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
 mkdir -p $PKG_GCC_JAVA/${PREFIX}/bin
 mv $PKG_GCC/${PREFIX}/bin/gnative2ascii $PKG_GCC_JAVA/${PREFIX}/bin
 # Now make the gcc-gnat package tree:
-( cd $PKG_GCC_GNAT
+if [ -n "${PKG_GCC_GNAT}" ]; then ( cd $PKG_GCC_GNAT
   move_from_pkg_gcc "${PREFIX}/bin/*gnat*"
   move_from_pkg_gcc "${PREFIX}/info/*gnat*"
   move_from_pkg_gcc "${PREFIX}/libexec/gcc/$TARGET/$VERSION/gnat1"
@@ -519,7 +521,7 @@ mv $PKG_GCC/${PREFIX}/bin/gnative2ascii $PKG_GCC_JAVA/${PREFIX}/bin
 ); fi
 
 # gcc-java:
-( cd $PKG_GCC_JAVA
+if [ -n "${PKG_GCC_JAVA}" ]; then ( cd $PKG_GCC_JAVA
   # used to mv fastjar too
   move_from_pkg_gcc "${PREFIX}/bin/{aot-compile,gappletviewer,gc-analyze,*gcj*,gij,gjar,gjarsigner,gkeytool,grmid,grmic,grmiregistry,gserialver,gtnameserv,gjavah,gorbd,jcf-dump,jv-*}"
   # Move some Java only C++ headers from the C++ package:
@@ -548,14 +550,14 @@ mv $PKG_GCC/${PREFIX}/bin/gnative2ascii $PKG_GCC_JAVA/${PREFIX}/bin
   move_from_pkg_gcc ${PREFIX}/lib${LIBDIRSUFFIX_HST}/jvm*
   # And add the missing javac symlink:
   ln -s ../../../bin/ecj ${PREFIX}/lib$LIBDIRSUFFIX_HST/jvm/bin/javac
-)
+); fi
 
 # gcc-objc:
-( cd $PKG_GCC_OBJC
+if [ -n "${PKG_GCC_OBJC}" ]; then ( cd $PKG_GCC_OBJC
   move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/libobjc*"
   move_from_pkg_gcc "${PREFIX}/libexec/gcc/$TARGET/$VERSION/cc1obj"
   move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/$TARGET/$VERSION/include/objc"
-)
+); fi
 
 ## NOTE: Thought about this, because the precompiled headers are so large.
 ## Probably easier to keep everything together, though.
@@ -566,7 +568,7 @@ mv $PKG_GCC/${PREFIX}/bin/gnative2ascii $PKG_GCC_JAVA/${PREFIX}/bin
 #)
 
 # gcc-go:
-( cd $PKG_GCC_GO
+if [ -n "${PKG_GCC_GO}" ]; then ( cd $PKG_GCC_GO
   move_from_pkg_gcc "${PREFIX}/bin/*gccgo*"
   move_from_pkg_gcc "${PREFIX}/libexec/gcc/$TARGET/$VERSION/go1"
   move_from_pkg_gcc "${PREFIX}/info/gccgo.info.gz"
