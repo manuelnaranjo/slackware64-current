@@ -51,16 +51,6 @@ BUILD=${BUILD:-1}
 # How many jobs to run in parallel:
 NUMJOBS=" -j 7 "
 
-if [ x"$GCC_CORE" = x"yes" ]; then
-  GCC_LANGUAGES="c"
-else
-  if echo "$TGT" | grep -q -v mingw32; then
-    GCC_LANGUAGES=ada,c,c++,fortran,go,java,lto,objc
-  else
-    GCC_LANGUAGES=ada,c,c++,fortran,java,lto,objc
-  fi
-fi
-
 # Automatically determine the architecture we're building on:
 if [ -z "$ARCH" ]; then
   case "$(uname -m)" in
@@ -94,10 +84,27 @@ else
   LIB_ARCH=$ARCH
 fi
 
-case "$ARCH" in
+if [ -z "${TARGET}"]; then
+  case "$ARCH" in
     arm*) TARGET=$ARCH-slackware-linux-gnueabi ;;
     *)    TARGET=$ARCH-slackware-linux ;;
-esac
+  esac
+fi
+
+if [ x"$GCC_CORE" = x"yes" ]; then
+  GCC_LANGUAGES="c"
+else
+  GCC_LANGUAGES=ada,c,c++,fortran,java,lto,objc
+  if echo "$TARGET" | grep -v -q mingw32; then
+    GCC_LANGUAGES+=",go"
+  fi
+fi
+
+if echo "${TARGET}" | grep -q i686; then
+  LIBDIRSUFFIX_TGT=""
+elif echo "${TARGET}" | grep -q x86_64; then
+  LIBDIRSUFFIX_TGT="64"
+fi
 
 CWD=$(pwd)
 # Temporary build location.  This should *NOT* be a directory
