@@ -84,10 +84,10 @@ else
   LIB_ARCH=$ARCH
 fi
 
-if [ -z "${TARGET}"]; then
+if [ -z "${TARGET_TRIPLET}"]; then
   case "$ARCH" in
-    arm*) TARGET=$ARCH-slackware-linux-gnueabi ;;
-    *)    TARGET=$ARCH-slackware-linux ;;
+    arm*) TARGET_TRIPLET=$ARCH-slackware-linux-gnueabi ;;
+    *)    TARGET_TRIPLET=$ARCH-slackware-linux ;;
   esac
 fi
 
@@ -95,14 +95,14 @@ if [ x"$GCC_CORE" = x"yes" ]; then
   GCC_LANGUAGES="c"
 else
   GCC_LANGUAGES=ada,c,c++,fortran,java,lto,objc
-  if echo "$TARGET" | grep -v -q mingw32; then
+  if echo "$TARGET_TRIPLET" | grep -v -q mingw32; then
     GCC_LANGUAGES+=",go"
   fi
 fi
 
-if echo "${TARGET}" | grep -q i686; then
+if echo "${TARGET_TRIPLET}" | grep -q i686; then
   LIBDIRSUFFIX_TGT=""
-elif echo "${TARGET}" | grep -q x86_64; then
+elif echo "${TARGET_TRIPLET}" | grep -q x86_64; then
   LIBDIRSUFFIX_TGT="64"
 fi
 
@@ -331,7 +331,9 @@ if [ -n "${PKG_GCC_JAVA}" ] ; then ( cd $TMP
      --libdir=/${PREFIX}/lib$LIBDIRSUFFIX_HST \
      --mandir=/${PREFIX}/man \
      --infodir=/${PREFIX}/info \
-     --build=$TARGET
+     --build=$BUILD_TRIPLET \
+     --host=$BUILD_TRIPLET \
+     --target=$TARGET_TRIPLET
   make $NUMJOBS || exit 1
   make install DESTDIR=${PKG_GCC_JAVA} || exit 1
   mkdir -p ${PKG_GCC_JAVA}/${PREFIX}/doc/fastjar-$FASTJARVER
@@ -408,9 +410,9 @@ fi
      --enable-java-awt=gtk \
      --disable-gtktest \
      $GCC_ARCHOPTS \
-     --target=${TARGET} \
-     --build=${TARGET} \
-     --host=${TARGET} || exit 1
+     --build=$BUILD_TRIPLET \
+     --host=$BUILD_TRIPLET \
+     --target=$TARGET_TRIPLET || exit 1
 
   # Start the build:
 
@@ -435,14 +437,14 @@ fi
   rm -f $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX_HST}/*gdb.py
 
   # Be sure the "specs" file is installed.
-  if [ ! -r $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/${TARGET}/${VERSION}/specs ]; then
-    cat gcc/specs > $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/${TARGET}/${VERSION}/specs
+  if [ ! -r $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/${TARGET_TRIPLET}/${VERSION}/specs ]; then
+    cat gcc/specs > $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/${TARGET_TRIPLET}/${VERSION}/specs
   fi
 
   # Make our 64bit gcc look for 32bit gcc binaries in ./32 subdirectory:
   if [ "$ARCH" = "x86_64" ]; then
     sed -i 's#;.\(:../lib !m64 m32;\)$#;32\1#' \
-      $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/${TARGET}/${VERSION}/specs
+      $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/${TARGET_TRIPLET}/${VERSION}/specs
   fi
 
   #  make ada.install-common DESTDIR=$PKG_GCC
@@ -502,7 +504,7 @@ if [ -n "${PKG_GCC_GPP}" ]; then ( cd $PKG_GCC_GPP
   move_from_pkg_gcc "${PREFIX}/bin/*++*"
   move_from_pkg_gcc "${PREFIX}/include/c++"
   move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/*++*"
-  move_from_pkg_gcc "${PREFIX}/libexec/gcc/$TARGET/$VERSION/cc1plus"
+  move_from_pkg_gcc "${PREFIX}/libexec/gcc/$TARGET_TRIPLET/$VERSION/cc1plus"
   move_from_pkg_gcc "${PREFIX}/man/man1/*++*"
 ); fi
 
@@ -510,9 +512,9 @@ if [ -n "${PKG_GCC_GPP}" ]; then ( cd $PKG_GCC_GPP
 if [ -n "${PKG_GCC_GFORTRAN}" ]; then ( cd $PKG_GCC_GFORTRAN
   move_from_pkg_gcc "${PREFIX}/bin/{*gfortran*,*95*,*77*}"
   move_from_pkg_gcc "${PREFIX}/info/gfortran*"
-  move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/$TARGET/$VERSION/{finclude,libgfortran*}"
+  move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/$TARGET_TRIPLET/$VERSION/{finclude,libgfortran*}"
   move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/libgfortran*"
-  move_from_pkg_gcc "${PREFIX}/libexec/gcc/$TARGET/$VERSION/f951"
+  move_from_pkg_gcc "${PREFIX}/libexec/gcc/$TARGET_TRIPLET/$VERSION/f951"
   move_from_pkg_gcc "${PREFIX}/man/man1/gfortran*"
 ); fi
 
@@ -525,8 +527,8 @@ mv $PKG_GCC/${PREFIX}/bin/gnative2ascii $PKG_GCC_JAVA/${PREFIX}/bin
 if [ -n "${PKG_GCC_GNAT}" ]; then ( cd $PKG_GCC_GNAT
   move_from_pkg_gcc "${PREFIX}/bin/*gnat*"
   move_from_pkg_gcc "${PREFIX}/info/*gnat*"
-  move_from_pkg_gcc "${PREFIX}/libexec/gcc/$TARGET/$VERSION/gnat1"
-  move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/$TARGET/$VERSION/ada{include,lib}"
+  move_from_pkg_gcc "${PREFIX}/libexec/gcc/$TARGET_TRIPLET/$VERSION/gnat1"
+  move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/$TARGET_TRIPLET/$VERSION/ada{include,lib}"
 ); fi
 
 # gcc-java:
@@ -535,7 +537,7 @@ if [ -n "${PKG_GCC_JAVA}" ]; then ( cd $PKG_GCC_JAVA
   move_from_pkg_gcc "${PREFIX}/bin/{aot-compile,gappletviewer,gc-analyze,*gcj*,gij,gjar,gjarsigner,gkeytool,grmid,grmic,grmiregistry,gserialver,gtnameserv,gjavah,gorbd,jcf-dump,jv-*}"
   # Move some Java only C++ headers from the C++ package:
   (DIR="${PREFIX}/include/c++/$VERSION"; mkdir -p ${DIR} && mv $PKG_GCC_GPP/$DIR/{gcj,gnu,java,javax,org,sun} $DIR)
-  move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/$TARGET/$VERSION/include/{jawt,ffi,ffitarget,jawt_md,jni,jni_md,jvmpi}.h"
+  move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/$TARGET_TRIPLET/$VERSION/include/{jawt,ffi,ffitarget,jawt_md,jni,jni_md,jvmpi}.h"
   # aot-compile Python plugins:
   if [ ! -d $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX_HST}/python2.6 ]; then
     echo "NO $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX_HST}/python2.6 !"
@@ -547,8 +549,8 @@ if [ -n "${PKG_GCC_JAVA}" ]; then ( cd $PKG_GCC_JAVA
   move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/{libffi*,logging.properties,gcj*,libgcj*,libgij*,security}"
   move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/pkgconfig/libgcj*.pc"
   rmdir $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX_HST}/pkgconfig 2> /dev/null
-  move_from_pkg_gcc "${PREFIX}/libexec/gcc/$TARGET/$VERSION/{jc1,ecj1,jvgenmain}"
-  move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/$TARGET/$VERSION/include/gcj"
+  move_from_pkg_gcc "${PREFIX}/libexec/gcc/$TARGET_TRIPLET/$VERSION/{jc1,ecj1,jvgenmain}"
+  move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/$TARGET_TRIPLET/$VERSION/include/gcj"
   move_from_pkg_gcc "${PREFIX}/man/man1/{aot-compile,gappletviewer,gc-analyze,gcj,gcjh,gcj-dbtool,gij,gjar,gjarsigner,gjavah,gjdoc,gkeytool,gnative2ascii,gorbd,grmic,grmid,grmiregistry,gserialver,gtnameserv,jcf-dump,jv-convert,rebuild-gcj-db}.1.gz"
   move_from_pkg_gcc "${PREFIX}/share/java"
   # The ecj wrapper script:
@@ -563,23 +565,23 @@ if [ -n "${PKG_GCC_JAVA}" ]; then ( cd $PKG_GCC_JAVA
 
 # gcc-objc:
 if [ -n "${PKG_GCC_OBJC}" ]; then ( cd $PKG_GCC_OBJC
-  move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/libobjc*"
-  move_from_pkg_gcc "${PREFIX}/libexec/gcc/$TARGET/$VERSION/cc1obj"
-  move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/$TARGET/$VERSION/include/objc"
+  move_from_pkg_gcc "${PREFIX}/${TARGET_TRIPLET}/lib${LIBDIRSUFFIX_rGT}/libobjc*"
+  move_from_pkg_gcc "${PREFIX}/libexec/gcc/$TARGET_TRIPLET/$VERSION/cc1obj"
+  move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/$TARGET_TRIPLET/$VERSION/include/objc"
 ); fi
 
 ## NOTE: Thought about this, because the precompiled headers are so large.
 ## Probably easier to keep everything together, though.
 ## gcc-g++-gch (precompiled c++ headers)
 #( cd $PKG_GCC_GPP_GCH
-#  mkdir -p ${PREFIX}/include/c++/$VERSION/$TARGET/bits
-#  mv $PKG_GPP/${PREFIX}/include/c++/$VERSION/$TARGET/bits/stdc++.h.gch ${PREFIX}/include/c++/$VERSION/$TARGET/bits
+#  mkdir -p ${PREFIX}/include/c++/$VERSION/$TARGET_TRIPLET/bits
+#  mv $PKG_GPP/${PREFIX}/include/c++/$VERSION/$TARGET_TRIPLET/bits/stdc++.h.gch ${PREFIX}/include/c++/$VERSION/$TARGET_TRIPLET/bits
 #)
 
 # gcc-go:
 if [ -n "${PKG_GCC_GO}" ]; then ( cd $PKG_GCC_GO
   move_from_pkg_gcc "${PREFIX}/bin/*gccgo*"
-  move_from_pkg_gcc "${PREFIX}/libexec/gcc/$TARGET/$VERSION/go1"
+  move_from_pkg_gcc "${PREFIX}/libexec/gcc/$TARGET_TRIPLET/$VERSION/go1"
   move_from_pkg_gcc "${PREFIX}/info/gccgo.info.gz"
   move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/{go,libgo.la,libgo.so.0.*,libgobegin.a}"
   (cd ${PREFIX}/lib${LIBDIRSUFFIX_HST} && [ -e libgo.la -a -e libgo.so.0.* -a -e libgobegin.a ])
