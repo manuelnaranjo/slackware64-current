@@ -380,6 +380,12 @@ fi
   else
     GCC_ARCHOPTS="--disable-multilib"
   fi
+
+  if [ "${BUILD_TRIPLET}" != "${TARGET_TRIPLET}" ]; then
+    BOOTSTRAP="--disable-bootstrap"
+  else
+    BOOTSTRAP="--enable-bootstrap"
+  fi
  
   CFLAGS="$SLKCFLAGS" \
   CXXFLAGS="$SLKCFLAGS" \
@@ -388,9 +394,9 @@ fi
      --mandir=/${PREFIX}/man \
      --infodir=/${PREFIX}/info \
      --enable-shared \
-     --enable-bootstrap \
-     --enable-languages=${GCC_LANGUAGES} \
+     ${BOOTSTRAP} \
      --enable-threads \
+     --enable-languages=${GCC_LANGUAGES} \
      --enable-checking=release \
      --enable-objc-gc \
      --with-system-zlib \
