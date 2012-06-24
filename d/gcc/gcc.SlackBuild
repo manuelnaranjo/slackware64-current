@@ -479,15 +479,25 @@ fi
   )
 
   ( cd $PKG_GCC/${PREFIX}/bin
-    mv gcc gcc-$VERSION
-    mv g++ g++-gcc-$VERSION
-    mv ${TARGET}-gfortran gfortran-gcc-$VERSION
-    for bin in gcc-${VERSION} gcc-ar gcc-nm gcc-ranlib gcj gcjh; do
-      ln -sf ${bin} ${TARGET}-${bin}
+    mv ${TARGET_TRIPLET}-gfortran ${TARGET_TRIPLET}-gfortran-gcc
+    for bin in gcc g++ gfortran-gcc; do
+      if [ -e ${bin} ]; then
+        mv ${bin} ${TARGET_TRIPLET}-${bin}-${VERSION}
+      elif [ -e ${TARGET_TRIPLET}-${bin} ]; then
+        mv ${TARGET_TRIPLET}-${bin} ${TARGET_TRIPLET}-${bin}-${VERSION}
+      fi
     done
-    symlink_to "gcc-${VERSION}" gcc ${TARGET}-gcc cc
-    symlink_to "g++-gcc-${VERSION}" g++ c++ ${TARGET}-{c++,g++}
-    symlink_to "gfortran-gcc-${VERSION}" gfortran fortran ${TARGET}-{gfortran,gfortran-${VERSION},g95,g77} {f,g}{95,77}
+    symlink_to "${TARGET_TRIPLET}-gcc-${VERSION}" ${TARGET_TRIPLET}-gcc
+    symlink_to "${TARGET_TRIPLET}-g++-gcc-${VERSION}" ${TARGET_TRIPLET}-{c++,g++}
+    symlink_to "${TARGET_TRIPLET}-gfortran-gcc-${VERSION}" ${TARGET_TRIPLET}-{gfortran,gfortran-${VERSION},g95,g77}
+    if [ x"${BUILD_TRIPLET}" = x"${TARGET_TRIPLET}" ]; then
+      for bin in gcc gcc-{ar,nm,ranlib} gcj gcjh; do
+        symlink_to "${TARGET_TRIPLET}-${bin}-${VERSION}" ${bin} ${bin}-${VERSION}
+      done
+      symlink_to "${TARGET_TRIPLET}-gcc-${VERSION}" cc
+      symlink_to "${TARGET_TRIPLET}-g++-gcc-${VERSION}" g++ c++
+      symlink_to "${TARGET_TRIPLET}-gfortran-gcc-${VERSION}" gfortran fortran {f,g}{95,77}
+    fi
   )
 
   ( cd $PKG_GCC/${PREFIX}/man
