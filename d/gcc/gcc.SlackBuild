@@ -100,7 +100,7 @@ else
   fi
 fi
 
-if echo "${TARGET_TRIPLET}" | grep -q i686; then
+if echo "${TARGET_TRIPLET}" | grep -q i.86; then
   LIBDIRSUFFIX_TGT=""
 elif echo "${TARGET_TRIPLET}" | grep -q x86_64; then
   LIBDIRSUFFIX_TGT="64"
