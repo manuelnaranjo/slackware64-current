@@ -106,6 +106,14 @@ elif echo "${TARGET_TRIPLET}" | grep -q x86_64; then
   LIBDIRSUFFIX_TGT="64"
 fi
 
+if echo "${TARGET_TRIPLET}"  | grep -q 'x86_64'; then
+  TARGET_ARCH=""
+  GCC_ARCHOPTS="--disable-multilib"
+else
+  TARGET_ARCH="$(echo "${TARGET_TRIPLET}" | cut -f1 -d-)"
+  GCC_ARCHOPTS="--with-arch=${TARGET_ARCH}"
+fi
+
 CWD=$(pwd)
 # Temporary build location.  This should *NOT* be a directory
 # path a non-root user could create later...
@@ -375,12 +383,6 @@ fi
   # Correct me if my take on this is wrong.
   #  --with-cpu=$ARCH 
  
-  if [ "$ARCH" != "x86_64" ]; then
-    GCC_ARCHOPTS="--with-arch=$ARCH"
-  else
-    GCC_ARCHOPTS="--disable-multilib"
-  fi
-
   if [ "${BUILD_TRIPLET}" != "${TARGET_TRIPLET}" ]; then
     BOOTSTRAP="--disable-bootstrap"
   else
@@ -415,7 +417,7 @@ fi
      --with-antlr-jar=$ANTLJAR \
      --enable-java-awt=gtk \
      --disable-gtktest \
-     $GCC_ARCHOPTS \
+     ${GCC_ARCHOPTS} \
      --build=$BUILD_TRIPLET \
      --host=$BUILD_TRIPLET \
      --target=$TARGET_TRIPLET || exit 1
