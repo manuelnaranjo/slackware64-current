@@ -520,10 +520,15 @@ fi
 # gcc-g++:
 if [ -n "${PKG_GCC_GPP}" ]; then ( cd $PKG_GCC_GPP
   move_from_pkg_gcc "${PREFIX}/bin/*++*"
-  move_from_pkg_gcc "${PREFIX}/include/c++"
-  move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/*++*"
   move_from_pkg_gcc "${PREFIX}/libexec/gcc/$TARGET_TRIPLET/$VERSION/cc1plus"
   move_from_pkg_gcc "${PREFIX}/man/man1/*++*"
+  if [ x"${BUILD_TRIPLET}" = x"${TARGET_TRIPLET}" ]; then
+    move_from_pkg_gcc "${PREFIX}/include/c++"
+    move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/*++*"
+  else
+    move_from_pkg_gcc "${PREFIX}/${TARGET_TRIPLET}/include/c++"
+    move_from_pkg_gcc "${PREFIX}/${TARGET_TRIPLET}/lib${LIBDIRSUFFIX_TGT}/*++*"
+  fi
 ); fi
 
 # gcc-gfortran:
@@ -531,9 +536,13 @@ if [ -n "${PKG_GCC_GFORTRAN}" ]; then ( cd $PKG_GCC_GFORTRAN
   move_from_pkg_gcc "${PREFIX}/bin/{*gfortran*,*95*,*77*}"
   move_from_pkg_gcc "${PREFIX}/info/gfortran*"
   move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/$TARGET_TRIPLET/$VERSION/{finclude,libgfortran*}"
-  move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/libgfortran*"
   move_from_pkg_gcc "${PREFIX}/libexec/gcc/$TARGET_TRIPLET/$VERSION/f951"
   move_from_pkg_gcc "${PREFIX}/man/man1/gfortran*"
+  if [ x"${BUILD_TRIPLET}" = x"${TARGET_TRIPLET}" ]; then
+    move_from_pkg_gcc "${PREFIX}/${TARGET_TRIPLET}/lib${LIBDIRSUFFIX_TGT}/libgfortran*"
+  else
+    move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_TGT}/libgfortran*"
+  fi
 ); fi
 
 # gcc-gnat:
@@ -583,7 +592,7 @@ if [ -n "${PKG_GCC_JAVA}" ]; then ( cd $PKG_GCC_JAVA
 
 # gcc-objc:
 if [ -n "${PKG_GCC_OBJC}" ]; then ( cd $PKG_GCC_OBJC
-  move_from_pkg_gcc "${PREFIX}/${TARGET_TRIPLET}/lib${LIBDIRSUFFIX_rGT}/libobjc*"
+  move_from_pkg_gcc "${PREFIX}/${TARGET_TRIPLET}/lib${LIBDIRSUFFIX_TGT}/libobjc*"
   move_from_pkg_gcc "${PREFIX}/libexec/gcc/$TARGET_TRIPLET/$VERSION/cc1obj"
   move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/$TARGET_TRIPLET/$VERSION/include/objc"
 ); fi
