@@ -243,6 +243,16 @@ compress_info_files() {
   [ -d $1/${PREFIX}/info ] && ( cd $1/${PREFIX}/info && rm -f dir && gzip -9 *)
 }
 
+description_of_compiler() {
+  PKG="${1}"
+  cat "${CWD}/slack-desc.${1}" \
+    | sed -e 's;/;\\/;g' \
+    | sed -n "/^${PKG}:/ s#^${PKG}: ##p" \
+    | sed -e 's;";\\\\";g' \
+    | tr -d '()#' \
+    | tr '\n' ' '
+}
+
 # Clear the build locations:
 if [ -d $TMP ]; then
   rm -rf $TMP
@@ -634,6 +644,15 @@ for COMPILER in ${ALL_COMPILERS}; do
     makepkg -l y -c n $TMP/${COMPILER}-${VERSION}-${ARCH}-${BUILD}.txz )
 done
 
+for COMPILER in ${ALL_COMPILERS}; do
+  cat ${CWD}/$PKGNAM.yypkg.meta | sed \
+    -e "s/%{PKG}/${COMPILER}/" \
+    -e "s/%{HST}/${HOST_TRIPLET}/" \
+    -e "s/%{TGT}/${TARGET_TRIPLET}/" \
+    -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
+    -e "s/%{DESCR}/$(description_of_compiler "${COMPILER}")/" \
+    | OCAMLRUNPARAM="b" makeypkg -o ${YYOUTPUT} -meta - "$(pkg_of_element "${COMPILER}")/${PREFIX}"
+done
 
 echo
 echo "Slackware GCC package build complete!"
