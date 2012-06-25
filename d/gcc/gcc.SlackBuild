@@ -146,6 +146,11 @@ cp $CWD/ecj-4.5.jar gcc-$VERSION/ecj.jar
 #https://oss.sonatype.org/content/repositories/releases/org/antlr/antlr-runtime/
 ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
 
+# Upstream -fPIC fix for gnat build:
+cd gcc-$VERSION
+  zcat $CWD/gcc-4.7.1.adalib.pic.diff.gz | patch -p1 --verbose || exit 1
+cd ..
+
 # install docs
 ( cd gcc-$VERSION
   # Smite the fixincludes:
@@ -414,7 +419,7 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
      --enable-checking=release \
      --enable-objc-gc \
      --with-system-zlib \
-     --with-python-dir=/lib$LIBDIRSUFFIX/python2.6/site-packages \
+     --with-python-dir=/lib$LIBDIRSUFFIX/python2.7/site-packages \
      --disable-libunwind-exceptions \
      --enable-__cxa_atexit \
      --enable-libssp \
@@ -637,11 +642,11 @@ mv $PKG1/usr/bin/gnative2ascii $PKG5/usr/bin
   mv $PKG1/usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/jvmpi.h usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include
   mv $PKG1/usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include/libffi usr/lib${LIBDIRSUFFIX}/gcc/$TARGET/$VERSION/include
   # aot-compile Python plugins:
-  if [ ! -d $PKG1/usr/lib${LIBDIRSUFFIX}/python2.6 ]; then
-    echo "NO $PKG1/usr/lib${LIBDIRSUFFIX}/python2.6 !"
+  if [ ! -d $PKG1/usr/lib${LIBDIRSUFFIX}/python2.7 ]; then
+    echo "NO $PKG1/usr/lib${LIBDIRSUFFIX}/python2.7 !"
     exit 1
   fi
-  mv $PKG1/usr/lib${LIBDIRSUFFIX}/python2.6 usr/lib${LIBDIRSUFFIX}
+  mv $PKG1/usr/lib${LIBDIRSUFFIX}/python2.7 usr/lib${LIBDIRSUFFIX}
   mkdir -p usr/info
   mv $PKG1/usr/info/gcj.* usr/info
   # mv $PKG1/usr/info/fastjar.* usr/info
@@ -687,6 +692,8 @@ mv $PKG1/usr/bin/gnative2ascii $PKG5/usr/bin
   mv $PKG1/usr/man/man1/jv-convert.1.gz usr/man/man1
   mv $PKG1/usr/man/man1/jv-scan.1.gz usr/man/man1
   mv $PKG1/usr/man/man1/rebuild-gcj-db.1.gz usr/man/man1
+  mkdir -p usr/man/man3
+  mv $PKG1/usr/man/man3/ffi* usr/man/man3
   mkdir -p usr/share
   mv $PKG1/usr/share/java usr/share
   # The ecj wrapper script:
@@ -698,6 +705,11 @@ mv $PKG1/usr/bin/gnative2ascii $PKG5/usr/bin
   mv $PKG1/usr/lib$LIBDIRSUFFIX/jvm* usr/lib$LIBDIRSUFFIX
   # And add the missing javac symlink:
   ln -s ../../../bin/ecj usr/lib$LIBDIRSUFFIX/jvm/bin/javac
+  # Don't package libffi stuff anymore.  GCC will link the internal version
+  # statically, and we'll need a newer one elsewhere.
+  find . -name "ffi*.h" | xargs rm
+  find . -name "libffi*" | xargs rm
+  rm usr/man/man3/ffi*
 )
 
 # gcc-objc:
@@ -733,8 +745,6 @@ mv $PKG1/usr/bin/gnative2ascii $PKG5/usr/bin
   # it is useful for deploying compiled binaries on machines that do not yet
   # have libgo.so.0.0.0.
   mv $PKG1/usr/lib${LIBDIRSUFFIX}/libgo.a usr/lib${LIBDIRSUFFIX}
-  mkdir -p usr/libexec/gcc/$TARGET/$VERSION
-  mv $PKG1/usr/libexec/gcc/$TARGET/$VERSION/go usr/libexec/gcc/$TARGET/$VERSION/go
   mkdir -p usr/man/man1
   mv $PKG1/usr/man/man1/gccgo.1.gz usr/man/man1
 ) || exit 1
