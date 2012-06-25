@@ -87,17 +87,6 @@ case "$ARCH" in
     *)    TARGET=$ARCH-slackware-linux ;;
 esac
 
-if [ "${BUILD}" != "${HST}" ]; then
-  if [ "${HST}" = "i686-w64-mingw32" ]; then
-    SLKCFLAGS="-O2"
-    LIBDIRSUFFIX=""
-    WERROR="--enable-werror=no"
-  elif [ "${HST}" = "x86_64-w64-mingw32" ]; then
-    SLKCFLAGS="-O2"
-    LIBDIRSUFFIX="64"
-  fi
-fi
-
 WERROR="--enable-werror=no"
 
 CWD=$(pwd)
@@ -138,10 +127,10 @@ CFLAGS="$SLKCFLAGS" \
   --enable-64-bit-bfd \
   --enable-plugins \
   --enable-threads \
-  --enable-targets=${TGT} \
-  --target=${TGT} \
-  --build=${BUILD} \
-  --host=${HST} \
+  --enable-targets=${TARGET_TRIPLET} \
+  --target=${TARGET_TRIPLET} \
+  --build=${BUILD_TRIPLET} \
+  --host=${HOST_TRIPLET} \
   $GOLD \
   $NO_INITFINI \
   $WERROR \
@@ -159,8 +148,8 @@ cp -a include/libiberty.h $PKG/${PREFIX}/include/libiberty.h
 ( cd $PKG/${PREFIX}/man/man1 ; mv strings.1 strings-GNU.1 )
 
 # Move ldscripts to ${PREFIX}/lib${LIBDIRSUFFIX}, and then put symlinks in place
-mv $PKG/${PREFIX}/${TGT}/lib/ldscripts $PKG/${PREFIX}/lib${LIBDIRSUFFIX}
-( cd $PKG/${PREFIX}/${TGT}
+mv $PKG/${PREFIX}/${TARGET_TRIPLET}/lib/ldscripts $PKG/${PREFIX}/lib${LIBDIRSUFFIX}
+( cd $PKG/${PREFIX}/${TARGET_TRIPLET}
   ln -s /${PREFIX}/lib${LIBDIRSUFFIX}/ldscripts lib/ldscripts
   for FILE in ar as ld ld.bfd ld.gold nm objcopy objdump ranlib strip ; do
     if [ -r "$PKG/${PREFIX}/bin/$FILE" ]; then
@@ -207,10 +196,10 @@ fi
 chown -R root:root $PKG/${PREFIX}/doc/binutils-$VERSION
 
 cat ${CWD}/binutils.yypkg.meta | sed \
-  -e "s/%{HST}/${HST}/" \
-  -e "s/%{TGT}/${TGT}/" \
+  -e "s/%{HST}/${HOST_TRIPLET}/" \
+  -e "s/%{TGT}/${TARGET_TRIPLET}/" \
   -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
-  | makeypkg.native -o ${YYOUTPUT} -meta - ${PKG}/${PREFIX}
+  | makeypkg -o ${YYOUTPUT} -meta - ${PKG}/${PREFIX}
 
 cat << EOF
 

@@ -1,2 +1,0 @@
-export HST="${BUILD}"
-export TGT="${TRIPLET}"
