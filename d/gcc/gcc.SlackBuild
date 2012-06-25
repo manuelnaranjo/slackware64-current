@@ -94,9 +94,9 @@ fi
 if [ x"$GCC_CORE" = x"yes" ]; then
   GCC_LANGUAGES="c"
 else
-  GCC_LANGUAGES=ada,c,c++,fortran,java,lto,objc
-  if echo "$TARGET_TRIPLET" | grep -v -q mingw32; then
-    GCC_LANGUAGES+=",go"
+  GCC_LANGUAGES=ada,c,c++,fortran,lto,objc
+  if echo "$TARGET_TRIPLET" | grep -v -q mingw; then
+    GCC_LANGUAGES+=",java,go"
   fi
 fi
 
