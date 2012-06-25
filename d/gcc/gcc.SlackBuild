@@ -340,7 +340,7 @@ if [ -n "${PKG_GCC_JAVA}" ] ; then ( cd $TMP
      --mandir=/${PREFIX}/man \
      --infodir=/${PREFIX}/info \
      --build=$BUILD_TRIPLET \
-     --host=$BUILD_TRIPLET \
+     --host=$HOST_TRIPLET \
      --target=$TARGET_TRIPLET
   make $NUMJOBS || exit 1
   make install DESTDIR=${PKG_GCC_JAVA} || exit 1
@@ -419,7 +419,7 @@ fi
      --disable-gtktest \
      ${GCC_ARCHOPTS} \
      --build=$BUILD_TRIPLET \
-     --host=$BUILD_TRIPLET \
+     --host=$HOST_TRIPLET \
      --target=$TARGET_TRIPLET || exit 1
 
   # Start the build:
