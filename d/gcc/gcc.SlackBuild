@@ -632,12 +632,10 @@ if [ -n "${PKG_GCC_GO}" ]; then ( cd $PKG_GCC_GO
 # Filter all .la files (thanks much to Mark Post for the sed script):
 find $TMP -type f -name "*.la" | xargs sed -i -e 's%-L/gcc-[[:graph:]]* % %g'
 
-## Strip bloated binaries and libraries:
-find ${ALL_PKGS} -type f -name "lib*\.so*" -exec strip --strip-unneeded "{}" \;
-find ${ALL_PKGS} -type f -name "lib*\.a" -exec strip -g "{}" \;
-strip --strip-unneeded ${PREFIX}/bin/* 2> /dev/null
-find ${ALL_PKGS} -type f | xargs file | grep "executable" | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
-find ${ALL_PKGS} -type f | xargs file | grep "shared object" | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
+# Strip bloated binaries and libraries:
+find ${ALL_PKGS} -type f | xargs file | grep "executable" | cut -f 1 -d : | xargs ${STRIP} --strip-unneeded 2> /dev/null
+find ${ALL_PKGS} -type f | xargs file | grep "shared object" | cut -f 1 -d : | xargs ${STRIP} --strip-unneeded 2> /dev/null
+find ${ALL_PKGS} -type f | xargs file | grep "current ar archive" | cut -f 1 -d : | xargs ${STRIP} -g 2> /dev/null
 
 for COMPILER in ${ALL_COMPILERS}; do
   ( cd "$(pkg_of_element "${COMPILER}")"
