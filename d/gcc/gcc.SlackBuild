@@ -282,6 +282,11 @@ cp $CWD/ecj-4.5.jar gcc-$VERSION/ecj.jar
 #https://oss.sonatype.org/content/repositories/releases/org/antlr/antlr-runtime/
 ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
 
+# Upstream -fPIC fix for gnat build:
+cd gcc-$VERSION
+  zcat $CWD/gcc-4.7.1.adalib.pic.diff.gz | patch -p1 --verbose || exit 1
+cd ..
+
 # install docs
 if [ x"$GCC_CORE" != x"yes" ]; then ( cd gcc-$VERSION
   # Smite the fixincludes:
@@ -412,7 +417,7 @@ fi
      --enable-checking=release \
      --enable-objc-gc \
      --with-system-zlib \
-     --with-python-dir=/${PREFIX}/lib$LIBDIRSUFFIX_HST/python2.6/site-packages \
+     --with-python-dir=/${PREFIX}/lib$LIBDIRSUFFIX_HST/python2.7/site-packages \
      --disable-libunwind-exceptions \
      --enable-__cxa_atexit \
      --enable-libssp \
@@ -576,11 +581,11 @@ if [ -n "${PKG_GCC_JAVA}" ]; then ( cd $PKG_GCC_JAVA
   (DIR="${PREFIX}/include/c++/$VERSION"; mkdir -p ${DIR} && mv $PKG_GCC_GPP/$DIR/{gcj,gnu,java,javax,org,sun} $DIR)
   move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/$TARGET_TRIPLET/$VERSION/include/{jawt,ffi,ffitarget,jawt_md,jni,jni_md,jvmpi}.h"
   # aot-compile Python plugins:
-  if [ ! -d $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX_HST}/python2.6 ]; then
-    echo "NO $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX_HST}/python2.6 !"
+  if [ ! -d $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX_HST}/python2.7 ]; then
+    echo "NO $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX_HST}/python2.7 !"
     exit 1
   fi
-  move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/python2.6"
+  move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/python2.7"
   move_from_pkg_gcc "${PREFIX}/info/gcj.*"
   # move_from_pkg_gcc ${PREFIX}/info/fastjar.*"
   move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/{libffi*,logging.properties,gcj*,libgcj*,libgij*,security}"
@@ -589,6 +594,7 @@ if [ -n "${PKG_GCC_JAVA}" ]; then ( cd $PKG_GCC_JAVA
   move_from_pkg_gcc "${PREFIX}/libexec/gcc/$TARGET_TRIPLET/$VERSION/{jc1,ecj1,jvgenmain}"
   move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/$TARGET_TRIPLET/$VERSION/include/gcj"
   move_from_pkg_gcc "${PREFIX}/man/man1/{aot-compile,gappletviewer,gc-analyze,gcj,gcjh,gcj-dbtool,gij,gjar,gjarsigner,gjavah,gjdoc,gkeytool,gnative2ascii,gorbd,grmic,grmid,grmiregistry,gserialver,gtnameserv,jcf-dump,jv-convert,rebuild-gcj-db}.1.gz"
+  move_from_pkg_gcc "${PREFIX}/usr/man/man3/ffi*"
   move_from_pkg_gcc "${PREFIX}/share/java"
   # The ecj wrapper script:
   cat $CWD/ecj.sh | sed -e "s,@JAVADIR@,/${PREFIX}/share/java," > ${PREFIX}/bin/ecj
@@ -598,6 +604,12 @@ if [ -n "${PKG_GCC_JAVA}" ]; then ( cd $PKG_GCC_JAVA
   move_from_pkg_gcc ${PREFIX}/lib${LIBDIRSUFFIX_HST}/jvm*
   # And add the missing javac symlink:
   ln -s ../../../bin/ecj ${PREFIX}/lib$LIBDIRSUFFIX_HST/jvm/bin/javac
+  ln -s ../../../bin/ecj usr/lib$LIBDIRSUFFIX/jvm/bin/javac
+  # Don't package libffi stuff anymore.  GCC will link the internal version
+  # statically, and we'll need a newer one elsewhere.
+  find . -name "ffi*.h" | xargs rm
+  find . -name "libffi*" | xargs rm
+  rm usr/man/man3/ffi*
 ); fi
 
 # gcc-objc:
@@ -627,7 +639,6 @@ if [ -n "${PKG_GCC_GO}" ]; then ( cd $PKG_GCC_GO
   # have libgo.so.0.0.0.
   move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/libgo.a"
   move_from_pkg_gcc "${PREFIX}/man/man1/gccgo.1.gz"
-); fi
 
 # Filter all .la files (thanks much to Mark Post for the sed script):
 find $TMP -type f -name "*.la" | xargs sed -i -e 's%-L/gcc-[[:graph:]]* % %g'
