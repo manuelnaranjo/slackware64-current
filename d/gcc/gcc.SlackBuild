@@ -643,6 +643,7 @@ if [ -n "${PKG_GCC_GO}" ]; then ( cd $PKG_GCC_GO
   # have libgo.so.0.0.0.
   move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/libgo.a"
   move_from_pkg_gcc "${PREFIX}/man/man1/gccgo.1.gz"
+); fi
 
 # Filter all .la files (thanks much to Mark Post for the sed script):
 find $TMP -type f -name "*.la" | xargs sed -i -e 's%-L/gcc-[[:graph:]]* % %g'
