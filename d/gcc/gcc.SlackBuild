@@ -614,7 +614,11 @@ if [ -n "${PKG_GCC_JAVA}" ]; then ( cd $PKG_GCC_JAVA
 
 # gcc-objc:
 if [ -n "${PKG_GCC_OBJC}" ]; then ( cd $PKG_GCC_OBJC
-  move_from_pkg_gcc "${PREFIX}/${TARGET_TRIPLET}/lib${LIBDIRSUFFIX_TGT}/libobjc*"
+  if [ x"${BUILD_TRIPLET}" = x"${TARGET_TRIPLET}" ]; then
+    move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_TGT}/libobjc*"
+  else
+    move_from_pkg_gcc "${PREFIX}/${TARGET_TRIPLET}/lib${LIBDIRSUFFIX_TGT}/libobjc*"
+  fi
   move_from_pkg_gcc "${PREFIX}/libexec/gcc/$TARGET_TRIPLET/$VERSION/cc1obj"
   move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/$TARGET_TRIPLET/$VERSION/include/objc"
 ); fi
