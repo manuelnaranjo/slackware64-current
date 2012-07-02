@@ -421,7 +421,7 @@ fi
      --enable-checking=release \
      --enable-objc-gc \
      --with-system-zlib \
-     --with-python-dir=/${PREFIX}/lib$LIBDIRSUFFIX_HST/python2.7/site-packages \
+     --with-python-dir=/lib$LIBDIRSUFFIX_HST/python2.7/site-packages \
      --disable-libunwind-exceptions \
      --enable-__cxa_atexit \
      --enable-libssp \
