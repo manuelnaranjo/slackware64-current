@@ -84,7 +84,7 @@ else
   LIB_ARCH=$ARCH
 fi
 
-if [ -z "${TARGET_TRIPLET}"]; then
+if [ -z "${TARGET_TRIPLET}" ]; then
   case "$ARCH" in
     arm*) TARGET_TRIPLET=$ARCH-slackware-linux-gnueabi ;;
     *)    TARGET_TRIPLET=$ARCH-slackware-linux ;;
