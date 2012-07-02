@@ -499,7 +499,8 @@ fi
     for bin in gcc g++ gfortran-gcc gcc-{ar,nm,ranlib} gcj gcjh; do
       if [ -e ${bin} ]; then
         mv ${bin} ${TARGET_TRIPLET}-${bin}-${VERSION}
-      elif [ -e ${TARGET_TRIPLET}-${bin} ]; then
+      fi
+      if [ -e ${TARGET_TRIPLET}-${bin} ]; then
         mv ${TARGET_TRIPLET}-${bin} ${TARGET_TRIPLET}-${bin}-${VERSION}
       fi
     done
