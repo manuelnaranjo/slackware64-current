@@ -451,7 +451,7 @@ fi
     make $NUMJOBS
     make info
     # Set GCCCHECK=something to run the tests
-    if [ ! -z $GCCCHECK ]; then
+    if [ -n "$GCCCHECK" ]; then
       make $NUMJOBS check
     fi
     make install DESTDIR=$PKG_GCC
