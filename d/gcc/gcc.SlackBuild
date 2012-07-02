@@ -135,7 +135,6 @@ PKG_GCC_GFORTRAN=$TMP/package-gcc-gfortran
 PKG_GCC_GNAT=$TMP/package-gcc-gnat
 PKG_GCC_JAVA=$TMP/package-gcc-java
 PKG_GCC_OBJC=$TMP/package-gcc-objc
-# PKG_GCC_GPP_GCH=$TMP/package-gcc-g++-gch
 PKG_GCC_GO=$TMP/package-gcc-go
 
 ALL_PKGS="${PKG_GCC}"
@@ -186,7 +185,6 @@ pkg_of_element() {
     gcc-gnat | libada) echo "${PKG_GCC_GNAT}" ;;
     gcc-java | libffi | libjava) echo "${PKG_GCC_JAVA}" ;;
     gcc-objc | libobjc) echo "${PKG_GCC_OBJC}" ;;
-    # gcc-g++-gch) echo "${PKG_GCC_GPP_GCH}" ;;
     gcc-go) echo "${PKG_GCC_GO}" ;;
   esac
 }
@@ -203,7 +201,6 @@ doc_dir_of_element() {
     gcc-gnat) echo "gcc/ada" ;;
     gcc-java) echo "gcc/java" ;;
     gcc-objc | libobjc) echo "gcc/objc" ;;
-    # gcc-g++-gch) echo "gcc/g++-gch" ;;
     gcc-go) echo "gcc/go" ;;
     lib*) echo "$1" ;;
     # I would have liked to write the following but it's not valid syntax:
@@ -630,14 +627,6 @@ if [ -n "${PKG_GCC_OBJC}" ]; then ( cd $PKG_GCC_OBJC
   move_from_pkg_gcc "${PREFIX}/libexec/gcc/$TARGET_TRIPLET/$VERSION/cc1obj"
   move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/$TARGET_TRIPLET/$VERSION/include/objc"
 ); fi
-
-## NOTE: Thought about this, because the precompiled headers are so large.
-## Probably easier to keep everything together, though.
-## gcc-g++-gch (precompiled c++ headers)
-#( cd $PKG_GCC_GPP_GCH
-#  mkdir -p ${PREFIX}/include/c++/$VERSION/$TARGET_TRIPLET/bits
-#  mv $PKG_GPP/${PREFIX}/include/c++/$VERSION/$TARGET_TRIPLET/bits/stdc++.h.gch ${PREFIX}/include/c++/$VERSION/$TARGET_TRIPLET/bits
-#)
 
 # gcc-go:
 if [ -n "${PKG_GCC_GO}" ]; then ( cd $PKG_GCC_GO
