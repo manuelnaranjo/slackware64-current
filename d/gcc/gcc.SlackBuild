@@ -565,8 +565,10 @@ if [ -n "${PKG_GCC_GFORTRAN}" ]; then ( cd $PKG_GCC_GFORTRAN
 # gcc-gnat:
 # First, relocate usr/bin/gnative2ascii to the gcc-java package so it
 # isn't matched and accidentally put in gcc-gnat:
-mkdir -p $PKG_GCC_JAVA/${PREFIX}/bin
-mv $PKG_GCC/${PREFIX}/bin/gnative2ascii $PKG_GCC_JAVA/${PREFIX}/bin
+if [ -n "${PKG_GCC_JAVA}" ]; then
+  mkdir -p $PKG_GCC_JAVA/${PREFIX}/bin
+  mv $PKG_GCC/${PREFIX}/bin/gnative2ascii $PKG_GCC_JAVA/${PREFIX}/bin
+fi
 # Now make the gcc-gnat package tree:
 if [ -n "${PKG_GCC_GNAT}" ]; then ( cd $PKG_GCC_GNAT
   move_from_pkg_gcc "${PREFIX}/bin/*gnat*"
