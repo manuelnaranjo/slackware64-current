@@ -129,45 +129,44 @@ TMP=${TMP:-"/gcc-$(mcookie)"}
 
 # This is the main DESTDIR target:
 PKG_GCC=$TMP/package-gcc
-# These are the directories to build other packages in:
-PKG_GCC_GPP=$TMP/package-gcc-g++
-PKG_GCC_GFORTRAN=$TMP/package-gcc-gfortran
-PKG_GCC_GNAT=$TMP/package-gcc-gnat
-PKG_GCC_JAVA=$TMP/package-gcc-java
-PKG_GCC_OBJC=$TMP/package-gcc-objc
-PKG_GCC_GO=$TMP/package-gcc-go
 
 ALL_PKGS="${PKG_GCC}"
 ALL_COMPILERS="gcc"
 ALL_LIBS="libmudflap libgomp"
 
 if echo ${GCC_LANGUAGES} | grep -q 'c++'; then
-  ALL_PKGS+=" ${PKG_GPP}"
+  PKG_GCC_GPP=$TMP/package-gcc-g++
+  ALL_PKGS+=" ${PKG_GCC_GPP}"
   ALL_COMPILERS+=" gcc-g++"
   ALL_LIBS+=" libstdc++-v3"
 fi
 if echo ${GCC_LANGUAGES} | grep -q 'fortran'; then
-  ALL_PKGS+=" ${PKG_GFORTRAN}"
+  PKG_GCC_GFORTRAN=$TMP/package-gcc-gfortran
+  ALL_PKGS+=" ${PKG_GCC_GFORTRAN}"
   ALL_COMPILERS+=" gcc-gfortran"
   ALL_LIBS+=" libgfortran"
 fi
 if echo ${GCC_LANGUAGES} | grep -q 'ada'; then
-  ALL_PKGS+=" ${PKG_GNAT}"
+  PKG_GCC_GNAT=$TMP/package-gcc-gnat
+  ALL_PKGS+=" ${PKG_GCC_GNAT}"
   ALL_COMPILERS+=" gcc-gnat"
   ALL_LIBS+=" libada"
 fi
 if echo ${GCC_LANGUAGES} | grep -q 'java'; then
-  ALL_PKGS+=" ${PKG_JAVA}"
+  PKG_GCC_JAVA=$TMP/package-gcc-java
+  ALL_PKGS+=" ${PKG_GCC_JAVA}"
   ALL_COMPILERS+=" gcc-java"
   ALL_LIBS+=" libffi libjava"
 fi
 if echo ${GCC_LANGUAGES} | grep -q 'objc'; then
-  ALL_PKGS+=" ${PKG_OBJC}"
+  PKG_GCC_OBJC=$TMP/package-gcc-objc
+  ALL_PKGS+=" ${PKG_GCC_OBJC}"
   ALL_COMPILERS+=" gcc-objc"
   ALL_LIBS+=" libobjc"
 fi
 if echo ${GCC_LANGUAGES} | grep -q 'go'; then
-  ALL_PKGS+=" ${PKG_GO}"
+  PKG_GCC_GO=$TMP/package-gcc-go
+  ALL_PKGS+=" ${PKG_GCC_GO}"
   ALL_COMPILERS+=" gcc-go"
   # ALL_LIBS+=" libgo"
 fi
