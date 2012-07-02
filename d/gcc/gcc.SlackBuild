@@ -455,6 +455,7 @@ fi
       make $NUMJOBS check
     fi
     make install DESTDIR=$PKG_GCC
+    make install-info DESTDIR=$PKG_GCC
   fi
 
   # KLUDGE ALERT
@@ -476,7 +477,6 @@ fi
 
   #  make ada.install-common DESTDIR=$PKG_GCC
   #  make install-gnatlib DESTDIR=$PKG_GCC
-  make -i install-info DESTDIR=$PKG_GCC
 
   chmod 755 $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX_HST}/libgcc_s.so.1
 
