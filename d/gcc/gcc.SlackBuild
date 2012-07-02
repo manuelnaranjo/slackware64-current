@@ -475,9 +475,6 @@ fi
       $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/${TARGET_TRIPLET}/${VERSION}/specs
   fi
 
-  #  make ada.install-common DESTDIR=$PKG_GCC
-  #  make install-gnatlib DESTDIR=$PKG_GCC
-
   chmod 755 $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX_HST}/libgcc_s.so.1
 
   # The (huge) static GNU java libraries are not packaged.  In nearly all
