@@ -114,12 +114,19 @@ elif echo "${TARGET_TRIPLET}" | grep -q x86_64; then
   LIBDIRSUFFIX_TGT="64"
 fi
 
-if echo "${TARGET_TRIPLET}"  | grep -q 'x86_64'; then
-  TARGET_ARCH=""
-  GCC_ARCHOPTS="--disable-multilib"
+GCC_ARCHOPTS="--disable-multilib"
+if ! echo "${TARGET_TRIPLET}" | grep -q 'x86_64'; then
+  if echo "${TARGET_TRIPLET}" | grep -q mingw; then
+    GCC_ARCHOPTS+=" --with-arch=pentium3"
+  else
+    GCC_ARCHOPTS+=" --with-arch=$(echo "${TARGET_TRIPLET}" | cut -f1 -d-)"
+  fi
+fi
+
+if [ "${BUILD_TRIPLET}" != "${TARGET_TRIPLET}" ]; then
+  GCC_BOOTSTRAP="--disable-bootstrap"
 else
-  TARGET_ARCH="$(echo "${TARGET_TRIPLET}" | cut -f1 -d-)"
-  GCC_ARCHOPTS="--with-arch=${TARGET_ARCH}"
+  GCC_BOOTSTRAP="--disable-bootstrap"
 fi
 
 CWD=$(pwd)
@@ -400,14 +407,7 @@ fi
   # for i686, as that is where almost all of the optimization speedups
   # are to be found.
   # Correct me if my take on this is wrong.
-  #  --with-cpu=$ARCH 
- 
-  if [ "${BUILD_TRIPLET}" != "${TARGET_TRIPLET}" ]; then
-    BOOTSTRAP="--disable-bootstrap"
-  else
-    BOOTSTRAP="--enable-bootstrap"
-  fi
- 
+
   CFLAGS="$SLKCFLAGS" \
   CXXFLAGS="$SLKCFLAGS" \
   ../gcc-$VERSION/configure --prefix=/${PREFIX} \
@@ -415,7 +415,8 @@ fi
      --mandir=/${PREFIX}/man \
      --infodir=/${PREFIX}/info \
      --enable-shared \
-     ${BOOTSTRAP} \
+     ${GCC_BOOTSTRAP} \
+     ${GCC_ARCHOPTS} \
      --enable-threads \
      --enable-languages=${GCC_LANGUAGES} \
      --enable-checking=release \
@@ -436,7 +437,6 @@ fi
      --with-antlr-jar=$ANTLJAR \
      --enable-java-awt=gtk \
      --disable-gtktest \
-     ${GCC_ARCHOPTS} \
      --build=$BUILD_TRIPLET \
      --host=$HOST_TRIPLET \
      --target=$TARGET_TRIPLET || exit 1
