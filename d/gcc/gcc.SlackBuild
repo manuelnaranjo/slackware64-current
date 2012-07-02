@@ -554,7 +554,7 @@ if [ -n "${PKG_GCC_GFORTRAN}" ]; then ( cd $PKG_GCC_GFORTRAN
   move_from_pkg_gcc "${PREFIX}/info/gfortran*"
   move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/$TARGET_TRIPLET/$VERSION/{finclude,libgfortran*}"
   move_from_pkg_gcc "${PREFIX}/libexec/gcc/$TARGET_TRIPLET/$VERSION/f951"
-  move_from_pkg_gcc "${PREFIX}/man/man1/gfortran*"
+  move_from_pkg_gcc "${PREFIX}/man/man1/*gfortran*"
   if [ x"${BUILD_TRIPLET}" = x"${TARGET_TRIPLET}" ]; then
     move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_TGT}/libgfortran*"
   else
