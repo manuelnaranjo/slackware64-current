@@ -582,8 +582,10 @@ if [ -n "${PKG_GCC_JAVA}" ]; then ( cd $PKG_GCC_JAVA
   # used to mv fastjar too
   move_from_pkg_gcc "${PREFIX}/bin/{aot-compile,gappletviewer,gc-analyze,*gcj*,gij,gjar,gjarsigner,gkeytool,grmid,grmic,grmiregistry,gserialver,gtnameserv,gjavah,gorbd,jcf-dump,jv-*}"
   # Move some Java only C++ headers from the C++ package:
-  (DIR="${PREFIX}/include/c++/$VERSION"; mkdir -p ${DIR} && mv $PKG_GCC_GPP/$DIR/{gcj,gnu,java,javax,org,sun} $DIR)
+  (DIR="${PREFIX}/include/c++/$VERSION";
+    mkdir -p ${DIR} && mv $PKG_GCC_GPP/$DIR/{gcj,gnu,java,javax,org,sun} $DIR)
   move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/$TARGET_TRIPLET/$VERSION/include/{jawt,ffi,ffitarget,jawt_md,jni,jni_md,jvmpi}.h"
+  move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/$TARGET_TRIPLET/$VERSION/include/gcj"
   # aot-compile Python plugins:
   if [ ! -d $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX_HST}/python2.7 ]; then
     echo "NO $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX_HST}/python2.7 !"
