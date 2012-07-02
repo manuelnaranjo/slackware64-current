@@ -47,6 +47,7 @@
 PKGNAM=gcc
 VERSION=${VERSION:-$(echo $PKGNAM-*.tar.xz | rev | cut -f 3- -d . | cut -f 1 -d - | rev)}
 BUILD=${BUILD:-1}
+PREFIX=${PREFIX:-usr}
 
 # How many jobs to run in parallel:
 NUMJOBS=" -j 7 "
@@ -90,6 +91,13 @@ if [ -z "${TARGET_TRIPLET}" ]; then
     *)    TARGET_TRIPLET=$ARCH-slackware-linux ;;
   esac
 fi
+
+BUILD_TRIPLET=${BUILD_TRIPLET:-${TARGET_TRIPLET}}
+HOST_TRIPLET=${HOST_TRIPLET:-${TARGET_TRIPLET}}
+
+GCC_CORE=${GCC_CORE:-"no"}
+
+STRIP=${STRIP:-"strip"}
 
 if [ x"$GCC_CORE" = x"yes" ]; then
   GCC_LANGUAGES="c"
