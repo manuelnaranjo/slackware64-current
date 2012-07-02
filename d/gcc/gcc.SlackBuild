@@ -242,7 +242,7 @@ symlink_to() {
 }
 
 # compress_info_files ${PREFIX}
-# Compress info files in ${PREFIX}/usr/info if any.
+# Compress info files in ${PREFIX}/info if any.
 compress_info_files() {
   [ -d $1/${PREFIX}/info ] && ( cd $1/${PREFIX}/info && rm -f dir && gzip -9 *)
 }
@@ -522,7 +522,7 @@ fi
     cd man1
     ln -sf g++.1.gz c++.1.gz
     ln -sf gcc.1.gz cc.1.gz
-  )  
+  )
 
   ## build the txz package
   #(
@@ -563,7 +563,7 @@ if [ -n "${PKG_GCC_GFORTRAN}" ]; then ( cd $PKG_GCC_GFORTRAN
 ); fi
 
 # gcc-gnat:
-# First, relocate usr/bin/gnative2ascii to the gcc-java package so it
+# First, relocate ${PREFIX}/bin/gnative2ascii to the gcc-java package so it
 # isn't matched and accidentally put in gcc-gnat:
 if [ -n "${PKG_GCC_JAVA}" ]; then
   mkdir -p $PKG_GCC_JAVA/${PREFIX}/bin
@@ -598,9 +598,8 @@ if [ -n "${PKG_GCC_JAVA}" ]; then ( cd $PKG_GCC_JAVA
   move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/pkgconfig/libgcj*.pc"
   rmdir $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX_HST}/pkgconfig 2> /dev/null
   move_from_pkg_gcc "${PREFIX}/libexec/gcc/$TARGET_TRIPLET/$VERSION/{jc1,ecj1,jvgenmain}"
-  move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/$TARGET_TRIPLET/$VERSION/include/gcj"
   move_from_pkg_gcc "${PREFIX}/man/man1/{aot-compile,gappletviewer,gc-analyze,gcj,gcjh,gcj-dbtool,gij,gjar,gjarsigner,gjavah,gjdoc,gkeytool,gnative2ascii,gorbd,grmic,grmid,grmiregistry,gserialver,gtnameserv,jcf-dump,jv-convert,rebuild-gcj-db}.1.gz"
-  move_from_pkg_gcc "${PREFIX}/usr/man/man3/ffi*"
+  move_from_pkg_gcc "${PREFIX}/man/man3/ffi*"
   move_from_pkg_gcc "${PREFIX}/share/java"
   # The ecj wrapper script:
   cat $CWD/ecj.sh | sed -e "s,@JAVADIR@,/${PREFIX}/share/java," > ${PREFIX}/bin/ecj
@@ -610,13 +609,12 @@ if [ -n "${PKG_GCC_JAVA}" ]; then ( cd $PKG_GCC_JAVA
   move_from_pkg_gcc ${PREFIX}/lib${LIBDIRSUFFIX_HST}/jvm*
   # And add the missing javac symlink:
   ln -s ../../../bin/ecj ${PREFIX}/lib$LIBDIRSUFFIX_HST/jvm/bin/javac
-  ln -s ../../../bin/ecj usr/lib$LIBDIRSUFFIX/jvm/bin/javac
   # Don't package libffi stuff anymore.  GCC will link the internal version
   # statically, and we'll need a newer one elsewhere.
   find . -name "ffi*.h" | xargs rm
-  find . -name "libffi*" | xargs rm
-  rm usr/man/man3/ffi*
-); fi
+  find . -name "libffi*" | xargs rm -r
+  rm ${PREFIX}/man/man3/ffi*
+) || exit 1; fi
 
 # gcc-objc:
 if [ -n "${PKG_GCC_OBJC}" ]; then ( cd $PKG_GCC_OBJC
