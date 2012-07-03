@@ -97,7 +97,8 @@ HOST_TRIPLET=${HOST_TRIPLET:-${TARGET_TRIPLET}}
 
 GCC_CORE=${GCC_CORE:-"no"}
 
-STRIP=${STRIP:-"strip"}
+HOST_STRIP=${HOST_STRIP:-"strip"}
+TARGET_STRIP=${TARGET_STRIP:-"strip"}
 
 if [ x"$GCC_CORE" = x"yes" ]; then
   GCC_LANGUAGES="c"
@@ -256,7 +257,7 @@ compress_info_files() {
 
 description_of_compiler() {
   PKG="${1}"
-  cat "${CWD}/slack-desc.${1}" \
+  cat "${CWD}/slack-desc.${PKG}" \
     | sed -e 's;/;\\/;g' \
     | sed -n "/^${PKG}:/ s#^${PKG}: ##p" \
     | sed -e 's;";\\\\";g' \
@@ -645,9 +646,9 @@ if [ -n "${PKG_GCC_GO}" ]; then ( cd $PKG_GCC_GO
 find $TMP -type f -name "*.la" | xargs sed -i -e 's%-L/gcc-[[:graph:]]* % %g'
 
 # Strip bloated binaries and libraries:
-find ${ALL_PKGS} -type f | xargs file | grep "executable" | cut -f 1 -d : | xargs ${STRIP} --strip-unneeded 2> /dev/null
-find ${ALL_PKGS} -type f | xargs file | grep "shared object" | cut -f 1 -d : | xargs ${STRIP} --strip-unneeded 2> /dev/null
-find ${ALL_PKGS} -type f | xargs file | grep "current ar archive" | cut -f 1 -d : | xargs ${STRIP} -g 2> /dev/null
+find ${ALL_PKGS} -type f | xargs file | grep "executable" | cut -f 1 -d : | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
+find ${ALL_PKGS} -type f | xargs file | grep "shared object" | cut -f 1 -d : | xargs ${TARGET_STRIP} --strip-unneeded 2> /dev/null
+find ${ALL_PKGS} -type f | xargs file | grep "current ar archive" | cut -f 1 -d : | xargs ${TARGET_STRIP} -g 2> /dev/null
 
 for COMPILER in ${ALL_COMPILERS}; do
   ( cd "$(pkg_of_element "${COMPILER}")"
