@@ -661,8 +661,9 @@ for COMPILER in ${ALL_COMPILERS}; do
     -e "s/%{HST}/${HOST_TRIPLET}/" \
     -e "s/%{TGT}/${TARGET_TRIPLET}/" \
     -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
+    -e "s/%{BUILD}/${BUILD}/" \
     -e "s/%{DESCR}/$(description_of_compiler "${COMPILER}")/" \
-    | OCAMLRUNPARAM="b" makeypkg -o ${YYOUTPUT} -meta - "$(pkg_of_element "${COMPILER}")/${PREFIX}"
+    | makeypkg -o ${YYOUTPUT} -meta - "$(pkg_of_element "${COMPILER}")/${PREFIX}"
 done
 
 echo
