@@ -71,7 +71,7 @@ CXXFLAGS="$SLKCFLAGS" \
   --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
   --docdir=/${PREFIX}/doc/xz-$VERSION \
-  --sysconfdir=/etc \
+  --sysconfdir=/${PREFIX}/etc \
   --mandir=/${PREFIX}/man \
   --enable-shared \
   --disable-static \
