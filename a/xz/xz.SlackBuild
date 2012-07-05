@@ -86,21 +86,6 @@ CXXFLAGS="$SLKCFLAGS" \
 make || exit 1
 make DESTDIR=$PKG install
 
-# It might be advisable to have the libraries in /lib${LIBDIRSUFFIX}:
-mkdir -p $PKG/lib${LIBDIRSUFFIX}
-mv $PKG/${PREFIX}/lib${LIBDIRSUFFIX}/liblzma.so.* $PKG/lib${LIBDIRSUFFIX}
-( cd $PKG/${PREFIX}/lib${LIBDIRSUFFIX}
-  rm -f liblzma.so
-  ln -sf ../../lib${LIBDIRSUFFIX}/liblzma.so.? liblzma.so
-)
-
-# At least the xz binary should also be in /bin:
-mkdir -p $PKG/bin
-mv $PKG/${PREFIX}/bin/xz $PKG/bin
-( cd $PKG/${PREFIX}/bin
-  ln -sf ../../bin/xz .
-)
-
 # Strip binaries:
 ( cd $PKG
   find . | xargs file | grep "executable" | grep ELF | cut -f 1 -d : | xargs strip --strip-debug 2> /dev/null
