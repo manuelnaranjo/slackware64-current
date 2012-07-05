@@ -73,11 +73,14 @@ CXXFLAGS="$SLKCFLAGS" \
   --docdir=/${PREFIX}/doc/xz-$VERSION \
   --sysconfdir=/${PREFIX}/etc \
   --mandir=/${PREFIX}/man \
+  --disable-threads \
+  --disable-nls \
   --enable-shared \
   --disable-static \
   --disable-rpath \
   --program-prefix= \
   --program-suffix= \
+  --host=${HOST_TRIPLET} \
   --build=$ARCH-slackware-linux
 
 make || exit 1
