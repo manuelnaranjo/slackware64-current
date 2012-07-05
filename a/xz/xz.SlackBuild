@@ -84,11 +84,11 @@ find . \
 CFLAGS="$SLKCFLAGS" \
 CXXFLAGS="$SLKCFLAGS" \
 ./configure \
-  --prefix=/usr \
-  --libdir=/usr/lib${LIBDIRSUFFIX} \
-  --docdir=/usr/doc/xz-$VERSION \
+  --prefix=/${PREFIX} \
+  --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
+  --docdir=/${PREFIX}/doc/xz-$VERSION \
   --sysconfdir=/etc \
-  --mandir=/usr/man \
+  --mandir=/${PREFIX}/man \
   --enable-shared \
   --disable-static \
   --disable-rpath \
@@ -101,16 +101,16 @@ make DESTDIR=$PKG install
 
 # It might be advisable to have the libraries in /lib${LIBDIRSUFFIX}:
 mkdir -p $PKG/lib${LIBDIRSUFFIX}
-mv $PKG/usr/lib${LIBDIRSUFFIX}/liblzma.so.* $PKG/lib${LIBDIRSUFFIX}
-( cd $PKG/usr/lib${LIBDIRSUFFIX}
+mv $PKG/${PREFIX}/lib${LIBDIRSUFFIX}/liblzma.so.* $PKG/lib${LIBDIRSUFFIX}
+( cd $PKG/${PREFIX}/lib${LIBDIRSUFFIX}
   rm -f liblzma.so
   ln -sf ../../lib${LIBDIRSUFFIX}/liblzma.so.? liblzma.so
 )
 
 # At least the xz binary should also be in /bin:
 mkdir -p $PKG/bin
-mv $PKG/usr/bin/xz $PKG/bin
-( cd $PKG/usr/bin
+mv $PKG/${PREFIX}/bin/xz $PKG/bin
+( cd $PKG/${PREFIX}/bin
   ln -sf ../../bin/xz .
 )
 
@@ -121,8 +121,8 @@ mv $PKG/usr/bin/xz $PKG/bin
 )
 
 # Compress and link manpages, if any:
-if [ -d $PKG/usr/man ]; then
-  ( cd $PKG/usr/man
+if [ -d $PKG/${PREFIX}/man ]; then
+  ( cd $PKG/${PREFIX}/man
     for manpagedir in $(find . -type d -name "man*") ; do
       ( cd $manpagedir
         for eachpage in $( find . -type l -maxdepth 1) ; do
@@ -135,15 +135,15 @@ if [ -d $PKG/usr/man ]; then
   )
 fi
 
-mkdir -p $PKG/usr/doc/$PKGNAM-$VERSION
+mkdir -p $PKG/${PREFIX}/doc/$PKGNAM-$VERSION
 cp -a \
   ABOUT-NLS AUTHORS COPYING* INSTALL* NEWS PACKAGERS README* THANKS \
-  $PKG/usr/doc/$PKGNAM-$VERSION
+  $PKG/${PREFIX}/doc/$PKGNAM-$VERSION
 
 # If there's a ChangeLog, installing at least part of the recent history
 # is useful, but don't let it get totally out of control:
 if [ -r ChangeLog ]; then
-  DOCSDIR=$(echo $PKG/usr/doc/${PKGNAM}-$VERSION)
+  DOCSDIR=$(echo $PKG/${PREFIX}/doc/${PKGNAM}-$VERSION)
   cat ChangeLog | head -n 1000 > $DOCSDIR/ChangeLog
   touch -r ChangeLog $DOCSDIR/ChangeLog
 fi
