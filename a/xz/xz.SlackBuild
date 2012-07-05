@@ -119,6 +119,24 @@ if [ -r ChangeLog ]; then
   touch -r ChangeLog $DOCSDIR/ChangeLog
 fi
 
+description_of_slack_desc() {
+  PKG="${1}"
+  cat "${CWD}/slack-desc" \
+    | sed -e 's;/;\\/;g' \
+    | sed -n "/^${PKG}:/ s#^${PKG}: ##p" \
+    | sed -e 's;";\\\\";g' \
+    | tr -d '()#' \
+    | tr '\n' ' '
+}
+
+cat ${CWD}/${PKGNAM}.yypkg.meta | sed \
+  -e "s/%{PKG}/${PKGNAM}/" \
+  -e "s/%{HST}/${HOST_TRIPLET}/" \
+  -e "s/%{TGT}//" \
+  -e "s/%{VER}/$(echo ${VERSION} | tr . ' ') Stable ${BUILD}/" \
+  -e "s/%{BUILD}/${BUILD}/" \
+  -e "s/%{DESCR}/$(description_of_slack_desc "${PKGNAM}")/" \
+  | makeypkg -o ${YYOUTPUT} -meta - "${PKG}/${PREFIX}"
 
 # Move temporary stuff to /tmp, so that it won't get forgotten
 # in the shuffle:
