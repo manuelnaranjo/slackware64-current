@@ -70,7 +70,7 @@ CXXFLAGS="$SLKCFLAGS" \
 ./configure \
   --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
-  --docdir=/${PREFIX}/doc/xz-$VERSION \
+  --docdir=/${PREFIX}/doc/$PKGNAM-$VERSION \
   --sysconfdir=/${PREFIX}/etc \
   --mandir=/${PREFIX}/man \
   --disable-threads \
@@ -83,7 +83,7 @@ CXXFLAGS="$SLKCFLAGS" \
   --host=${HOST_TRIPLET} \
   --build=$ARCH-slackware-linux
 
-make || exit 1
+make -j4 || exit 1
 make DESTDIR=$PKG install
 
 # Strip binaries:
@@ -137,7 +137,4 @@ cat ${CWD}/${PKGNAM}.yypkg.meta | sed \
   -e "s/%{BUILD}/${BUILD}/" \
   -e "s/%{DESCR}/$(description_of_slack_desc "${PKGNAM}")/" \
   | makeypkg -o ${YYOUTPUT} -meta - "${PKG}/${PREFIX}"
-
-# Move temporary stuff to /tmp, so that it won't get forgotten
-# in the shuffle:
 
