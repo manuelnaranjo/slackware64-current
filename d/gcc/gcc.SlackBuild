@@ -401,8 +401,6 @@ fi
 ( mkdir gcc.build.lnx;
   cd gcc.build.lnx;
 
-  # If enough people need "treelang" support for it may be considered.
-  #  --enable-languages=ada,c,c++,fortran,java,objc,treelang
   # I think it is incorrect to include this option (as it will end up set
   # to i486 on x86 platforms), and we want to tune the binary structure
   # for i686, as that is where almost all of the optimization speedups
