@@ -644,9 +644,19 @@ if [ -n "${PKG_GCC_GO}" ]; then ( cd $PKG_GCC_GO
 find $TMP -type f -name "*.la" | xargs sed -i -e 's%-L/gcc-[[:graph:]]* % %g'
 
 # Strip bloated binaries and libraries:
-find ${ALL_PKGS} -type f | xargs file | grep "executable" | cut -f 1 -d : | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
-find ${ALL_PKGS} -type f | xargs file | grep "shared object" | cut -f 1 -d : | xargs ${TARGET_STRIP} --strip-unneeded 2> /dev/null
-find ${ALL_PKGS} -type f | xargs file | grep "current ar archive" | cut -f 1 -d : | xargs ${TARGET_STRIP} -g 2> /dev/null
+strip_f() {
+  find ${ALL_PKGS} -type f | xargs file | egrep "${1}" | grep "${2}"| cut -f 1 -d : | xargs ${3} 2> /dev/null
+}
+
+strip_f "executable|shared object" "${HOST_EXE_FORMAT}" "${HOST_STRIP} --strip-unneeded"
+
+if echo "$TARGET_TRIPLET" | grep -q mingw; then
+  strip_f "DLL" "${TARGET_EXE_FORMAT}" "${TARGET_STRIP} --strip-unneeded"
+else
+  strip_f "shared object" "${TARGET_EXE_FORMAT}" "${TARGET_STRIP} --strip-unneeded"
+fi
+
+strip_f "current ar archive" "" "${TARGET_STRIP} -g"
 
 for COMPILER in ${ALL_COMPILERS}; do
   ( cd "$(pkg_of_element "${COMPILER}")"
