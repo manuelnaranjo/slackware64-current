@@ -49,7 +49,7 @@ esac
 CWD=$(pwd)
 # Temporary build location.  This should *NOT* be a directory
 # path a non-root user could create later...
-TMP=${TMP:-/xz-tmp-$(mcookie)}
+TMP=${TMP:-/tmp}
 PKG=$TMP/package-$PKGNAM
 rm -rf $PKG
 mkdir -p $TMP $PKG
@@ -140,8 +140,4 @@ cat ${CWD}/${PKGNAM}.yypkg.meta | sed \
 
 # Move temporary stuff to /tmp, so that it won't get forgotten
 # in the shuffle:
-
-cp -a $TMP/${PKGNAM}-${VERSION}-${ARCH}-${BUILD}.tgz /tmp
-rm -rf /tmp/xz-tmp*
-mv /xz-tmp* /tmp
 
