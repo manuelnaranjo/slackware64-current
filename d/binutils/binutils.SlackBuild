@@ -166,7 +166,7 @@ if [ -r $PKG/${PREFIX}/bin/$DEFAULT_LD ]; then
 fi
       
 find $PKG | xargs file | grep -e "executable" -e "shared object" \
-  | grep ${EXE_FORMAT} | cut -f 1 -d : | xargs ${STRIP} --strip-unneeded 2> /dev/null
+  | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
 
 # Remove some unneeded man pages, and then compress the rest
 # rm -f $PKG/${PREFIX}/man/man1/{dlltool,windres}.1
