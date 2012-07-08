@@ -34,25 +34,22 @@ if [ -z "$ARCH" ]; then
   esac
 fi
 
+case "${HOST_TRIPLET}" in
+  i686-w64-mingw32)
+    SLKCFLAGS="-O2 -march=i686"
+    LIBDIRSUFFIX=""
+    ;;
+  x86_64-w64-mingw32)
+    SLKCFLAGS="-O2"
+    LIBDIRSUFFIX="64"
+    ;;
+esac
+
 NUMJOBS=${NUMJOBS:-" -j7 "}
 
 CWD=$(pwd)
 TMP=${TMP:-/tmp}
 PKG=$TMP/package-libjpeg
-
-if [ "$ARCH" = "i486" ]; then
-  SLKCFLAGS="-O2 -march=i486 -mtune=i686"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "s390" ]; then
-  SLKCFLAGS="-O2"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "x86_64" ]; then
-  SLKCFLAGS="-O2 -fPIC"
-  LIBDIRSUFFIX="64"
-else
-  SLKCFLAGS="-O2"
-  LIBDIRSUFFIX=""
-fi
 
 rm -rf $PKG
 mkdir -p $TMP $PKG
@@ -71,21 +68,21 @@ find . \
 
 export CFLAGS="$SLKCFLAGS"
 ./configure \
-  --prefix=/usr \
-  --mandir=/usr/man \
-  --libdir=/usr/lib${LIBDIRSUFFIX}
+  --prefix=/${PREFIX} \
+  --mandir=/${PREFIX}/man \
+  --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
+  --host=${HOST_TRIPLET}
 make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG
 
 # Strip binaries:
 ( cd $PKG
-  find . | xargs file | grep "executable" | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
-  find . | xargs file | grep "shared object" | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
+  find . | xargs file | egrep "executable|shared object" | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
 )
 
 # Compress and link manpages, if any:
-if [ -d $PKG/usr/man ]; then
-  ( cd $PKG/usr/man
+if [ -d $PKG/${PREFIX}/man ]; then
+  ( cd $PKG/${PREFIX}/man
     for manpagedir in $(find . -type d -name "man*") ; do
       ( cd $manpagedir
         for eachpage in $( find . -type l -maxdepth 1) ; do
@@ -98,13 +95,15 @@ if [ -d $PKG/usr/man ]; then
   )
 fi
 
-mkdir -p $PKG/usr/doc/libjpeg-$VERSION
-cp -a README $PKG/usr/doc/libjpeg-$VERSION
+mkdir -p $PKG/${PREFIX}/doc/libjpeg-$VERSION
+cp -a README $PKG/${PREFIX}/doc/libjpeg-$VERSION
 
-mkdir -p $PKG/install
-cat $CWD/slack-desc > $PKG/install/slack-desc
-
-# Build the package:
-cd $PKG
-makepkg -c y -l y $TMP/libjpeg-$VERSION-$ARCH-$BUILD.txz
+cat ${CWD}/libjpeg.yypkg.meta | sed \
+  -e "s/%{PKG}/libjpeg/" \
+  -e "s/%{HST}/${HOST_TRIPLET}/" \
+  -e "s/%{TGT}//" \
+  -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
+  -e "s/%{BUILD}/${BUILD}/" \
+  -e "s/%{DESCR}/${DESCR:-"No description"}/" \
+  | makeypkg -o ${YYOUTPUT} -meta - "${PKG}/${PREFIX}"
 
