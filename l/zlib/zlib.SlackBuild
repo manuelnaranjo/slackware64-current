@@ -39,22 +39,16 @@ CWD=$(pwd)
 TMP=${TMP:-/tmp}
 PKG=$TMP/package-zlib
 
-if [ "$ARCH" = "i386" ]; then
-  SLKCFLAGS="-O2 -march=i386 -mcpu=i686"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "i486" ]; then
-  SLKCFLAGS="-O2 -march=i486 -mtune=i686"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "s390" ]; then
-  SLKCFLAGS="-O2"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "x86_64" ]; then
-  SLKCFLAGS="-O2 -fPIC"
-  LIBDIRSUFFIX="64"
-else
-  SLKCFLAGS="-O2"
-  LIBDIRSUFFIX=""
-fi
+case "${HOST_TRIPLET}" in
+  i686-w64-mingw32)
+    SLKCFLAGS="-O3 -march=i686"
+    LIBDIRSUFFIX=""
+    ;;
+  x86_64-w64-mingw32)
+    SLKCFLAGS="-O3"
+    LIBDIRSUFFIX="64"
+    ;;
+esac
 
 rm -rf $PKG
 mkdir -p $TMP $PKG
@@ -71,65 +65,62 @@ find . \
   \( -perm 666 -o -perm 664 -o -perm 600 -o -perm 444 -o -perm 440 -o -perm 400 \) \
   -exec chmod 644 {} \;
 
+# We only call configure so that it creates "zlib.pc" from "zlib.pc.in". zlib's
+# build system is pretty crappy and doesn't handle cross-compilation: we have to
+# call a makefile directly instead.
 CFLAGS="$SLKCFLAGS" \
 ./configure \
-  --prefix=/usr
-make clean
-make || exit 1
-CFLAGS="$SLKCFLAGS" \
-./configure \
-  --prefix=/usr \
-  --libdir=/usr/lib${LIBDIRSUFFIX} \
+  --prefix=/${PREFIX} \
+  --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
   --shared
-make || exit 1
 
-mkdir -p $PKG/usr/include
-cp -a zlib.h zconf.h $PKG/usr/include
-chmod 644 $PKG/usr/include/*
-mkdir -p $PKG/usr/lib${LIBDIRSUFFIX}
-cp -a libz.a libz.so* $PKG/usr/lib${LIBDIRSUFFIX}
-chmod 755 $PKG/usr/lib${LIBDIRSUFFIX}/*
-chmod 644 $PKG/usr/lib${LIBDIRSUFFIX}/libz.a
-mkdir -p $PKG/usr/man/man3
-cat zlib.3 | gzip -9c > $PKG/usr/man/man3/zlib.3.gz
+CC=${HOST_TRIPLET}-gcc \
+  CFLAGS="$SLKCFLAGS -Wall" \
+  LD=${HOST_TRIPLET}-gcc \
+  AS=${HOST_TRIPLET}-gcc \
+  AR="${HOST_TRIPLET}-ar" \
+  RC="${HOST_TRIPLET}-windres" \
+  STRIP="${HOST_STRIP}" \
+  make -j 2 -f $CWD/Makefile.yypkg || exit 1
+
+mkdir -p $PKG/${PREFIX}/include
+cp -a zlib.h zconf.h $PKG/${PREFIX}/include
+chmod 644 $PKG/${PREFIX}/include/*
+mkdir -p $PKG/${PREFIX}/lib${LIBDIRSUFFIX}
+cp -a libz.a libz.so* libz*.dll* $PKG/${PREFIX}/lib${LIBDIRSUFFIX}
+chmod 755 $PKG/${PREFIX}/lib${LIBDIRSUFFIX}/*
+chmod 644 $PKG/${PREFIX}/lib${LIBDIRSUFFIX}/libz.a
+mkdir -p $PKG/${PREFIX}/man/man3
+cat zlib.3 | gzip -9c > $PKG/${PREFIX}/man/man3/zlib.3.gz
 
 # Add pkgconfig file:
-mkdir -p $PKG/usr/lib${LIBDIRSUFFIX}/pkgconfig
-cat zlib.pc > $PKG/usr/lib${LIBDIRSUFFIX}/pkgconfig/zlib.pc
-
-# Now that libkmod requires libz, we had better move the shared library
-# up a level:
-mkdir $PKG/lib${LIBDIRSUFFIX}
-( cd $PKG/usr/lib${LIBDIRSUFFIX}
-  for file in lib*.so.?.* ; do
-    mv $file ../../lib${LIBDIRSUFFIX}
-    ln -sf ../../lib${LIBDIRSUFFIX}/$file .
-  done
-  cp -a lib*.so.? ../../lib${LIBDIRSUFFIX}
-)
+mkdir -p $PKG/${PREFIX}/lib${LIBDIRSUFFIX}/pkgconfig
+cat zlib.pc > $PKG/${PREFIX}/lib${LIBDIRSUFFIX}/pkgconfig/zlib.pc
 
 # Strip binaries:
 ( cd $PKG
-  find . | xargs file | grep "executable" | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
-  find . | xargs file | grep "shared object" | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
+  find . | xargs file | egrep "executable|shared object" | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
 )
 
-mkdir -p $PKG/usr/doc/zlib-$VERSION
+mkdir -p $PKG/${PREFIX}/doc/zlib-$VERSION
 cp -a \
   FAQ INDEX README* \
-  $PKG/usr/doc/zlib-$VERSION
+  $PKG/${PREFIX}/doc/zlib-$VERSION
 
 # If there's a ChangeLog, installing at least part of the recent history
 # is useful, but don't let it get totally out of control:
 if [ -r ChangeLog ]; then
-  DOCSDIR=$(echo $PKG/usr/doc/${PKGNAM}-$VERSION)
+  DOCSDIR=$(echo $PKG/${PREFIX}/doc/${PKGNAM}-$VERSION)
   cat ChangeLog | head -n 1000 > $DOCSDIR/ChangeLog
   touch -r ChangeLog $DOCSDIR/ChangeLog
 fi
 
-mkdir -p $PKG/install
-cat $CWD/slack-desc > $PKG/install/slack-desc
-
-cd $PKG
-makepkg -l y -c n $TMP/zlib-$VERSION-$ARCH-$BUILD.txz
+cat ${CWD}/${PKGNAM}.yypkg.meta | sed \
+  -e "s/%{PKG}/${PKGNAM}/" \
+  -e "s/%{HST}/${HOST_TRIPLET}/" \
+  -e "s/%{TGT}//" \
+  -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
+  -e "s/%{BUILD}/${BUILD}/" \
+  -e "s/%{DESCR}/${DESCR:-"No description"}/" \
+  | makeypkg -o ${YYOUTPUT} -meta - "${PKG}/${PREFIX}"
 
