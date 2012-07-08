@@ -1,5 +1,5 @@
-((name xz) (size_expanded (TB 42))
+((name %{PKG}) (size_expanded (TB 42))
  (version ((%{VER}) Stable %{BUILD}))
  (packager_email adrien@notk.org) (packager_name "Adrien Nader")
- (description dummy) (host %{HST}) (target (%{TGT})) (predicates ())
+ (description "%{DESCR}") (host %{HST}) (target (%{TGT})) (predicates ())
  (comments ()))
