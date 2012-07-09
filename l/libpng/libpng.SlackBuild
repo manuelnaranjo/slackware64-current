@@ -1,0 +1,118 @@
+#!/bin/sh
+
+# Copyright 2005-2012  Patrick J. Volkerding, Sebeka, MN, USA
+# All rights reserved.
+#
+# Redistribution and use of this script, with or without modification, is
+# permitted provided that the following conditions are met:
+#
+# 1. Redistributions of this script must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+#
+#  THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
+#  WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+#  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO
+#  EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+#  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+#  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+#  OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+#  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+#  OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+#  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+VERSION=1.4.9
+BUILD=${BUILD:-1}
+
+# Automatically determine the architecture we're building on:
+if [ -z "$ARCH" ]; then
+  case "$( uname -m )" in
+    i?86) export ARCH=i486 ;;
+    arm*) export ARCH=arm ;;
+    # Unless $ARCH is already set, use uname -m for all other archs:
+       *) export ARCH=$( uname -m ) ;;
+  esac
+fi
+
+case "${HOST_TRIPLET}" in
+  i686-w64-mingw32)
+    SLKCFLAGS="-O2 -march=i686"
+    LIBDIRSUFFIX=""
+    ;;
+  x86_64-w64-mingw32)
+    SLKCFLAGS="-O2"
+    LIBDIRSUFFIX="64"
+    ;;
+esac
+
+CWD=$(pwd)
+TMP=${TMP:-/tmp}
+PKG=$TMP/package-libpng
+rm -rf $PKG
+mkdir -p $TMP $PKG/${PREFIX}
+
+cd $TMP
+rm -rf libpng-$VERSION
+tar xvf $CWD/libpng-$VERSION.tar.?z* || exit 1
+cd libpng-$VERSION
+chown -R root:root .
+find . \
+  \( -perm 777 -o -perm 775 -o -perm 711 -o -perm 555 -o -perm 511 \) \
+  -exec chmod 755 {} \; -o \
+  \( -perm 666 -o -perm 664 -o -perm 600 -o -perm 444 -o -perm 440 -o -perm 400 \) \
+  -exec chmod 644 {} \;
+
+# Look like using ./configure is the only way that works now...
+./configure --prefix=/${PREFIX} \
+  --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
+  --host=${HOST_PREFIX} \
+  --mandir=/${PREFIX}/man
+
+make -j4 || exit 1
+make install DESTDIR=$PKG
+
+# Well, glad I got rid of the above, but <someone> upstream still does not
+# grok shared libraries on Linux it seems -- libpng-1.4.0 caused all the
+# newly compiled binaries to want libpng.so.14, and now libpng-1.4.1
+# wants to change that to libpng14.so.14.  Searching online finds that
+# we are not the only ones with binaries that want libpng.so.14, so we
+# are forced to provide a compatibility symlink again...  :-/
+#
+# We'll try to remove this in 5 to 10 years, just like before.
+( cd $PKG/${PREFIX}/lib${LIBDIRSUFFIX}
+  if [ ! -e libpng.so.14 -a -e libpng14.so.14 ]; then
+    ln -sf libpng14.so.14 libpng.so.14
+  fi
+)
+
+find $PKG | xargs file | egrep "executable|shared object" \
+  | grep ${HOST_EXE_PREFIX} | cut -f 1 -d : | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
+
+gzip -9 --force $PKG/${PREFIX}/man/man?/*.?
+
+mkdir -p $PKG/${PREFIX}/doc/libpng-$VERSION
+cp -a \
+  ANNOUNCE CHANGES INSTALL KNOWNBUG LICENSE README TODO Y2KINFO \
+  libpng*.txt example.c \
+  $PKG/${PREFIX}/doc/libpng-$VERSION
+
+# If there's a ChangeLog, installing at least part of the recent history
+# is useful, but don't let it get totally out of control:
+if [ -r ChangeLog ]; then
+  DOCSDIR=$(echo $PKG/${PREFIX}/doc/libpng-$VERSION)
+  cat ChangeLog | head -n 1000 > $DOCSDIR/ChangeLog
+  touch -r ChangeLog $DOCSDIR/ChangeLog
+fi
+
+# Default the includes to version 1.4.x:
+( cd $PKG/${PREFIX}/include ; ln -sf libpng14 libpng )
+
+cat ${CWD}/libpng.yypkg.meta | sed \
+  -e "s/%{PKG}/libpng/" \
+  -e "s/%{HST}/${HOST_TRIPLET}/" \
+  -e "s/%{TGT}//" \
+  -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
+  -e "s/%{BUILD}/${BUILD}/" \
+  -e "s/%{DESCR}/${DESCR:-"No description"}/" \
+  | makeypkg -o ${YYOUTPUT} -meta - "${PKG}/${PREFIX}"
+
