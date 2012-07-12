@@ -464,8 +464,16 @@ fi
   rm -f $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX_HST}/*gdb.py
 
   # Be sure the "specs" file is installed.
-  if [ ! -r $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/${TARGET_TRIPLET}/${VERSION}/specs ]; then
-    cat gcc/specs > $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/${TARGET_TRIPLET}/${VERSION}/specs
+
+  SPECS="${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/${TARGET_TRIPLET}/${VERSION}/specs"
+  if [ ! -r $PKG_GCC/${SPECS} ]; then
+    cat gcc/specs > $PKG_GCC/${SPECS}
+  fi
+
+  # Add, for instance, /opt/mgw32_libs/{include,lib} to default search paths
+  if [ -n "${YYPREFIX_libs}" ]; then
+    sed -i "/^\*link:$/ { N; s;$; -L/${YYPREFIX_libs}/lib${LIBDIRSUFFIX_TGT}; }" ${PKG_GCC}/${SPECS}
+    sed -i "/^\*cpp:$/ { N; s;$; -I/${YYPREFIX_libs}/include; }" ${PKG_GCC}/${SPECS}
   fi
 
   # Make our 64bit gcc look for 32bit gcc binaries in ./32 subdirectory:
