@@ -65,7 +65,7 @@ find . \
 # Look like using ./configure is the only way that works now...
 ./configure --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
-  --host=${HOST_PREFIX} \
+  --host=${HOST_TRIPLET} \
   --mandir=/${PREFIX}/man
 
 make -j4 || exit 1
