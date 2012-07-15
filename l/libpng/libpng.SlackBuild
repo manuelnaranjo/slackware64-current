@@ -36,11 +36,9 @@ fi
 
 case "${HOST_TRIPLET}" in
   i686-w64-mingw32)
-    SLKCFLAGS="-O2 -march=i686"
     LIBDIRSUFFIX=""
     ;;
   x86_64-w64-mingw32)
-    SLKCFLAGS="-O2"
     LIBDIRSUFFIX="64"
     ;;
 esac
@@ -63,7 +61,9 @@ find . \
   -exec chmod 644 {} \;
 
 # Look like using ./configure is the only way that works now...
-./configure --prefix=/${PREFIX} \
+CFLAGS="-O2" \
+./configure \
+  --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
   --host=${HOST_TRIPLET} \
   --mandir=/${PREFIX}/man

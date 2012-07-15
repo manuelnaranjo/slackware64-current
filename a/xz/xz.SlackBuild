@@ -37,11 +37,9 @@ fi
 
 case "${HOST_TRIPLET}" in
   i686-w64-mingw32)
-    SLKCFLAGS="-O2 -march=i686"
     LIBDIRSUFFIX=""
     ;;
   x86_64-w64-mingw32)
-    SLKCFLAGS="-O2"
     LIBDIRSUFFIX="64"
     ;;
 esac
@@ -65,8 +63,7 @@ find . \
   \( -perm 666 -o -perm 664 -o -perm 600 -o -perm 444 -o -perm 440 -o -perm 400 \) \
   -exec chmod 644 {} \;
 
-CFLAGS="$SLKCFLAGS" \
-CXXFLAGS="$SLKCFLAGS" \
+CFLAGS="-O2" \
 ./configure \
   --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \

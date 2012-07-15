@@ -35,20 +35,18 @@ if [ -z "$ARCH" ]; then
   esac
 fi
 
-CWD=$(pwd)
-TMP=${TMP:-/tmp}
-PKG=$TMP/package-zlib
-
 case "${HOST_TRIPLET}" in
   i686-w64-mingw32)
-    SLKCFLAGS="-O3 -march=i686"
     LIBDIRSUFFIX=""
     ;;
   x86_64-w64-mingw32)
-    SLKCFLAGS="-O3"
     LIBDIRSUFFIX="64"
     ;;
 esac
+
+CWD=$(pwd)
+TMP=${TMP:-/tmp}
+PKG=$TMP/package-zlib
 
 rm -rf $PKG
 mkdir -p $TMP $PKG
@@ -68,14 +66,14 @@ find . \
 # We only call configure so that it creates "zlib.pc" from "zlib.pc.in". zlib's
 # build system is pretty crappy and doesn't handle cross-compilation: we have to
 # call a makefile directly instead.
-CFLAGS="$SLKCFLAGS" \
+CFLAGS="-O3" \
 ./configure \
   --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
   --shared
 
 CC=${HOST_TRIPLET}-gcc \
-  CFLAGS="$SLKCFLAGS -Wall" \
+  CFLAGS="-O3 -Wall" \
   LD=${HOST_TRIPLET}-gcc \
   AS=${HOST_TRIPLET}-gcc \
   AR="${HOST_TRIPLET}-ar" \
