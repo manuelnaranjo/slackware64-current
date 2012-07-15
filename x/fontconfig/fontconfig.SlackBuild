@@ -34,25 +34,20 @@ if [ -z "$ARCH" ]; then
   esac
 fi
 
+case "${HOST_TRIPLET}" in
+  i686-w64-mingw32)
+    LIBDIRSUFFIX=""
+    ;;
+  x86_64-w64-mingw32)
+    LIBDIRSUFFIX="64"
+    ;;
+esac
+
 NUMJOBS=${NUMJOBS:-" -j7 "}
 
 CWD=$(pwd)
 TMP=${TMP:-/tmp}
 PKG=$TMP/package-fontconfig
-
-if [ "$ARCH" = "i486" ]; then
-  SLKCFLAGS="-O2 -march=i486 -mtune=i686"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "s390" ]; then
-  SLKCFLAGS="-O2"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "x86_64" ]; then
-  SLKCFLAGS="-O2 -fPIC"
-  LIBDIRSUFFIX="64"
-else
-  SLKCFLAGS="-O2"
-  LIBDIRSUFFIX=""
-fi
 
 rm -rf $PKG
 mkdir -p $TMP $PKG
@@ -75,46 +70,39 @@ find . \
 # rolling with should clearly (IMHO) be the default font:
 zcat $CWD/fontconfig.dejavu.diff.gz | patch -p1 --verbose || exit 1
 
-# Hardcode the default font search path rather than having
-# fontconfig figure it out (and possibly follow symlinks, or
-# index ugly bitmapped fonts):
-zcat $CWD/fontconfig.font.dir.list.diff.gz | patch -p1 --verbose --backup --suffix=.orig || exit 1
-
-CFLAGS=$SLKCFLAGS \
+CFLAGS="-O2" \
 ./configure \
-  --prefix=/usr \
-  --libdir=/usr/lib${LIBDIRSUFFIX} \
-  --mandir=/usr/man \
-  --sysconfdir=/etc \
-  --localstatedir=/var \
+  --prefix=/${PREFIX} \
+  --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
+  --mandir=/${PREFIX}/man \
+  --sysconfdir=/${PREFIX}/etc \
+  --localstatedir=/${PREFIX}/var \
+  --host=${HOST_TRIPLET} \
+  --with-arch=$(echo "${HOST_TRIPLET}" | cut -f1 -d-) \
+  --disable-static \
   --build=$ARCH-slackware-linux
 
-# Uses a currently non-functional sgml tool, thus '-i':
 make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG || exit 1
 
-mkdir -p $PKG/usr/doc/fontconfig-$VERSION
+mkdir -p $PKG/${PREFIX}/doc/fontconfig-$VERSION
 cp -a \
   AUTHORS COPYING* INSTALL NEWS README \
-  $PKG/usr/doc/fontconfig-$VERSION
+  $PKG/${PREFIX}/doc/fontconfig-$VERSION
 # You can shop for this kind of stuff in the source tarball.
-rm -rf $PKG/usr/share/doc
-rmdir $PKG/usr/share 2>/dev/null
+rm -rf $PKG/${PREFIX}/share/doc
+rmdir $PKG/${PREFIX}/share 2>/dev/null
 
 # If there's a ChangeLog, installing at least part of the recent history
 # is useful, but don't let it get totally out of control:
 if [ -r ChangeLog ]; then
-  DOCSDIR=$(echo $PKG/usr/doc/*-$VERSION)
+  DOCSDIR=$(echo $PKG/${PREFIX}/doc/*-$VERSION)
   cat ChangeLog | head -n 1000 > $DOCSDIR/ChangeLog
   touch -r ChangeLog $DOCSDIR/ChangeLog
 fi
 
-mkdir -p $PKG/var/log/setup
-cat $CWD/setup.05.fontconfig > $PKG/var/log/setup/setup.05.fontconfig
-chmod 755 $PKG/var/log/setup/setup.05.fontconfig
-
-find $PKG | xargs file | grep -e "executable" -e "shared object" | grep ELF \
-  | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
+find $PKG | xargs file | egrep "executable|shared object" \
+  | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
 
 # Set up the default options in /etc/fonts/conf.d:
 (  cd $PKG/etc/fonts/conf.d
@@ -146,8 +134,8 @@ if [ ! $? = 0 ]; then
 fi
 
 # Fix manpages:
-if [ -d $PKG/usr/man ]; then
-  ( cd $PKG/usr/man
+if [ -d $PKG/${PREFIX}/man ]; then
+  ( cd $PKG/${PREFIX}/man
     for manpagedir in $(find . -type d -name "man*") ; do
       ( cd $manpagedir
         for eachpage in $( find . -type l -maxdepth 1) ; do
@@ -160,10 +148,12 @@ if [ -d $PKG/usr/man ]; then
   )
 fi
 
-mkdir $PKG/install
-cat $CWD/slack-desc > $PKG/install/slack-desc
-zcat $CWD/doinst.sh.gz > $PKG/install/doinst.sh
-
-cd $PKG
-/sbin/makepkg -l y -c n $TMP/fontconfig-$VERSION-$ARCH-$BUILD.txz
+cat ${CWD}/fontconfig.yypkg.meta | sed \
+  -e "s/%{PKG}/fontconfig/" \
+  -e "s/%{HST}/${HOST_TRIPLET}/" \
+  -e "s/%{TGT}//" \
+  -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
+  -e "s/%{BUILD}/${BUILD}/" \
+  -e "s/%{DESCR}/${DESCR:-"No description"}/" \
+  | makeypkg -o ${YYOUTPUT} -meta - "${PKG}/${PREFIX}"
 
