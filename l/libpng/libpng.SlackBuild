@@ -69,32 +69,30 @@ CFLAGS="-O2" \
   --disable-static \
   --mandir=/${PREFIX}/man
 
+# It was working by default so the libpng people had to break installation of
+# libraries and clutter everything with their awful redundant names.
+sed -i '/\t$(MAKE) $(AM_MAKEFLAGS) install-\(data\|exec\)-hook/ d' Makefile
+
 make -j4 || exit 1
 make install DESTDIR=$PKG
 
-# Well, glad I got rid of the above, but <someone> upstream still does not
-# grok shared libraries on Linux it seems -- libpng-1.4.0 caused all the
-# newly compiled binaries to want libpng.so.14, and now libpng-1.4.1
-# wants to change that to libpng14.so.14.  Searching online finds that
-# we are not the only ones with binaries that want libpng.so.14, so we
-# are forced to provide a compatibility symlink again...  :-/
-#
-# We'll try to remove this in 5 to 10 years, just like before.
-( cd $PKG/${PREFIX}/lib${LIBDIRSUFFIX}
-  if [ ! -e libpng.so.14 -a -e libpng14.so.14 ]; then
-    ln -sf libpng14.so.14 libpng.so.14
-  fi
-)
+(cd $PKG/$PREFIX
+  rename '14' '' bin/*
+  rm -f bin/libpng-config # I hate these crappy NIH syndrome *-config binaries
+  rename '14' '' lib${LIBDIRSUFFIX}/*
+  rename '14' '' lib${LIBDIRSUFFIX}/pkgconfig/*.pc
+  sed -i -e 's;-lpng14;-lpng;' -e 's;include/libpng14;include/libpng;' lib${LIBDIRSUFFIX}/pkgconfig/libpng.pc
+  mv include/libpng14 include/libpng
+  )
 
 find $PKG | xargs file | egrep "executable|shared object" \
-  | grep ${HOST_EXE_PREFIX} | cut -f 1 -d : | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
+  | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
 
 gzip -9 --force $PKG/${PREFIX}/man/man?/*.?
 
 mkdir -p $PKG/${PREFIX}/doc/libpng-$VERSION
 cp -a \
-  ANNOUNCE CHANGES INSTALL KNOWNBUG LICENSE README TODO Y2KINFO \
-  libpng*.txt example.c \
+  ANNOUNCE CHANGES INSTALL LICENSE README TODO libpng*.txt example.c \
   $PKG/${PREFIX}/doc/libpng-$VERSION
 
 # If there's a ChangeLog, installing at least part of the recent history
@@ -104,9 +102,6 @@ if [ -r ChangeLog ]; then
   cat ChangeLog | head -n 1000 > $DOCSDIR/ChangeLog
   touch -r ChangeLog $DOCSDIR/ChangeLog
 fi
-
-# Default the includes to version 1.4.x:
-( cd $PKG/${PREFIX}/include ; ln -sf libpng14 libpng )
 
 cat ${CWD}/libpng.yypkg.meta | sed \
   -e "s/%{PKG}/libpng/" \
