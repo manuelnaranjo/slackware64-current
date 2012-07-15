@@ -84,10 +84,11 @@ CC=${HOST_TRIPLET}-gcc \
 mkdir -p $PKG/${PREFIX}/include
 cp -a zlib.h zconf.h $PKG/${PREFIX}/include
 chmod 644 $PKG/${PREFIX}/include/*
+mkdir -p $PKG/${PREFIX}/bin
+cp -a libz*.dll $PKG/${PREFIX}/bin
 mkdir -p $PKG/${PREFIX}/lib${LIBDIRSUFFIX}
-cp -a libz.a libz.so* libz*.dll* $PKG/${PREFIX}/lib${LIBDIRSUFFIX}
-chmod 755 $PKG/${PREFIX}/lib${LIBDIRSUFFIX}/*
-chmod 644 $PKG/${PREFIX}/lib${LIBDIRSUFFIX}/libz.a
+cp -a libz*.dll.a $PKG/${PREFIX}/lib${LIBDIRSUFFIX}
+chmod 755 $PKG/${PREFIX}/bin/*
 mkdir -p $PKG/${PREFIX}/man/man3
 cat zlib.3 | gzip -9c > $PKG/${PREFIX}/man/man3/zlib.3.gz
 
