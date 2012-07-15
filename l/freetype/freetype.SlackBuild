@@ -37,19 +37,14 @@ if [ -z "$ARCH" ]; then
   esac
 fi
 
-if [ "$ARCH" = "i486" ]; then
-  SLKCFLAGS="-O2 -march=i486 -mtune=i686"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "s390" ]; then
-  SLKCFLAGS="-O2"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "x86_64" ]; then
-  SLKCFLAGS="-O2 -fPIC"
-  LIBDIRSUFFIX="64"
-else
-  SLKCFLAGS="-O2"
-  LIBDIRSUFFIX=""
-fi
+case "${HOST_TRIPLET}" in
+  i686-w64-mingw32)
+    LIBDIRSUFFIX=""
+    ;;
+  x86_64-w64-mingw32)
+    LIBDIRSUFFIX="64"
+    ;;
+esac
 
 CWD=$(pwd)
 TMP=${TMP:-/tmp}
@@ -81,37 +76,30 @@ zcat $CWD/freetype.illadvisederror.diff.gz | patch -p1 --verbose || exit 1
 #zcat $CWD/freetype.subpixel.rendering.diff.gz | patch -p1 --verbose || exit 1
 
 chown -R root:root .
-CFLAGS="$SLKCFLAGS" make setup CFG="--prefix=/usr --libdir=/usr/lib${LIBDIRSUFFIX} --build=$ARCH-slackware-linux"
+CFLAGS="-O2" make setup CFG="--prefix=/${PREFIX} --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} --build=$ARCH-slackware-linux --host=${HOST_TRIPLET}"
 make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG
 
-# This shouldn't be needed (apps should pick up -I/usr/include/freetype2 from
-# `freetype-config --cflags` while compiling), but it's so often reported as
-# a bug that I'll give in to the point.  Now that Freetype1 is pretty much gone
-# having this link shouldn't hurt anything.  Try not to rely on it, though.
-mkdir -p $PKG/usr/include
-( cd $PKG/usr/include
-  rm -rf freetype
-  ln -sf freetype2/freetype .
-)
-
 # Can't imagine a lot of use for this:
-rm -f $PKG/usr/lib${LIBDIRSUFFIX}/*.a
+rm -f $PKG/${PREFIX}/lib${LIBDIRSUFFIX}/libfreetype.a
 
-find $PKG | xargs file | grep -e "executable" -e "shared object" \
-  | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
+find $PKG | xargs file | egrep "executable|shared object" \
+  | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
 
-mkdir -p $PKG/usr/doc/freetype-$VERSION
+mkdir -p $PKG/${PREFIX}/doc/freetype-$VERSION
 cp -a \
   docs \
   README \
-  $PKG/usr/doc/freetype-$VERSION
+  $PKG/${PREFIX}/doc/freetype-$VERSION
 # too much
-rm -rf $PKG/usr/doc/freetype-$VERSION/docs/reference
+rm -rf $PKG/${PREFIX}/doc/freetype-$VERSION/docs/reference
 
-mkdir $PKG/install
-cat $CWD/slack-desc > $PKG/install/slack-desc
-
-cd $PKG
-/sbin/makepkg -l y -c n $TMP/freetype-$VERSION-$ARCH-$BUILD.txz
+cat ${CWD}/${PKGNAM}.yypkg.meta | sed \
+  -e "s/%{PKG}/${PKGNAM}/" \
+  -e "s/%{HST}/${HOST_TRIPLET}/" \
+  -e "s/%{TGT}//" \
+  -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
+  -e "s/%{BUILD}/${BUILD}/" \
+  -e "s/%{DESCR}/${DESCR:-"No description"}/" \
+  | makeypkg -o ${YYOUTPUT} -meta - "${PKG}/${PREFIX}"
 
