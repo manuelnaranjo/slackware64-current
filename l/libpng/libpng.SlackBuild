@@ -66,6 +66,7 @@ CFLAGS="-O2" \
   --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
   --host=${HOST_TRIPLET} \
+  --disable-static \
   --mandir=/${PREFIX}/man
 
 make -j4 || exit 1

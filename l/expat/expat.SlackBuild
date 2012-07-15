@@ -64,9 +64,11 @@ CFLAGS="-O2" \
   --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
   --host=${HOST_TRIPLET} \
+  --disable-static \
   --build=$ARCH-slackware-linux
 make -j4 || exit 1
 make install DESTDIR=$PKG
+
 ( cd $PKG
   find . | xargs file | egrep "executable|shared object" | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
 )
