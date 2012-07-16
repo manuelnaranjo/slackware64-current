@@ -79,7 +79,7 @@ CFLAGS="-O2" \
   --localstatedir=/${PREFIX}/var \
   --host=${HOST_TRIPLET} \
   --with-arch=$(echo "${HOST_TRIPLET}" | cut -f1 -d-) \
-  --disable-static \
+  --enable-static=no \
   --build=$ARCH-slackware-linux
 
 make $NUMJOBS || make || exit 1
