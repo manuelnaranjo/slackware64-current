@@ -478,8 +478,7 @@ fi
 
   # Make our 64bit gcc look for 32bit gcc binaries in ./32 subdirectory:
   if [ "$ARCH" = "x86_64" ]; then
-    sed -i 's#;.\(:../lib !m64 m32;\)$#;32\1#' \
-      $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/${TARGET_TRIPLET}/${VERSION}/specs
+    sed -i 's#;.\(:../lib !m64 m32;\)$#;32\1#' ${SPECS}
   fi
 
   chmod 755 $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX_HST}/libgcc_s.so.1
