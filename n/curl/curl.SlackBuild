@@ -37,26 +37,21 @@ fi
 
 NUMJOBS=${NUMJOBS:-" -j7 "}
 
+case "${HOST_TRIPLET}" in
+  i686-w64-mingw32)
+    LIBDIRSUFFIX=""
+    ;;
+  x86_64-w64-mingw32)
+    LIBDIRSUFFIX="64"
+    ;;
+esac
+
 CWD=$(pwd)
 TMP=${TMP:-/tmp}
 PKG=$TMP/package-curl
 
 # Uncomment to build a no-SSL version:
 #SSLOPT=--without-ssl
-
-if [ "$ARCH" = "i486" ]; then
-  SLKCFLAGS="-O2 -march=i486 -mtune=i686"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "s390" ]; then
-  SLKCFLAGS="-O2"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "x86_64" ]; then
-  SLKCFLAGS="-O2 -fPIC"
-  LIBDIRSUFFIX="64"
-else
-  SLKCFLAGS="-O2"
-  LIBDIRSUFFIX=""
-fi
 
 rm -rf $PKG
 mkdir -p $PKG
@@ -74,18 +69,20 @@ find . \
 
 CFLAGS="$SLKCFLAGS" \
 ./configure \
-  --prefix=/usr \
-  --libdir=/usr/lib${LIBDIRSUFFIX} \
-  --mandir=/usr/man \
-  --with-ca-bundle=/usr/share/curl/ca-bundle.crt \
+  --prefix=/${PREFIX} \
+  --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
+  --mandir=/${PREFIX}/man \
+  --with-ca-bundle=/${PREFIX}/share/curl/ca-bundle.crt \
+  --host=${HOST_TRIPLET} \
+  --disable-static \
   $SSLOPT
 
 make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG || exit 1
 
-mkdir -p $PKG/usr/share/curl
-cp -a $CWD/cacert.pem.bz2 $PKG/usr/share/curl
-( cd $PKG/usr/share/curl
+mkdir -p $PKG/${PREFIX}/share/curl
+cp -a $CWD/cacert.pem.bz2 $PKG/${PREFIX}/share/curl
+( cd $PKG/${PREFIX}/share/curl
   bzip2 -d cacert.pem.bz2
   mv cacert.pem ca-bundle.crt
   chown root:root ca-bundle.crt
@@ -93,34 +90,33 @@ cp -a $CWD/cacert.pem.bz2 $PKG/usr/share/curl
 )
 
 # We don't ship the related perl script (yet):
-rm -f $PKG/usr/man/man1/mk-ca-bundle.1
+rm -f $PKG/${PREFIX}/man/man1/mk-ca-bundle.1
 
-find $PKG | xargs file | grep -e "executable" -e "shared object" | grep ELF \
-  | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
+find $PKG | xargs file | egrep -e "executable|shared object" \
+  | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : \
+  | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
 
-strip -g $PKG/usr/lib${LIBDIRSUFFIX}/libcurl.a
-
-mkdir -p $PKG/usr/doc/curl-$VERSION
+mkdir -p $PKG/${PREFIX}/doc/curl-$VERSION
 cp -a \
   COPYING* README* UPGRADE \
-  $PKG/usr/doc/curl-$VERSION
+  $PKG/${PREFIX}/doc/curl-$VERSION
 ( cd docs
   rm -rf Makefile* curl-config.1 curl-config.html curl.1 curl.html libcurl
   cp -a \
     BUGS CONTRIBUTE FAQ FEATURES INSTALL INTERNALS MANUAL README* RESOURCES THANKS TODO examples \
-    $PKG/usr/doc/curl-$VERSION )
+    $PKG/${PREFIX}/doc/curl-$VERSION )
 
 # If there's a CHANGES file, installing at least part of the recent history
 # is useful, but don't let it get totally out of control:
 if [ -r CHANGES ]; then
-  DOCSDIR=$(echo $PKG/usr/doc/${PKGNAM}-$VERSION)
+  DOCSDIR=$(echo $PKG/${PREFIX}/doc/${PKGNAM}-$VERSION)
   cat CHANGES | head -n 1000 > $DOCSDIR/ChangeLog
   touch -r CHANGES $DOCSDIR/ChangeLog
 fi
 
 # Compress and if needed symlink the man pages:
-if [ -d $PKG/usr/man ]; then
-  ( cd $PKG/usr/man
+if [ -d $PKG/${PREFIX}/man ]; then
+  ( cd $PKG/${PREFIX}/man
     for manpagedir in $(find . -type d -name "man*") ; do
       ( cd $manpagedir
         for eachpage in $( find . -type l -maxdepth 1) ; do
@@ -133,9 +129,12 @@ if [ -d $PKG/usr/man ]; then
   )
 fi
 
-mkdir -p $PKG/install
-cat $CWD/slack-desc > $PKG/install/slack-desc
-
-cd $PKG
-/sbin/makepkg -l y -c n $TMP/curl-$VERSION-$ARCH-$BUILD.txz
+cat ${CWD}/${PKGNAM}.yypkg.meta | sed \
+  -e "s/%{PKG}/${PKGNAM}/" \
+  -e "s/%{HST}/${HOST_TRIPLET}/" \
+  -e "s/%{TGT}//" \
+  -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
+  -e "s/%{BUILD}/${BUILD}/" \
+  -e "s/%{DESCR}/${DESCR:-"No description"}/" \
+  | makeypkg -o ${YYOUTPUT} -meta - "${PKG}/${PREFIX}"
 
