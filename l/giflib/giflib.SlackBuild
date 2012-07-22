@@ -35,19 +35,14 @@ if [ -z "$ARCH" ]; then
   esac
 fi
 
-if [ "$ARCH" = "i486" ]; then
-  SLKCFLAGS="-O2 -march=i486 -mtune=i686"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "s390" ]; then
-  SLKCFLAGS="-O2"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "x86_64" ]; then
-  SLKCFLAGS="-O2 -fPIC"
-  LIBDIRSUFFIX="64"
-else
-  SLKCFLAGS="-O2"
-  LIBDIRSUFFIX=""
-fi
+case "${HOST_TRIPLET}" in
+  i686-w64-mingw32)
+    LIBDIRSUFFIX=""
+    ;;
+  x86_64-w64-mingw32)
+    LIBDIRSUFFIX="64"
+    ;;
+esac
 
 CWD=$(pwd)
 TMP=${TMP:-/tmp}
@@ -66,44 +61,46 @@ find . \
   \( -perm 666 -o -perm 664 -o -perm 600 -o -perm 444 -o -perm 440 -o -perm 400 \) \
   -exec chmod 644 {} \;
 
-CFLAGS="$SLKCFLAGS" \
+CFLAGS="-O2" \
 ./configure \
-  --prefix=/usr \
-  --libdir=/usr/lib${LIBDIRSUFFIX} \
-  --mandir=/usr/man \
+  --prefix=/${PREFIX} \
+  --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
+  --mandir=/${PREFIX}/man \
   --with-x=no \
   --disable-static \
+  --host=${HOST_TRIPLET} \
   --build=$ARCH-slackware-linux
+
+sed -i 's/libgif_la_LDFLAGS = -version-info 5:6:1/\0 -no-undefined/' lib/Makefile
 
 make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG || exit 1
 
-# Make some compatibility symlinks
-( cd $PKG/usr/lib${LIBDIRSUFFIX}
-  ln -s libgif.so.4 libungif.so.4
-  ln -s libgif.so libungif.so
-)
-
-mkdir -p $PKG/usr/doc/giflib-$VERSION
+mkdir -p $PKG/${PREFIX}/doc/giflib-$VERSION
 cp -a \
   AUTHORS BUGS COPYING DEVELOPERS INSTALL NEWS ONEWS README TODO \
-  $PKG/usr/doc/giflib-$VERSION
-cp -a doc $PKG/usr/doc/giflib-$VERSION/html
-rm $PKG/usr/doc/giflib-$VERSION/html/Makefile*
+  $PKG/${PREFIX}/doc/giflib-$VERSION
+cp -a doc $PKG/${PREFIX}/doc/giflib-$VERSION/html
+rm $PKG/${PREFIX}/doc/giflib-$VERSION/html/Makefile*
 
 # If there's a ChangeLog, installing at least part of the recent history
 # is useful, but don't let it get totally out of control:
 if [ -r ChangeLog ]; then
-  DOCSDIR=$(echo $PKG/usr/doc/*-$VERSION)
+  DOCSDIR=$(echo $PKG/${PREFIX}/doc/*-$VERSION)
   cat ChangeLog | head -n 1000 > $DOCSDIR/ChangeLog
   touch -r ChangeLog $DOCSDIR/ChangeLog
 fi
 
-find $PKG | xargs file | grep -e "executable" -e "shared object" | grep ELF \
-  | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
+find $PKG | xargs file | egrep -e "executable|shared object" \
+  | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : \
+  | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
 
-mkdir -p $PKG/install
-cat $CWD/slack-desc > $PKG/install/slack-desc
+cat ${CWD}/giflib.yypkg.meta | sed \
+  -e "s/%{PKG}/giflib/" \
+  -e "s/%{HST}/${HOST_TRIPLET}/" \
+  -e "s/%{TGT}//" \
+  -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
+  -e "s/%{BUILD}/${BUILD}/" \
+  -e "s/%{DESCR}/${DESCR:-"No description"}/" \
+  | makeypkg -o ${YYOUTPUT} -meta - "${PKG}/${PREFIX}"
 
-cd $PKG
-/sbin/makepkg -l y -c n $TMP/giflib-$VERSION-$ARCH-$BUILD.txz
