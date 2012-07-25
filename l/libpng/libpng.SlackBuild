@@ -21,8 +21,8 @@
 #  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-VERSION_OLD=1.2.47
-VERSION_NEW=1.4.9
+VERSION_OLD=1.2.50
+VERSION_NEW=1.4.12
 BUILD=${BUILD:-1}
 
 # Automatically determine the architecture we're building on:
