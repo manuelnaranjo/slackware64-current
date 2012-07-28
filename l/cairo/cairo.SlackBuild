@@ -36,19 +36,14 @@ fi
 
 NUMJOBS=${NUMJOBS:-" -j7 "}
 
-if [ "$ARCH" = "i486" ]; then
-  SLKCFLAGS="-O2 -march=i486 -mtune=i686"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "s390" ]; then
-  SLKCFLAGS="-O2"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "x86_64" ]; then
-  SLKCFLAGS="-O2 -fPIC"
-  LIBDIRSUFFIX="64"
-else
-  SLKCFLAGS="-O2"
-  LIBDIRSUFFIX=""
-fi
+case "${HOST_TRIPLET}" in
+  i686-w64-mingw32)
+    LIBDIRSUFFIX=""
+    ;;
+  x86_64-w64-mingw32)
+    LIBDIRSUFFIX="64"
+    ;;
+esac
 
 CWD=$(pwd)
 TMP=${TMP:-/tmp}
@@ -71,26 +66,25 @@ find . \
 # http://bugs.gentoo.org/show_bug.cgi?id=336696
 zcat $CWD/cairo-1.10.0-buggy_gradients.patch.gz | patch -p1 || exit 1
 
-CFLAGS="$SLKCFLAGS" \
+CFLAGS="$SLKCFLAGS -Dffs=__builtin_ffs" \
 ./configure \
-  --prefix=/usr \
-  --libdir=/usr/lib${LIBDIRSUFFIX} \
-  --mandir=/usr/man \
+  --prefix=/${PREFIX} \
+  --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
+  --mandir=/${PREFIX}/man \
   --sysconfdir=/etc \
   --disable-gtk-doc \
   --disable-quartz \
   --disable-static \
-  --disable-win32 \
   --disable-trace \
-  --enable-xlib \
   --enable-freetype \
   --enable-ps \
   --enable-pdf \
   --enable-svg \
-  --enable-tee \
   --enable-gobject \
+  --host=${HOST_TRIPLET} \
   --build=$ARCH-slackware-linux
 # None of these are 'stable' yet...
+#  --enable-tee \
 #  --enable-qt \
 #  --enable-gl \
 #  --enable-drm \
@@ -105,18 +99,22 @@ CFLAGS="$SLKCFLAGS" \
 make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG
 
-find $PKG | xargs file | grep -e "executable" -e "shared object" \
-  | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
+find $PKG | xargs file | egrep -e "executable|shared object" \
+  | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : \
+  | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
 
-mkdir -p $PKG/usr/doc/cairo-$VERSION
+mkdir -p $PKG/${PREFIX}/doc/cairo-$VERSION
 cp -a \
   AUTHORS BIBLIOGRAPHY BUGS CODING_STYLE COPYING* HACKING NEWS PORTING_GUIDE README RELEASING \
-  $PKG/usr/doc/cairo-$VERSION
-( cd $PKG/usr/doc/cairo-$VERSION ; ln -sf /usr/share/gtk-doc/html/cairo html )
+  $PKG/${PREFIX}/doc/cairo-$VERSION
+( cd $PKG/${PREFIX}/doc/cairo-$VERSION ; ln -sf /${PREFIX}/share/gtk-doc/html/cairo html )
 
-mkdir -p $PKG/install
-cat $CWD/slack-desc > $PKG/install/slack-desc
-
-cd $PKG
-/sbin/makepkg -l y -c n $TMP/cairo-$VERSION-$ARCH-$BUILD.txz
+cat ${CWD}/cairo.yypkg.meta | sed \
+  -e "s/%{PKG}/cairo/" \
+  -e "s/%{HST}/${HOST_TRIPLET}/" \
+  -e "s/%{TGT}//" \
+  -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
+  -e "s/%{BUILD}/${BUILD}/" \
+  -e "s/%{DESCR}/${DESCR:-"No description"}/" \
+  | makeypkg -o ${YYOUTPUT} -meta - "${PKG}/${PREFIX}"
 
