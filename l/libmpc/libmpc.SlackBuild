@@ -42,19 +42,14 @@ fi
 
 NUMJOBS=${NUMJOBS:-" -j7 "}
 
-if [ "$ARCH" = "i486" ]; then
-  SLKCFLAGS="-O2 -march=i486 -mtune=i686"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "s390" ]; then
-  SLKCFLAGS="-O2"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "x86_64" ]; then
-  SLKCFLAGS="-O2 -fPIC"
-  LIBDIRSUFFIX="64"
-else
-  SLKCFLAGS="-O2"
-  LIBDIRSUFFIX=""
-fi
+case "${HOST_TRIPLET}" in
+  i686-w64-mingw32)
+    LIBDIRSUFFIX=""
+    ;;
+  x86_64-w64-mingw32)
+    LIBDIRSUFFIX="64"
+    ;;
+esac
 
 CWD=$(pwd)
 TMP=${TMP:-/tmp}
@@ -68,44 +63,49 @@ tar xvf $CWD/$SRCNAM-$VERSION.tar.?z* || exit 1
 cd $SRCNAM-$VERSION
 chown -R root:root .
 
+sed -i -e 's/LDFLAGS="$LDFLAGS -no-undefined"//' configure
+sed -i -e 's/libmpc_la_LDFLAGS = -version-info 2:0:0/\0 -no-undefined/' src/Makefile.in
+
 CFLAGS="$SLKCFLAGS" \
 ./configure \
-  --prefix=/usr \
-  --libdir=/usr/lib${LIBDIRSUFFIX} \
-  --infodir=/usr/info \
-  --docdir=/usr/doc/$PKGNAM-$VERSION \
-  --enable-static=yes \
+  --prefix=/${PREFIX} \
+  --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
+  --infodir=/${PREFIX}/info \
+  --docdir=/${PREFIX}/doc/$PKGNAM-$VERSION \
+  --enable-static=no \
   --enable-shared=yes \
+  --host=${HOST_TRIPLET} \
   --build=$ARCH-slackware-linux
 
 make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG || exit 1
 
-find $PKG | xargs file | grep -e "executable" -e "shared object" | grep ELF \
-  | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
+find $PKG | xargs file | egrep -e "executable|shared object" \
+  | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : \
+  | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
 
-# Hardly a savings doing this...
-#strip -g $PKG/usr/lib${LIBDIRSUFFIX}/*.a
+rm -f $PKG/${PREFIX}/info/dir
+gzip -9 $PKG/${PREFIX}/info/*
 
-rm -f $PKG/usr/info/dir
-gzip -9 $PKG/usr/info/*
-
-mkdir -p $PKG/usr/doc/$PKGNAM-$VERSION
+mkdir -p $PKG/${PREFIX}/doc/$PKGNAM-$VERSION
 cp -a \
   AUTHORS COPYING* INSTALL NEWS README* TODO \
-  $PKG/usr/doc/$PKGNAM-$VERSION
+  $PKG/${PREFIX}/doc/$PKGNAM-$VERSION
 
 # If there's a ChangeLog, installing at least part of the recent history
 # is useful, but don't let it get totally out of control:
 if [ -r ChangeLog ]; then
-  DOCSDIR=$(echo $PKG/usr/doc/${PKGNAM}-$VERSION)
+  DOCSDIR=$(echo $PKG/${PREFIX}/doc/${PKGNAM}-$VERSION)
   cat ChangeLog | head -n 1000 > $DOCSDIR/ChangeLog
   touch -r ChangeLog $DOCSDIR/ChangeLog
 fi
 
-mkdir -p $PKG/install
-cat $CWD/slack-desc > $PKG/install/slack-desc
-
-cd $PKG
-/sbin/makepkg -l y -c n $TMP/$PKGNAM-${VERSION}-${ARCH}-${BUILD}.txz
+cat ${CWD}/${PKGNAM}.yypkg.meta | sed \
+  -e "s/%{PKG}/${PKGNAM}/" \
+  -e "s/%{HST}/${HOST_TRIPLET}/" \
+  -e "s/%{TGT}//" \
+  -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
+  -e "s/%{BUILD}/${BUILD}/" \
+  -e "s/%{DESCR}/${DESCR:-"No description"}/" \
+  | makeypkg -o ${YYOUTPUT} -meta - "${PKG}/${PREFIX}"
 

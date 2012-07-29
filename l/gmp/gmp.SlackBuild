@@ -39,32 +39,24 @@ fi
 
 NUMJOBS=${NUMJOBS:-" -j7 "}
 
+case "${HOST_TRIPLET}" in
+  i686-w64-mingw32)
+    LIBDIRSUFFIX=""
+    ;;
+  x86_64-w64-mingw32)
+    LIBDIRSUFFIX="64"
+    ;;
+esac
+
 CWD=$(pwd)
 TMP=${TMP:-/tmp}
 PKG=/$TMP/package-gmp
 rm -rf $PKG
-mkdir -p $TMP $PKG/usr
-
-if [ "$ARCH" = "i486" ]; then
-  SLKCFLAGS="-O2 -march=i486 -mtune=i686"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "s390" ]; then
-  SLKCFLAGS="-O2"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "x86_64" ]; then
-  SLKCFLAGS="-O2 -fPIC"
-  LIBDIRSUFFIX="64"
-elif [ "$ARCH" = "armv7hl" ]; then
-  SLKCFLAGS="-O2 -march=armv7-a -mfpu=vfpv3-d16"
-  LIBDIRSUFFIX=""
-else
-  SLKCFLAGS="-O2"
-  LIBDIRSUFFIX=""
-fi
+mkdir -p $TMP $PKG/${PREFIX}
 
 case "$ARCH" in
-    arm*) TARGET=$ARCH-slackware-linux-gnueabi ;;
-    *)    TARGET=$ARCH-slackware-linux ;;
+    arm*) BUILD_TRIPLET=$ARCH-slackware-linux-gnueabi ;;
+    *)    BUILD_TRIPLET=$ARCH-slackware-linux ;;
 esac
 
 cd $TMP
@@ -78,46 +70,47 @@ find . \
   \( -perm 666 -o -perm 664 -o -perm 600 -o -perm 444 -o -perm 440 -o -perm 400 \) \
   -exec chmod 644 {} \;
 
-# End of preparations
-if echo "$*" | grep -qw -- --prep ; then
-  exit 0
-fi
-
 CFLAGS="$SLKCFLAGS" \
 ./configure \
-  --prefix=/usr \
-  --libdir=/usr/lib${LIBDIRSUFFIX} \
-  --infodir=/usr/info \
+  --prefix=/${PREFIX} \
+  --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
+  --infodir=/${PREFIX}/info \
   --with-gnu-ld \
   --enable-cxx \
-  --enable-mpbsd \
-  --build=$TARGET
+  --enable-static=no \
+  --enable-shared=yes \
+  --host=${HOST_TRIPLET} \
+  --build=$BUILD_TRIPLET
 
 make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG || exit 1
 
-rm $PKG/usr/info/dir
-gzip -9 $PKG/usr/info/*
+rm $PKG/${PREFIX}/info/dir
+gzip -9 $PKG/${PREFIX}/info/*
 
-find $PKG | xargs file | grep -e "executable" -e "shared object" | grep ELF \
-  | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
+find $PKG | xargs file | egrep -e "executable|shared object" \
+  | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : \
+  | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
 
-mkdir -p $PKG/usr/doc/gmp-$VERSION
+mkdir -p $PKG/${PREFIX}/doc/gmp-$VERSION
 cp -a \
   AUTHORS COPYING* NEWS README \
-  $PKG/usr/doc/gmp-$VERSION
+  $PKG/${PREFIX}/doc/gmp-$VERSION
 
 # If there's a ChangeLog, installing at least part of the recent history
 # is useful, but don't let it get totally out of control:
 if [ -r ChangeLog ]; then
-  DOCSDIR=$(echo $PKG/usr/doc/*-$VERSION)
+  DOCSDIR=$(echo $PKG/${PREFIX}/doc/*-$VERSION)
   cat ChangeLog | head -n 1000 > $DOCSDIR/ChangeLog
   touch -r ChangeLog $DOCSDIR/ChangeLog
 fi
 
-mkdir -p $PKG/install
-cat $CWD/slack-desc > $PKG/install/slack-desc
-
-cd /$TMP/package-gmp
-/sbin/makepkg -l y -c n $TMP/gmp-$VERSION-$ARCH-$BUILD.txz
+cat ${CWD}/gmp.yypkg.meta | sed \
+  -e "s/%{PKG}/gmp/" \
+  -e "s/%{HST}/${HOST_TRIPLET}/" \
+  -e "s/%{TGT}//" \
+  -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
+  -e "s/%{BUILD}/${BUILD}/" \
+  -e "s/%{DESCR}/${DESCR:-"No description"}/" \
+  | makeypkg -o ${YYOUTPUT} -meta - "${PKG}/${PREFIX}"
 
