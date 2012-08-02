@@ -470,10 +470,10 @@ fi
     cat gcc/specs > $PKG_GCC/${SPECS}
   fi
 
-  # Add, for instance, /opt/mgw32_libs/{include,lib} to default search paths
-  if [ -n "${YYPREFIX_libs}" ]; then
-    sed -i "/^\*link:$/ { N; s;$; -L/${YYPREFIX_libs}/lib${LIBDIRSUFFIX_TGT}; }" ${PKG_GCC}/${SPECS}
-    sed -i "/^\*cpp:$/ { N; s;$; -I/${YYPREFIX_libs}/include; }" ${PKG_GCC}/${SPECS}
+  # Add, e.g., /opt/mgw32_windows_32/{include,lib} to default search paths
+  if [ -n "${YYPREFIX_TARGET_PREFIX}" ]; then
+    sed -i "/^\*link:$/ { N; s;$; -L/${YYPREFIX_TARGET_PREFIX}/lib${LIBDIRSUFFIX_TGT}; }" ${PKG_GCC}/${SPECS}
+    sed -i "/^\*cpp:$/ { N; s;$; -I/${YYPREFIX_TARGET_PREFIX}/include; }" ${PKG_GCC}/${SPECS}
   fi
 
   # Make our 64bit gcc look for 32bit gcc binaries in ./32 subdirectory:
