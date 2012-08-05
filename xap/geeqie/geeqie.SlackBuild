@@ -37,19 +37,16 @@ if [ -z "$ARCH" ]; then
   esac
 fi
 
-NUMJOBS=${NUMJOBS:-" -j7 "}
+case "${HOST_TRIPLET}" in
+  i686-w64-mingw32)
+    LIBDIRSUFFIX=""
+    ;;
+  x86_64-w64-mingw32)
+    LIBDIRSUFFIX="64"
+    ;;
+esac
 
-if [ "$ARCH" = "i486" ]; then
-  SLKCFLAGS="-O2 -D_FILE_OFFSET_BITS=64 -march=i486 -mtune=i686"
-elif [ "$ARCH" = "i686" ]; then
-  SLKCFLAGS="-O2 -D_FILE_OFFSET_BITS=64 -march=i686"
-elif [ "$ARCH" = "s390" ]; then
-  SLKCFLAGS="-O2 -D_FILE_OFFSET_BITS=64"
-elif [ "$ARCH" = "x86_64" ]; then
-  SLKCFLAGS="-O2 -D_FILE_OFFSET_BITS=64 -fPIC"
-else
-  SLKCFLAGS="-O2 -D_FILE_OFFSET_BITS=64"
-fi
+NUMJOBS=${NUMJOBS:-" -j7 "}
 
 CWD=$(pwd)
 TMP=${TMP:-/tmp}
@@ -68,38 +65,39 @@ find . \
   \( -perm 666 -o -perm 664 -o -perm 600 -o -perm 444 -o -perm 440 -o -perm 400 \) \
   -exec chmod 644 {} \;
 
-CFLAGS="$SLKCFLAGS" \
+CFLAGS="-O2 -D_FILE_OFFSET_BITS=64" \
 CXXFLAGS="$SLKCFLAGS" \
 ./configure \
-  --prefix=/usr \
-  --sysconfdir=/etc \
-  --localstatedir=/var \
-  --mandir=/usr/man \
+  --prefix=/${PREFIX} \
+  --sysconfdir=/${PREFIX}/etc \
+  --localstatedir=/${PREFIX}/var \
+  --mandir=/${PREFIX}/man \
   --program-prefix="" \
   --program-suffix="" \
+  --host=${HOST_TRIPLET} \
   --build=$ARCH-slackware-linux
 
 make $NUMJOBS || make || exit 1
 make install-strip DESTDIR=$PKG || exit 1
 
-mkdir -p $PKG/usr/doc/$PKGNAM-$VERSION
-mv $PKG/usr/share/doc/$PKGNAM-$VERSION/* $PKG/usr/doc/$PKGNAM-$VERSION
-rm -r $PKG/usr/share/doc
+mkdir -p $PKG/${PREFIX}/doc/$PKGNAM-$VERSION
+mv $PKG/${PREFIX}/share/doc/$PKGNAM-$VERSION/* $PKG/${PREFIX}/doc/$PKGNAM-$VERSION
+rm -r $PKG/${PREFIX}/share/doc
 cp -a \
   AUTHORS COPYING* INSTALL NEWS README* TODO \
-  $PKG/usr/doc/$PKGNAM-$VERSION
+  $PKG/${PREFIX}/doc/$PKGNAM-$VERSION
 
 # If there's a ChangeLog, installing at least part of the recent history
 # is useful, but don't let it get totally out of control:
 if [ -r ChangeLog ]; then
-  DOCSDIR=$(echo $PKG/usr/doc/${PKGNAM}-$VERSION)
+  DOCSDIR=$(echo $PKG/${PREFIX}/doc/${PKGNAM}-$VERSION)
   cat ChangeLog | head -n 1000 > $DOCSDIR/ChangeLog
   touch -r ChangeLog $DOCSDIR/ChangeLog
 fi
 
 # Compress and if needed symlink the man pages:
-if [ -d $PKG/usr/man ]; then
-  ( cd $PKG/usr/man
+if [ -d $PKG/${PREFIX}/man ]; then
+  ( cd $PKG/${PREFIX}/man
     for manpagedir in $(find . -type d -name "man*") ; do
       ( cd $manpagedir
         for eachpage in $( find . -type l -maxdepth 1) ; do
@@ -112,10 +110,12 @@ if [ -d $PKG/usr/man ]; then
   )
 fi
 
-mkdir -p $PKG/install
-cat $CWD/slack-desc > $PKG/install/slack-desc
-zcat $CWD/doinst.sh.gz > $PKG/install/doinst.sh
-
-cd $PKG
-/sbin/makepkg -l y -c n $TMP/$PKGNAM-$VERSION-$ARCH-$BUILD.txz
+cat ${CWD}/geeqie.yypkg.meta | sed \
+  -e "s/%{PKG}/geeqie/" \
+  -e "s/%{HST}/${HOST_TRIPLET}/" \
+  -e "s/%{TGT}//" \
+  -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
+  -e "s/%{BUILD}/${BUILD}/" \
+  -e "s/%{DESCR}/${DESCR:-"No description"}/" \
+  | makeypkg -o ${YYOUTPUT} -meta - "${PKG}/${PREFIX}"
 
