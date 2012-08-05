@@ -305,8 +305,9 @@ if [ x"$GCC_CORE" != x"yes" ]; then ( cd gcc-$VERSION
   zcat $CWD/gcc-no_fixincludes.diff.gz | patch -p1 --verbose --backup --suffix=.orig || exit 1
   # Fix perms/owners
   chown -R root:root .
-  find . -perm 777 -o -perm 775 -o -perm 754 -exec chmod 755 {} \;
-  find . -perm 664 -exec chmod 644 {} \;
+  find . \
+    \( -perm 777 -o -perm 775 -o -perm 754 \) -exec chmod 755 {} + -o \
+    -perm 664 -exec chmod 644 {} +
 
   for ELEMENT in ${ALL_ELEMENTS}; do
     DOC_DIR="$(doc_dir_of_element "${ELEMENT}")"
@@ -353,9 +354,9 @@ if [ -n "${PKG_GCC_JAVA}" ] ; then ( cd $TMP
   chown -R root:root .
   find . \
     \( -perm 777 -o -perm 775 -o -perm 711 -o -perm 555 -o -perm 511 \) \
-    -exec chmod 755 {} \; -o \
+    -exec chmod 755 {} + -o \
     \( -perm 666 -o -perm 664 -o -perm 600 -o -perm 444 -o -perm 440 -o -perm 400 \) \
-    -exec chmod 644 {} \;
+    -exec chmod 644 {} +
   for patch in $CWD/fastjar-patches/*.gz ; do
     zcat $patch | patch -p1 --verbose || exit 1
   done
@@ -617,8 +618,7 @@ if [ -n "${PKG_GCC_JAVA}" ]; then ( cd $PKG_GCC_JAVA
   ln -s ../../../bin/ecj ${PREFIX}/lib$LIBDIRSUFFIX_HST/jvm/bin/javac
   # Don't package libffi stuff anymore.  GCC will link the internal version
   # statically, and we'll need a newer one elsewhere.
-  find . -name "ffi*.h" | xargs rm
-  find . -name "libffi*" | xargs rm -r
+  find . \( -name "ffi*.h" -o -name "libffi*" \) -exec rm {} +
   rm ${PREFIX}/man/man3/ffi*
 ) || exit 1; fi
 
