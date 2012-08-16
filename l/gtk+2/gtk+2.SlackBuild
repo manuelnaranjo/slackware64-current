@@ -137,7 +137,7 @@ cp -a \
 # If there's a ChangeLog, installing at least part of the recent history
 # is useful, but don't let it get totally out of control:
 if [ -r ChangeLog ]; then
-  OCSDIR=$(echo $PKG/${PREFIX}/doc/*-$VERSION)
+  DOCSDIR=$(echo $PKG/${PREFIX}/doc/*-$VERSION)
   cat ChangeLog | head -n 1000 > $DOCSDIR/ChangeLog
   touch -r ChangeLog $DOCSDIR/ChangeLog
 fi
