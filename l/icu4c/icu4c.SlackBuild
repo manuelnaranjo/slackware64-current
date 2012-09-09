@@ -114,7 +114,7 @@ cp -a \
   license.html readme.html unicode-license.txt $PKG/${PREFIX}/doc/icu4c-$VERSION
 
 cat ${CWD}/${PKGNAM}.yypkg.meta | sed \
-  -e "s/%{PKG}/libjpeg/" \
+  -e "s/%{PKG}/${PKGNAM}/" \
   -e "s/%{HST}/${HOST_TRIPLET}/" \
   -e "s/%{TGT}//" \
   -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
