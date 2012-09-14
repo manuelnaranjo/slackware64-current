@@ -24,7 +24,7 @@
 
 PKGNAM=libsoup
 VERSION=${VERSION:-$(echo $PKGNAM-*.tar.?z* | rev | cut -f 3- -d . | cut -f 1 -d - | rev)}
-BUILD=${BUILD:-1}
+BUILD=${BUILD:-2}
 
 if [ -z "$ARCH" ]; then
   case "$( uname -m )" in
@@ -76,8 +76,9 @@ CFLAGS="$SLKCFLAGS" \
 make $NUMJOBS || make || exit 1
 make install-strip DESTDIR=$PKG || exit 1
 
-# Don't ship .la files:
-rm -f $PKG/usr/lib${LIBDIRSUFFIX}/*.la
+## NOTE:  These _should_ go eventually, but for now it causes problems.
+## Don't ship .la files:
+#rm -f $PKG/usr/lib${LIBDIRSUFFIX}/*.la
 
 mkdir -p $PKG/usr/doc/$PKGNAM-$VERSION
 cp -a COPYING* AUTHORS NEWS README* $PKG/usr/doc/$PKGNAM-$VERSION
