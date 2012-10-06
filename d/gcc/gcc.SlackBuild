@@ -103,9 +103,9 @@ TARGET_STRIP=${TARGET_STRIP:-"strip"}
 if [ x"$GCC_CORE" = x"yes" ]; then
   GCC_LANGUAGES="c"
 else
-  GCC_LANGUAGES=ada,c,c++,fortran,lto,objc
+  GCC_LANGUAGES=c,c++,lto,objc
   if echo "$TARGET_TRIPLET" | grep -v -q mingw; then
-    GCC_LANGUAGES+=",java,go"
+    GCC_LANGUAGES+=",ada,fortran,java,go"
   fi
 fi
 
