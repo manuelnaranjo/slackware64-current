@@ -358,6 +358,7 @@ if [ -n "${PKG_GCC_JAVA}" ] ; then ( cd $TMP
   CXXFLAGS="$SLKCFLAGS" \
   ./configure \
      --prefix=/${PREFIX} \
+     --with-sysroot=/${PREFIX} \
      --libdir=/${PREFIX}/lib$LIBDIRSUFFIX_HST \
      --mandir=/${PREFIX}/man \
      --infodir=/${PREFIX}/info \
@@ -392,6 +393,14 @@ if [ -n "${PKG_GCC_JAVA}" ] ; then ( cd $TMP
 ) || exit 1
 fi
 
+# Mingw requires a kludge known as "winsup"
+mkdir -p winsup/mingw
+ln -s ${YYPREFIX_CROSS_TOOLCHAIN}/${TARGET_TRIPLET}/include winsup/mingw/include
+ln -s /${PREFIX}/${TARGET_TRIPLET} /${PREFIX}/mingw
+if [ -n "${LIBDIRSUFFIX_TGT}" ]; then
+  ln -s /${PREFIX}/${TARGET_TRIPLET}/lib{,${LIBDIRSUFFIX_TGT}}
+fi
+
 # build gcc
 ( mkdir gcc.build.lnx;
   cd gcc.build.lnx;
@@ -404,7 +413,7 @@ fi
 
   CFLAGS="$SLKCFLAGS" \
   CXXFLAGS="$SLKCFLAGS" \
-  ../gcc-$VERSION/configure --prefix=/${PREFIX} \
+  ../gcc-$VERSION/configure --prefix=/${PREFIX} --with-sysroot=/${PREFIX} \
      --libdir=/${PREFIX}/lib$LIBDIRSUFFIX_HST \
      --mandir=/${PREFIX}/man \
      --infodir=/${PREFIX}/info \
@@ -431,6 +440,7 @@ fi
      --with-antlr-jar=$ANTLJAR \
      --enable-java-awt=gtk \
      --disable-gtktest \
+     --enable-sjlj-exceptions \
      --build=$BUILD_TRIPLET \
      --host=$HOST_TRIPLET \
      --target=$TARGET_TRIPLET || exit 1

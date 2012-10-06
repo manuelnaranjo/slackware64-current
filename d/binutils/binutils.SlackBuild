@@ -115,6 +115,7 @@ fi
 CFLAGS="$SLKCFLAGS" \
 ./configure \
   --prefix=/${PREFIX} \
+  --with-sysroot=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
   --mandir=/${PREFIX}/man \
   --infodir=/${PREFIX}/info \
