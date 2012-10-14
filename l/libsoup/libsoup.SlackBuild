@@ -72,8 +72,9 @@ CFLAGS="$SLKCFLAGS" \
 make $NUMJOBS || make || exit 1
 make install-strip DESTDIR=$PKG || exit 1
 
-# Don't ship .la files:
-rm -f $PKG/${PREFIX}/lib${LIBDIRSUFFIX}/*.la
+## NOTE:  These _should_ go eventually, but for now it causes problems.
+## Don't ship .la files:
+#rm -f $PKG/${PREFIX}/lib${LIBDIRSUFFIX}/*.la
 
 mkdir -p $PKG/${PREFIX}/doc/$PKGNAM-$VERSION
 cp -a COPYING* AUTHORS NEWS README* $PKG/${PREFIX}/doc/$PKGNAM-$VERSION
