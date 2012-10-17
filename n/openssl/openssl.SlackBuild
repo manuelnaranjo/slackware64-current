@@ -41,9 +41,7 @@ if [ -z "$ARCH" ]; then
 fi
 
 PKG1=$TMP/package-openssl
-PKG2=$TMP/package-ossllibs
 NAME1=openssl-$VERSION-$ARCH-$BUILD
-NAME2=openssl-solibs-$VERSION-$ARCH-$BUILD
 
 # Parallel build doesn't link properly.
 #NUMJOBS=${NUMJOBS:--j6}
@@ -52,20 +50,23 @@ NAME2=openssl-solibs-$VERSION-$ARCH-$BUILD
 export LC_ALL=C
 
 cd $TMP
-rm -rf $PKG1 $PKG2 openssl-$VERSION
+rm -rf $PKG1 openssl-$VERSION
 
 tar xvf $CWD/openssl-$VERSION.tar.gz || exit 1
 cd openssl-$VERSION
 
 # Use .so.1, not .so.1.0.0:
 zcat $CWD/openssl.soname.diff.gz | patch -p1 --backup --verbose --suffix=.orig || exit 1
-if [ "$ARCH" = "i486" ]; then
-  # Build with -march=i486 -mtune=i686:
-  zcat $CWD/openssl.optsx86.diff.gz | patch -p1 --backup --verbose --suffix=.orig || exit 1
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "x86_64" ]; then
-  LIBDIRSUFFIX="64"
-fi
+
+case "${HOST_TRIPLET}" in
+  i686-w64-mingw32)
+    LIBDIRSUFFIX=""
+    zcat $CWD/openssl.optsx86.diff.gz | patch -p1 --backup --verbose --suffix=.orig || exit 1
+    ;;
+  x86_64-w64-mingw32)
+    LIBDIRSUFFIX="64"
+    ;;
+esac
 
 # OpenSSL has a (nasty?) habit of bumping the internal version number with
 # every release.  This wouldn't be so bad, but some applications are so
@@ -77,19 +78,45 @@ fi
 sed -i "s/#define OPENSSL_VERSION_NUMBER.*/\/* Use 0x1000103fL (1.0.1c) below to avoid pointlessly breaking the ABI *\/\n#define OPENSSL_VERSION_NUMBER 0x1000103fL/g" crypto/opensslv.h || exit 1
 
 chown -R root:root .
-mkdir -p $PKG1/usr/doc/openssl-$VERSION
+mkdir -p $PKG1/${PREFIX}/doc/openssl-$VERSION
 cp -a CHANGES CHANGES.SSLeay FAQ INSTALL INSTALL.MacOS INSTALL.VMS INSTALL.W32 \
-  LICENSE NEWS README README.ENGINE doc $PKG1/usr/doc/openssl-$VERSION
-find $PKG1/usr/doc/openssl-$VERSION -type d -exec chmod 755 {} \;
-find $PKG1/usr/doc/openssl-$VERSION -type f -exec chmod 644 {} \;
+  LICENSE NEWS README README.ENGINE doc $PKG1/${PREFIX}/doc/openssl-$VERSION
+chmod -R u+w,go+r-w,a-s
 
 # If there's a CHANGES file, installing at least part of the recent history
 # is useful, but don't let it get totally out of control:
 if [ -r CHANGES ]; then
-  DOCSDIR=$(echo $PKG1/usr/doc/*-$VERSION)
+  DOCSDIR=$(echo $PKG1/${PREFIX}/doc/*-$VERSION)
   cat CHANGES | head -n 2000 > $DOCSDIR/CHANGES
   touch -r CHANGES $DOCSDIR/CHANGES
 fi
+
+CC="${HOST_TRIPLET}-gcc"
+
+if echo "${HOST_TRIPLET}" | grep -q '^i.86-'; then
+  PERL_ASM_SCHEME_FORMAT='coff'
+  ASM='${x86_asm}'
+  BN_OPS='BN_LLONG ${x86_gcc_des} ${x86_gcc_opts}'
+  SYS_ID='MINGW32'
+  CFLAGS='-fomit-frame-pointer'
+else
+  PERL_ASM_SCHEME_FORMAT='mingw64'
+  ASM='${x86_64_asm}'
+  BN_OPS='SIXTY_FOUR_BIT RC4_CHUNK_LL DES_INT EXPORT_VAR_AS_FN'
+  SYS_ID='MINGW64'
+  CFLAGS=''
+fi
+
+CONFIGURATION="${HOST_TRIPLET}-gcc:-O2 -Wall ${CFLAGS} -DL_ENDIAN -DWIN32_LEAN_AND_MEAN -D_UNICODE::-D_MT:${SYS_ID}:-lws2_32 -lgdi32 -lcrypt32:${BN_OPS} EXPORT_VAR_AS_FN:${ASM}:${PERL_ASM_SCHEME_FORMAT}:win32:cygwin-shared:-D_WINDLL::.dll.a"
+
+sed -i 's/^"mingw",.*/"this","'"${CONFIGURATION}"'",/' Configure
+
+sed -i '/SHLIB=cyg.(LIBNAME)/ s/cyg/lib/' Makefile.shared
+
+# This one has a \t before "sfx" and ...
+sed -i '/\*DSO_WIN32\*)	sfx="eay32.dll"; pfx=;;/ { s/eay32// ; s/pfx=;/pfx=lib;/} ' engines/Makefile
+# ... this one doesn't
+sed -i '/\*DSO_WIN32\*) sfx="eay32.dll"; pfx=;;/ { s/eay32// ; s/pfx=;/pfx=lib;/} ' engines/ccgost/Makefile
 
 # These are the known patent issues with OpenSSL:
 # name   #         expires
@@ -97,54 +124,39 @@ fi
 # IDEA:  5,214,703  2010-05-25, not included.
 # RC5:   5,724,428  2015-03-03, not included.
 
-./config \
- --prefix=/usr \
- --openssldir=/etc/ssl \
+./Configure \
+ --prefix=/${PREFIX} \
+ --openssldir=/${PREFIX}/etc/ssl \
  no-idea \
  no-rc5 \
  no-sse2 \
- shared
+ shared \
+ this
 
-make $NUMJOBS depend || make depend || exit 1
+set -x
+export CROSS_COMPILE="${HOST_TRIPLET}-"
 
-make $NUMJOBS || make || exit 1
+(make $NUMJOBS depend || make depend) || exit 1
+
+(make $NUMJOBS; make) || exit 1
+
+set +x
 
 make install INSTALL_PREFIX=$PKG1 || exit 1
 
-# Make the .so.? library symlinks:
-( cd $PKG1/usr/lib${LIBDIRSUFFIX} ; ldconfig -l lib*.so.* )
+rm $PKG1/${PREFIX}/lib${LIBDIRSUFFIX}/lib{crypto,ssl}.a
 
-# Move libraries, as they might be needed by programs that bring a network
-# mounted /usr online:
+find $PKG1 | xargs file | egrep "executable|shared object" \
+  | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : \
+  | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
 
-mkdir $PKG1/lib${LIBDIRSUFFIX}
-( cd $PKG1/usr/lib${LIBDIRSUFFIX}
-  for file in lib*.so.?.* ; do
-    mv $file ../../lib${LIBDIRSUFFIX}
-    ln -sf ../../lib${LIBDIRSUFFIX}/$file .
-  done 
-  cp -a lib*.so.? ../../lib${LIBDIRSUFFIX}
-)
-
-# Add a cron script to warn root if a certificate is going to expire soon:
-mkdir -p $PKG1/etc/cron.daily
-zcat $CWD/certwatch.gz > $PKG1/etc/cron.daily/certwatch.new
-chmod 755 $PKG1/etc/cron.daily/certwatch.new
-
-mv $PKG1/etc/ssl/openssl.cnf $PKG1/etc/ssl/openssl.cnf.new
-
-( cd $PKG1
-  find . | xargs file | grep "executable" | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
-  find . | xargs file | grep "shared object" | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
-)
-
-mv $PKG1/etc/ssl/man $PKG1/usr
-( cd $PKG1/usr/man/man1 ; mv passwd.1 ssl_passwd.1 )
-( cd $PKG1/usr/man/man3 ; mv rand.3 ssl_rand.3 )
-( cd $PKG1/usr/man/man3 ; mv err.3 ssl_err.3 )
+mv $PKG1/${PREFIX}/etc/ssl/man $PKG1/${PREFIX}
+( cd $PKG1/${PREFIX}/man/man1 ; mv passwd.1 ssl_passwd.1 )
+( cd $PKG1/${PREFIX}/man/man3 ; mv rand.3 ssl_rand.3 )
+( cd $PKG1/${PREFIX}/man/man3 ; mv err.3 ssl_err.3 )
 # Compress and symlink the man pages:
-if [ -d $PKG1/usr/man ]; then
-  ( cd $PKG1/usr/man
+if [ -d $PKG1/${PREFIX}/man ]; then
+  ( cd $PKG1/${PREFIX}/man
     for manpagedir in $(find . -type d -name "man*") ; do
       ( cd $manpagedir
         for eachpage in $( find . -type l -maxdepth 1) ; do
@@ -157,53 +169,24 @@ if [ -d $PKG1/usr/man ]; then
   )
 fi
 
-# If there's an openssl0 directory, then build openssl-0 shared libraries for
-# compatibility with programs linked to those:
-if [ -d $CWD/openssl0 ]; then
-  ( cd $CWD/openssl0
-    ./openssl0.build || exit 1
-  ) || exit 1
-  # Don't put these in the openssl package...  openssl-solibs is enough.
-  #mkdir -p $PKG1/lib${LIBDIRSUFFIX}
-  #cp -a $TMP/package-openssl0/usr/lib/lib*.so.?.?.? $PKG1/lib${LIBDIRSUFFIX}
-  #( cd $PKG1/lib${LIBDIRSUFFIX} ; ldconfig -l lib*.so.?.?.? )
-  mkdir -p $PKG2/lib${LIBDIRSUFFIX}
-  cp -a $TMP/package-openssl0/usr/lib/lib*.so.?.?.? $PKG2/lib${LIBDIRSUFFIX}
-  ( cd $PKG2/lib${LIBDIRSUFFIX} ; ldconfig -l lib*.so.?.?.? )
-fi
-
 cd $PKG1
-chmod 755 usr/lib${LIBDIRSUFFIX}/pkgconfig
-sed -i -e "s#lib\$#lib${LIBDIRSUFFIX}#" usr/lib${LIBDIRSUFFIX}/pkgconfig/*.pc
-mkdir -p install
-zcat $CWD/doinst.sh-openssl.gz > install/doinst.sh
-cat $CWD/slack-desc.openssl > install/slack-desc
-/sbin/makepkg -l y -c n $TMP/${NAME1}.txz
+chmod 755 ${PREFIX}/lib${LIBDIRSUFFIX}/pkgconfig
+sed -i -e "s#lib\$#lib${LIBDIRSUFFIX}#" ${PREFIX}/lib${LIBDIRSUFFIX}/pkgconfig/*.pc
 
 # Make runtime package:
-mkdir -p $PKG2/lib${LIBDIRSUFFIX}
-( cd lib${LIBDIRSUFFIX} ; cp -a lib*.so.* $PKG2/lib${LIBDIRSUFFIX} )
-( cd $PKG2/lib${LIBDIRSUFFIX} ; ldconfig -l * )
-mkdir -p $PKG2/etc
-( cd $PKG2/etc ; cp -a $PKG1/etc/ssl . )
-mkdir -p $PKG2/usr/doc/openssl-$VERSION
+mkdir -p ${PREFIX}/doc/openssl-$VERSION
 ( cd $TMP/openssl-$VERSION
-  cp -a CHANGES CHANGES.SSLeay FAQ INSTALL INSTALL.MacOS INSTALL.VMS INSTALL.W32 \
-  LICENSE NEWS README README.ENGINE $PKG2/usr/doc/openssl-$VERSION
+  cp -a CHANGES CHANGES.SSLeay FAQ INSTALL INSTALL.MacOS INSTALL.VMS \
+    INSTALL.W32 LICENSE NEWS README README.ENGINE \
+    $PKG1/${PREFIX}/doc/openssl-$VERSION
 )
 
-# If there's a CHANGES file, installing at least part of the recent history
-# is useful, but don't let it get totally out of control:
-if [ -r CHANGES ]; then
-  DOCSDIR=$(echo $PKG2/usr/doc/*-$VERSION)
-  cat CHANGES | head -n 2000 > $DOCSDIR/CHANGES
-  touch -r CHANGES $DOCSDIR/CHANGES
-fi
+cat ${CWD}/openssl.yypkg.meta | sed \
+  -e "s/%{PKG}/openssl/" \
+  -e "s/%{HST}/${HOST_TRIPLET}/" \
+  -e "s/%{TGT}//" \
+  -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
+  -e "s/%{BUILD}/${BUILD}/" \
+  -e "s/%{DESCR}/${DESCR:-"No description"}/" \
+  | makeypkg -o ${YYOUTPUT} -meta - "${PKG1}/${PREFIX}"
 
-find $PKG2/usr/doc/openssl-$VERSION -type d -exec chmod 755 {} \;
-find $PKG2/usr/doc/openssl-$VERSION -type f -exec chmod 644 {} \;
-cd $PKG2
-mkdir -p install
-zcat $CWD/doinst.sh-openssl-solibs.gz > install/doinst.sh
-cat $CWD/slack-desc.openssl-solibs > install/slack-desc
-/sbin/makepkg -l y -c n $TMP/${NAME2}.txz
