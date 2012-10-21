@@ -58,9 +58,6 @@ chmod -R u+w,go+r-w,a-s .
 
 find . -iname '*.def' -exec sed -i 's/\r//' {} +
 
-# autoreconf -vif -I "/${PREFIX}/share/aclocal" -I m4
-# sed -i '1,1 d' win32/xmingw32/libtheora{dec,enc}-all.def
-
 # Configure:
 CFLAGS="$SLKCFLAGS" \
 ./configure \
