@@ -59,6 +59,14 @@ COMMON_CONFIGURE_OPTIONS=" \
   --enable-shared=yes \
   --enable-static=no"
 
+destdir_of_package() {
+  if [ -z "${1}" ]; then
+    echo "${PKG}"
+  else
+    echo "${PKG}${1:+"-${1}"}"
+  fi
+}
+
 begin() {
   PACKAGE="${1}"
 
@@ -71,12 +79,27 @@ begin() {
   chmod -R u+w,go+r-w,a-s .
 }
 
-destdir_of_package() {
-  if [ -z "${1}" ]; then
-    echo "${PKG}"
+update_libtool() {
+  LIBTOOL_RC='/bin/sh libtool --mode=compile --tag=RC'
+  if [ -e build-scripts/makedep.sh ]; then
+    sed -i \
+      -e 's;\\\$(WINDRES) \$src \\\$@;'"${LIBTOOL_RC}"' \\$(WINDRES) -i $src -o \\$@;' \
+      -e '/if test x"\$ext" = x"rc"; then/,/fi/ { /\<if\|else\|fi\|\\1\.o\>/ d }' \
+      build-scripts/makedep.sh
   else
-    echo "${PKG}${1:+"-${1}"}"
+    sed -i \
+      -e '/%.o : %.rc/ s;%\.o;%.lo;' \
+      -e 's;\$(WINDRES) \$< \$@;'"${LIBTOOL_RC}"' $(WINDRES) -i $< -o $@;' \
+      -e '/libSDL_[a-z]\+_la_DEPENDENCIES/ s/version\.o/version.lo/' \
+      Makefile.am
   fi
+
+  sed -i \
+    -e 's/\(AC_CHECK_PROGS(WINDRES, \[\)\(windres\) \($hostaliaswindres\) \($host_os-windres\)\])/\1\3 \2 \4])/' \
+    -e '/OBJECTS=`echo \$OBJECTS.*\.rc.*\\1.o/ s/\\1\.o/\\1.lo/' \
+    configure.in
+
+  autoreconf -vif -I /usr/share/aclocal/ -I acinclude
 }
 
 make_make_install() {
@@ -105,7 +128,7 @@ strip_compress() {
 
 package() {
   DESTDIR="$(destdir_of_package "${1}")"
-  PKGNAM="sdl${1:+"-$(echo $2 | cut -f1 -d- | cut -f2 -d_)"}"
+  PKGNAM="sdl${1:+"-$(echo $1 | cut -f1 -d- | cut -f2 -d_)"}"
 
   cat ${CWD}/sdl.yypkg.meta | sed \
     -e "s/%{PKG}/${PKGNAM}/" \
@@ -122,6 +145,8 @@ build_other() {
   EXTRA_CONFIGURE_ARGS="${2}"
 
   begin "${PACKAGE}"
+
+  update_libtool
 
   CFLAGS="-O2" ./configure ${COMMON_CONFIGURE_OPTIONS} ${EXTRA_CONFIGURE_ARGS}
 
@@ -140,21 +165,13 @@ if [ "${SDL_BUILD_BASE}" = "yes" ]; then
 
   zcat $CWD/sdl.linux-2.6.31.input_absinfo.diff.gz | patch -p1 --verbose || exit 1
 
-  sed -i \
-    -e 's;\\\$(WINDRES) \$src \\\$@;/bin/sh libtool --mode=compile --tag=RC \\$(WINDRES) -i $src -o \\$@;' \
-    -e '/if test x"\$ext" = x"rc"; then/,/fi/ { /\<if\|else\|fi\|\\1\.o\>/ d }' \
-    build-scripts/makedep.sh
-
-  sed -i \
-    -e 's/\(AC_CHECK_PROGS(WINDRES, \[\)\(windres\) \($hostaliaswindres\) \($host_os-windres\)\])/\1\3 \2 \4])/' \
-    -e '/OBJECTS=`echo \$OBJECTS.*\.rc.*\\1.o/ s/\\1\.o/\\1.lo/' \
-    configure.in
-
-  autoreconf -vif -I /usr/share/aclocal/ -I acinclude
+  update_libtool
 
   CFLAGS="-O2" ./configure ${COMMON_CONFIGURE_OPTIONS}
 
   make_make_install ""
+
+  sed -i 's/ -lmingw32//' ${PKG}/${PREFIX}/lib${LIBDIRSUFFIX}/pkgconfig/sdl.pc
 
   mkdir -p $PKG/${PREFIX}/doc/SDL-$VERSION/html
   cp -a docs/index.html $PKG/${PREFIX}/doc/SDL-$VERSION
@@ -174,9 +191,9 @@ if [ "${SDL_BUILD_OTHERS}" = "yes" ]; then
     --enable-png-shared=no \
     --enable-tif-shared=no"
 
-  build_other "SDL_net-$NET"
+  build_other "SDL_net-$NET" ""
 
-  build_other "SDL_ttf-$TTF"
+  build_other "SDL_ttf-$TTF" ""
 fi
 
 
