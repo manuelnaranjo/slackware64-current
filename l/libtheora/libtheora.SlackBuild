@@ -35,6 +35,11 @@ if [ -z "$ARCH" ]; then
   esac
 fi
 
+case "${HOST_TRIPLET}" in
+  i686-w64-mingw32) LIBDIRSUFFIX="" ;;
+  x86_64-w64-mingw32) LIBDIRSUFFIX="64" ;;
+esac
+
 NUMJOBS=${NUMJOBS:-" -j7 "}
 
 CWD=$(pwd)
@@ -43,39 +48,26 @@ PKG=$TMP/package-${PKGNAM}
 rm -rf $PKG
 mkdir -p $TMP $PKG
 
-if [ "$ARCH" = "i486" ]; then
-  SLKCFLAGS="-O2 -march=i486 -mtune=i686"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "s390" ]; then
-  SLKCFLAGS="-O2"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "x86_64" ]; then
-  SLKCFLAGS="-O2 -fPIC"
-  LIBDIRSUFFIX="64"
-else
-  SLKCFLAGS="-O2"
-  LIBDIRSUFFIX=""
-fi
-
 cd $TMP
 rm -rf ${PKGNAM}-${VERSION}
 tar xvf $CWD/${PKGNAM}-$VERSION.tar.?z* || exit 1
 cd ${PKGNAM}-$VERSION
 
-# Make sure ownerships and permissions are sane:
 chown -R root:root .
-find . \
-  \( -perm 777 -o -perm 775 -o -perm 711 -o -perm 555 -o -perm 511 \) \
-  -exec chmod 755 {} \; -o \
-  \( -perm 666 -o -perm 664 -o -perm 600 -o -perm 444 -o -perm 440 -o -perm 400 \) \
-  -exec chmod 644 {} \;
+chmod -R u+w,go+r-w,a-s .
+
+find . -iname '*.def' -exec sed -i 's/\r//' {} +
+
+# autoreconf -vif -I "/${PREFIX}/share/aclocal" -I m4
+# sed -i '1,1 d' win32/xmingw32/libtheora{dec,enc}-all.def
 
 # Configure:
 CFLAGS="$SLKCFLAGS" \
 ./configure \
-  --prefix=/usr \
-  --libdir=/usr/lib${LIBDIRSUFFIX} \
+  --prefix=/${PREFIX} \
+  --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
   --disable-static \
+  --host=${HOST_TRIPLET} \
   --build=$ARCH-slackware-linux
 
 # Build and install:
@@ -83,16 +75,16 @@ make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG || exit 1
 
 # Use the source, Luke.
-rm -rf $PKG/usr/share/doc
-rmdir $PKG/usr/share
+rm -rf $PKG/${PREFIX}/share/doc
+rmdir $PKG/${PREFIX}/share
 
-# Strip binaries:
-find $PKG | xargs file | grep -e "executable" -e "shared object" | grep ELF \
-  | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
+find $PKG | xargs file | egrep -e "executable|shared object" \
+  | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : \
+  | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
 
 # Compress and link manpages, if any:
-if [ -d $PKG/usr/man ]; then
-  ( cd $PKG/usr/man
+if [ -d $PKG/${PREFIX}/man ]; then
+  ( cd $PKG/${PREFIX}/man
     for manpagedir in $(find . -type d -name "man*") ; do
       ( cd $manpagedir
         for eachpage in $( find . -type l -maxdepth 1) ; do
@@ -106,27 +98,30 @@ if [ -d $PKG/usr/man ]; then
 fi
 
 # Compress info files, if any:
-if [ -d $PKG/usr/info ]; then
-  ( cd $PKG/usr/info
+if [ -d $PKG/${PREFIX}/info ]; then
+  ( cd $PKG/${PREFIX}/info
     rm -f dir
     gzip -9 *
   )
 fi
 
 # Add a documentation directory:
-mkdir -p $PKG/usr/doc/${PKGNAM}-$VERSION
+mkdir -p $PKG/${PREFIX}/doc/${PKGNAM}-$VERSION
 cp -a \
   AUTHORS CHANGES COPYING LICENSE README \
-  $PKG/usr/doc/${PKGNAM}-$VERSION
+  $PKG/${PREFIX}/doc/${PKGNAM}-$VERSION
 
-cat << EOF > $PKG/usr/doc/${PKGNAM}-$VERSION/more-docs-in-source.txt
+cat << EOF > $PKG/${PREFIX}/doc/${PKGNAM}-$VERSION/more-docs-in-source.txt
 See the docs directory in the source archive for more detailed
 technical documention.
 EOF
 
-mkdir -p $PKG/install
-cat $CWD/slack-desc > $PKG/install/slack-desc
-
-cd $TMP/package-${PKGNAM}
-/sbin/makepkg -l y -c n $TMP/${PKGNAM}-$VERSION-$ARCH-$BUILD.txz
+cat ${CWD}/${PKGNAM}.yypkg.meta | sed \
+  -e "s/%{PKG}/${PKGNAM}/" \
+  -e "s/%{HST}/${HOST_TRIPLET}/" \
+  -e "s/%{TGT}//" \
+  -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
+  -e "s/%{BUILD}/${BUILD}/" \
+  -e "s/%{DESCR}/${DESCR:-"No description"}/" \
+  | makeypkg -o ${YYOUTPUT} -meta - "${PKG}/${PREFIX}"
 
