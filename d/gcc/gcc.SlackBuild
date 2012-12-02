@@ -507,6 +507,7 @@ fi
   )
 
   ( cd $PKG_GCC/${PREFIX}/bin
+    rename '.exe' '' *.exe
     mv ${TARGET_TRIPLET}-gfortran ${TARGET_TRIPLET}-gfortran-gcc
     for bin in gcc g++ gfortran-gcc gcc-{ar,nm,ranlib} gcj gcjh; do
       if [ -e ${bin} ]; then
