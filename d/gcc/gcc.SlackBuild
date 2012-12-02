@@ -520,13 +520,19 @@ fi
     symlink_to "${TARGET_TRIPLET}-gcc-${VERSION}" ${TARGET_TRIPLET}-gcc
     symlink_to "${TARGET_TRIPLET}-g++-${VERSION}" ${TARGET_TRIPLET}-{c++,g++}
     symlink_to "${TARGET_TRIPLET}-gfortran-${VERSION}" ${TARGET_TRIPLET}-{gfortran,gfortran-${VERSION},g95,g77}
-    if [ x"${BUILD_TRIPLET}" = x"${TARGET_TRIPLET}" ]; then
-      for bin in gcc gcc-{ar,nm,ranlib} gcj gcjh; do
+    if [ x"${HOST_TRIPLET}" = x"${TARGET_TRIPLET}" ]; then
+      for bin in gcc gcc-{ar,nm,ranlib}; do
         symlink_to "${TARGET_TRIPLET}-${bin}-${VERSION}" ${bin} ${bin}-${VERSION}
       done
       symlink_to "${TARGET_TRIPLET}-gcc-${VERSION}" cc
       symlink_to "${TARGET_TRIPLET}-g++-${VERSION}" g++ c++
-      symlink_to "${TARGET_TRIPLET}-gfortran-${VERSION}" gfortran fortran {f,g}{95,77}
+      if [ -n "${PKG_GCC_JAVA}" ]; then
+        symlink_to "${TARGET_TRIPLET}-gcj-${VERSION}" gcj gcj-${VERSION}
+        symlink_to "${TARGET_TRIPLET}-gcjh-${VERSION}" gcjh gcjh-${VERSION}
+      fi
+      if [ -n "${PKG_GCC_GFORTRAN}" ]; then
+        symlink_to "${TARGET_TRIPLET}-gfortran-${VERSION}" gfortran fortran {f,g}{95,77}
+      fi
     fi
   )
 
@@ -552,7 +558,7 @@ if [ -n "${PKG_GCC_GPP}" ]; then ( cd $PKG_GCC_GPP
   move_from_pkg_gcc "${PREFIX}/bin/*++*"
   move_from_pkg_gcc "${PREFIX}/libexec/gcc/$TARGET_TRIPLET/$VERSION/cc1plus"
   move_from_pkg_gcc "${PREFIX}/man/man1/*++*"
-  if [ x"${BUILD_TRIPLET}" = x"${TARGET_TRIPLET}" ]; then
+  if [ x"${HOST_TRIPLET}" = x"${TARGET_TRIPLET}" ]; then
     move_from_pkg_gcc "${PREFIX}/include/c++"
     move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/*++*"
   else
@@ -568,7 +574,7 @@ if [ -n "${PKG_GCC_GFORTRAN}" ]; then ( cd $PKG_GCC_GFORTRAN
   move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/gcc/$TARGET_TRIPLET/$VERSION/{finclude,libgfortran*}"
   move_from_pkg_gcc "${PREFIX}/libexec/gcc/$TARGET_TRIPLET/$VERSION/f951"
   move_from_pkg_gcc "${PREFIX}/man/man1/*gfortran*"
-  if [ x"${BUILD_TRIPLET}" = x"${TARGET_TRIPLET}" ]; then
+  if [ x"${HOST_TRIPLET}" = x"${TARGET_TRIPLET}" ]; then
     move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_TGT}/libgfortran*"
   else
     move_from_pkg_gcc "${PREFIX}/${TARGET_TRIPLET}/lib${LIBDIRSUFFIX_TGT}/libgfortran*"
@@ -630,7 +636,7 @@ if [ -n "${PKG_GCC_JAVA}" ]; then ( cd $PKG_GCC_JAVA
 
 # gcc-objc:
 if [ -n "${PKG_GCC_OBJC}" ]; then ( cd $PKG_GCC_OBJC
-  if [ x"${BUILD_TRIPLET}" = x"${TARGET_TRIPLET}" ]; then
+  if [ x"${HOST_TRIPLET}" = x"${TARGET_TRIPLET}" ]; then
     move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_TGT}/libobjc*"
   else
     move_from_pkg_gcc "${PREFIX}/${TARGET_TRIPLET}/lib${LIBDIRSUFFIX_TGT}/libobjc*"
