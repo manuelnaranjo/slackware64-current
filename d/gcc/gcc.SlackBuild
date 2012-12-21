@@ -146,11 +146,6 @@ cp $CWD/ecj-4.5.jar gcc-$VERSION/ecj.jar
 #https://oss.sonatype.org/content/repositories/releases/org/antlr/antlr-runtime/
 ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
 
-# Upstream -fPIC fix for gnat build:
-cd gcc-$VERSION
-  zcat $CWD/gcc-4.7.1.adalib.pic.diff.gz | patch -p1 --verbose || exit 1
-cd ..
-
 # install docs
 ( cd gcc-$VERSION
   # Smite the fixincludes:
@@ -615,6 +610,7 @@ mv $PKG1/usr/bin/gnative2ascii $PKG5/usr/bin
   mv $PKG1/usr/bin/gij usr/bin
   mv $PKG1/usr/bin/gjar usr/bin
   mv $PKG1/usr/bin/gjarsigner usr/bin
+  mv $PKG1/usr/bin/gjdoc usr/bin
   mv $PKG1/usr/bin/gkeytool usr/bin
   mv $PKG1/usr/bin/grepjar usr/bin
   mv $PKG1/usr/bin/grmid usr/bin
@@ -740,7 +736,7 @@ mv $PKG1/usr/bin/gnative2ascii $PKG5/usr/bin
   mv $PKG1/usr/info/gccgo.info.gz usr/info
   mkdir -p usr/lib${LIBDIRSUFFIX}
   mv $PKG1/usr/lib${LIBDIRSUFFIX}/go usr/lib${LIBDIRSUFFIX}
-  mv $PKG1/usr/lib${LIBDIRSUFFIX}/{libgo.la,libgo.so.0.*,libgobegin.a} usr/lib${LIBDIRSUFFIX} || exit 1
+  mv $PKG1/usr/lib${LIBDIRSUFFIX}/{libgo.la,libgo.so*,libgobegin.a} usr/lib${LIBDIRSUFFIX} || exit 1
   # Ordinarily Slackware doesn't package static libraries, but in this case
   # it is useful for deploying compiled binaries on machines that do not yet
   # have libgo.so.0.0.0.

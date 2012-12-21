@@ -1,5 +1,5 @@
-This is the beta release of binutils 2.22.52.0.2 for Linux, which is
-based on binutils 2012 0424 in CVS on sourceware.org plus various
+This is the beta release of binutils 2.23.51.0.6 for Linux, which is
+based on binutils 2012 1123 in CVS on sourceware.org plus various
 changes. It is purely for Linux.
 
 All relevant patches in patches have been applied to the source tree.
@@ -115,12 +115,195 @@ endif
 
 to arch/ia64/Makefile in your kernel source tree.
 
-Please report any bugs related to binutils 2.22.52.0.2 to
+Please report any bugs related to binutils 2.23.51.0.6 to
 hjl.tools@gmail.com
 
 and
 
 http://www.sourceware.org/bugzilla/
+
+Changes from binutils 2.23.51.0.5:
+
+1. Update from binutils 2012 1123.
+2. Fix 64-bit jecxz encoding regression in x86 assembler.  PR 14859.
+3. Revert an accidental linker change.  PR 14862.
+4. Fix x32 TLS LD to LE optimization in gold.  PR 14858.
+5. Add "-z global" option to set DF_1_GLOBAL to ld.
+6. Improve ld plugin error handling.
+7. Port ld lib32 arrangement from Debian.
+8. Properly set the output maxpagesize when rewriting program header.
+PR 14493.
+9. Add additional DF_1_XXX support to readelf.
+10. Improve nacl support with separate code segments.
+11. Improve macos support.
+12. Improve arm support.
+13. Improve microblaze support.
+14. Improve mips support.
+15. Improve ppc support.
+16. Improve sparc support.
+
+Changes from binutils 2.23.51.0.4:
+
+1. Update from binutils 2012 1110.
+2. Support new Linux NOTE sections.
+3. Add -z stacksize=SIZE option to ld to set size of stack segment.
+4. Fix a BFD IOVEC close bug.  PR 14813.
+5. Fix a BFD IOVEC on archive bug.  PR 14567.
+6. Fix archive support for non-ELF targets.  PR 14481.
+7. Improve gold.
+8. Improve COFF support.
+9. Improve arm support.
+10. Improve microblaze support.
+11. Improve mips support.
+12. Improve ppc support.
+13. Improve rx support.
+14. Improve s390 support.
+15. Improve v850 support.
+16. Improve xgate support.
+
+Changes from binutils 2.23.51.0.3:
+
+1. Update from binutils 2012 1026.
+2. Fix an LTO linker bug.  PR 14747.
+3. Add cx16 arch feature to x86 assembler.
+4. Add -march=bdver3 option to x86 assembler.
+5. Properly handle ignored REX prefix with fwait in x86 disassembler.
+6. Fix x32 register names in objdump DWARF output.
+7. Add NT_SIGINFO/NT_FILE support to readelf.
+8. Add linker --ignore-unresolved-symbol option from NetBSD.
+9. Treat .gdb_index section as debug section.  PR 14662.
+10. Add --debug-dump=addr, --debug_dump=cu_index options to readelf and
+objdump.
+11. Add dwp, DWARF packaging utility.
+12. Add compressed debug section support to Windows.  PR 14067. 
+13. Improve gold.
+14. Improve aarch64 support.
+15. Improve arm support.
+16. Improve hppa support.
+17. Improve mips support.
+18. Improve s390 support.
+19. Improve tile support.
+20. Improve v850 support.
+
+Changes from binutils 2.23.51.0.2:
+
+1. Update from binutils 2012 0918.
+2. Properly handle versioned STB_SECONDARY symbols. 
+3. Fix wrong symbol type with common symbol and weak function.  PR 14591.
+4. Ignore discarded sections when converting mov to lea.
+5. Improve gold.
+6. Improve avr support.
+7. Improve aarch64 support.
+8. Improve moxie support.
+9. Improve ppc support.
+10. Improve tile support.
+
+Changes from binutils 2.23.51.0.1:
+
+1. Update from binutils 2012 0908.
+2. Fix STB_SECONDARY support:
+   a. Generate STB_SECONDARY symbols in DSO by default.
+   b. Properly handle STB_SECONDAY symbols when linking with archive.
+   c. Don't allow .weak directive to override .secondary directive.
+3. Optimize i386/x86-64 linker to convert GOT load (MOV) to LEA.
+4. Clarify x86 assembler error messages.  PR 14457.
+5. Improve NOP/prefetch support in x86 disassembler.
+6. Improve Intel syntax support in x86 assembler.
+7. Add -march={btver1, btver2} options to x86 assembler.
+8. Fix binutils build with --enable-shared.  PR 4970.
+9. Also provide __executable_start for PIE.  PR 14525.
+10. Use xmalloc to allocate memory for argument list file.  PR 14526.
+11. Add Intel Itanium Series 9500 support to assembler/diassembler.
+12. Ignore section symbols without a BFD section when outputing symbols
+and check bad section index.  PR 14493.
+13. Improve archive reader.  PR 14475.
+14. Support DW_OP_GNU_const_index reader.
+15. Improve handling of imput files with empty ELF group sections.
+PR 14444.
+16. Fix IFUNC support in s390 linker.
+17. Improve gold.
+18. Add aarch64 support.
+19. Improve arm support.
+20. Improve mips support.
+21. Improve mmix support.
+22. Improve moxie support.
+23. Improve ppc support.
+24. Improve s390 support.
+25. Improve tile support.
+
+Changes from binutils 2.22.52.0.4:
+
+1. Update from binutils 2012 0806.
+2. Add Intel ADX, RDSEED and PRFCHW new instruction support.
+3. Support 'rep bsf', 'rep bsr', and 'rep ret' syntax in x86 assembler.
+4. Mark 256-bit vmovntdqa as AVX2 instruction for x86 assembler.
+5. Improve x86 assembler error handling.
+6. Improve the repeat directive support in assembler.  PR 14201.
+7. Improve x86-64 disassembler on superfluous prefixes.
+8. Fix x86 disassembler crash on bad XOP instructions.  PR 14355.
+9. Support STB_SECONDARY:
+
+https://groups.google.com/forum/?hl=en&fromgroups#!forum/generic-abi
+
+10. Added SORT_NONE to the linker script language to disable section
+sorting and properly handle .init/.fini sections.  PR 14156.
+11. Fix a weak alias linker bug.  PR 14323.
+12. Fix the NULL GNU_RELRO segment linker bug.  PR 14207.
+13. Fix the bad GNU_RELRO segment linker bug.  PR 14215.
+14. Add linker support of __ehdr_start symbol for the ELF file header.
+15. Add IFUNC support to s390 linker.
+16. Fix ar for >4GB member.  PR 14302.
+17. Fix objcopy --compress-debug-sections on empty debug section.  PR
+14319.
+18. Fix readelf/objdup to display null bytes in DWARF debug info.  PR
+14420.
+19. Improve gold.
+20. Improve arm support.
+21. Improve avr support.
+22. Improve cris support.
+23. Improve m68k support.
+24. Improve mips support.
+25. Improve ppc support.
+26. Improve vax support.
+27. Improve xgate support.
+
+Changes from binutils 2.22.52.0.3:
+
+1. Update from binutils 2012 0604.
+2. Check addend overflow for R_X86_64_RELATIVE64.
+3. Fix ar/nm/ranlib with --plugin.
+4. Create .eh_frame_hdr section only if needed.  PR 13909.
+5. Properly create .eh_frame section for PLT.  PR 14105. 
+6. Fix a linker crash. PR 14170.
+7. Fix readelf to properly display addend.
+8. Don't make _DYNAMIC/_GLOBAL_OFFSET_TABLE_/_PROCEDURE_LINKAGE_TABLE_
+symbols absolute for x86 and ppc.
+9. Properly handle shared libraries with zero dynamic symbols.  PRs
+7023/13962.
+10. Update readelf/assembler to support multibyte characters in symbol
+names.
+11. Add --strip-dwo/--extract-dwo options to objcopy/strip.
+12. Add R_X86_64_RELATIVE64 support to gold.
+13. Improve gold.
+14. Improve NACL support.
+15. Improve alpha support.
+16. Improve avr support.
+17. Improve m68k support.
+18. Improve mips support.
+19. Improve ppc support.
+20. Improve vax support.
+
+Changes from binutils 2.22.52.0.2:
+
+1. Update from binutils 2012 0507.
+2. Fix Linux kernel build by reverting the PR 13621 fix.  PR 14052.
+3. Add support for x86_64-*-linux-gnux32 target.
+4. Improve x86 assembler.
+5. Improve DWARF support.
+6. Improve gold.
+7. Improve rx support.
+8. Improve sparc support.
+9. Add xgate support.
 
 Changes from binutils 2.22.52.0.1:
 
@@ -490,13 +673,13 @@ already been defined.  PR 12001.
 
 The file list:
 
-1. binutils-2.22.52.0.2.tar.bz2. Source code.
+1. binutils-2.23.51.0.6.tar.bz2.  Source code.
 
 The primary sites for the beta Linux binutils are:
 
 1. http://www.kernel.org/pub/linux/devel/binutils/
 
-It is also available on linux/release/2.22.52.0.2 branch at
+It is also available on linux/release/2.23.51.0.6 branch at
 
 http://git.kernel.org/?p=linux/kernel/git/hjl/binutils.git;a=summary
 
@@ -505,4 +688,4 @@ Thanks.
 
 H.J. Lu
 hjl.tools@gmail.com
-04/25/2012
+11/26/2012
