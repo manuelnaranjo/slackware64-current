@@ -34,79 +34,53 @@ if [ -z "$ARCH" ]; then
   esac
 fi
 
+case "${HOST_TRIPLET}" in
+  i686-w64-mingw32) LIBDIRSUFFIX="" ;;
+  x86_64-w64-mingw32) LIBDIRSUFFIX="64" ;;
+esac
+
 NUMJOBS=${NUMJOBS:-" -j7 "}
 
 CWD=$(pwd)
 TMP=${TMP:-/tmp}
 PKG=$TMP/package-pkg-config
 rm -rf $PKG
-mkdir -p $TMP $PKG/usr
-
-if [ "$ARCH" = "i486" ]; then
-  SLKCFLAGS="-O2 -march=i486 -mtune=i686"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "s390" ]; then
-  SLKCFLAGS="-O2"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "x86_64" ]; then
-  SLKCFLAGS="-O2 -fPIC"
-  LIBDIRSUFFIX="64"
-elif [ "$ARCH" = "arm" ]; then
-  SLKCFLAGS="-O2 -march=armv4 -mtune=xscale"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "armel" ]; then
-  SLKCFLAGS="-O2 -march=armv4t"
-  LIBDIRSUFFIX=""
-else
-  SLKCFLAGS="-O2"
-  LIBDIRSUFFIX=""
-fi
+mkdir -p $TMP $PKG/${PREFIX}
 
 cd $TMP
 rm -rf pkg-config-$VERSION
 tar xvf $CWD/pkg-config-$VERSION.tar.?z* || exit 1
 cd pkg-config-$VERSION || exit 1
 chown -R root:root .
-find . \
-  \( -perm 777 -o -perm 775 -o -perm 711 -o -perm 555 -o -perm 511 \) \
-  -exec chmod 755 {} \; -o \
-  \( -perm 666 -o -perm 664 -o -perm 600 -o -perm 444 -o -perm 440 -o -perm 400 \) \
-  -exec chmod 644 {} \;
+chmod -R u+w,go+r-w,a-s .
 
 CFLAGS="$SLKCFLAGS" \
 ./configure \
-  --prefix=/usr \
-  --libdir=/usr/lib${LIBDIRSUFFIX} \
-  --mandir=/usr/man \
-  --docdir=/usr/doc/pkg-config-$VERSION \
+  --prefix=/${PREFIX} \
+  --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
+  --mandir=/${PREFIX}/man \
+  --docdir=/${PREFIX}/doc/pkg-config-$VERSION \
+  --host=${HOST_TRIPLET} \
   --build=${ARCH}-slackware-linux
 
 make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG || exit 1
 
-mkdir -p $PKG/etc/profile.d/
-for script in $(ls $CWD/scripts/*) ; do
-  cat ${script} | sed -e "s#/lib/#/lib${LIBDIRSUFFIX}/#g" \
-    > $PKG/etc/profile.d/$(basename ${script})
-done
-chown root:root $PKG/etc/profile.d/*
-chmod 755 $PKG/etc/profile.d/*
+find $PKG | xargs file | egrep "executable|shared object" \
+  | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : \
+  | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
 
-find $PKG | xargs file | grep -e "executable" -e "shared object" \
-  | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
+gzip -9 $PKG/${PREFIX}/man/man?/*.?
 
-gzip -9 $PKG/usr/man/man?/*.?
+mkdir -p $PKG/${PREFIX}/doc/pkg-config-$VERSION
+cp -a AUTHORS COPYING NEWS README $PKG/${PREFIX}/doc/pkg-config-$VERSION
 
-mkdir -p $PKG/usr/doc/pkg-config-$VERSION
-cp -a \
-  AUTHORS COPYING NEWS README \
-  $PKG/usr/doc/pkg-config-$VERSION
-
-mkdir -p $PKG/install
-zcat $CWD/doinst.sh.gz | sed -e "s#/lib/#/lib${LIBDIRSUFFIX}/#g" \
-  > $PKG/install/doinst.sh
-cat $CWD/slack-desc > $PKG/install/slack-desc
-
-cd $TMP/package-pkg-config
-/sbin/makepkg -l y -c n $TMP/pkg-config-$VERSION-$ARCH-$BUILD.txz
+cat ${CWD}/${PKGNAM}.yypkg.meta | sed \
+  -e "s/%{PKG}/${PKGNAM}/" \
+  -e "s/%{HST}/${HOST_TRIPLET}/" \
+  -e "s/%{TGT}//" \
+  -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
+  -e "s/%{BUILD}/${BUILD}/" \
+  -e "s/%{DESCR}/${DESCR:-"No description"}/" \
+  | makeypkg -o ${YYOUTPUT} -meta - "${PKG}/${PREFIX}"
 
