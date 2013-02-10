@@ -294,11 +294,6 @@ cp $CWD/ecj-4.5.jar gcc-$VERSION/ecj.jar
 #https://oss.sonatype.org/content/repositories/releases/org/antlr/antlr-runtime/
 ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
 
-# Upstream -fPIC fix for gnat build:
-cd gcc-$VERSION
-  zcat $CWD/gcc-4.7.1.adalib.pic.diff.gz | patch -p1 --verbose || exit 1
-cd ..
-
 # install docs
 if [ x"$GCC_CORE" != x"yes" ]; then ( cd gcc-$VERSION
   # Smite the fixincludes:
@@ -599,7 +594,7 @@ if [ -n "${PKG_GCC_GNAT}" ]; then ( cd $PKG_GCC_GNAT
 # gcc-java:
 if [ -n "${PKG_GCC_JAVA}" ]; then ( cd $PKG_GCC_JAVA
   # used to mv fastjar too
-  move_from_pkg_gcc "${PREFIX}/bin/{aot-compile,gappletviewer,gc-analyze,*gcj*,gij,gjar,gjarsigner,gkeytool,grmid,grmic,grmiregistry,gserialver,gtnameserv,gjavah,gorbd,jcf-dump,jv-*}"
+  move_from_pkg_gcc "${PREFIX}/bin/{aot-compile,gappletviewer,gc-analyze,*gcj*,gij,gjar,gjarsigner,gjdoc,gkeytool,grmid,grmic,grmiregistry,gserialver,gtnameserv,gjavah,gorbd,jcf-dump,jv-*}"
   # Move some Java only C++ headers from the C++ package:
   (DIR="${PREFIX}/include/c++/$VERSION";
     mkdir -p ${DIR} && mv $PKG_GCC_GPP/$DIR/{gcj,gnu,java,javax,org,sun} $DIR)
@@ -650,7 +645,7 @@ if [ -n "${PKG_GCC_GO}" ]; then ( cd $PKG_GCC_GO
   move_from_pkg_gcc "${PREFIX}/bin/*gccgo*"
   move_from_pkg_gcc "${PREFIX}/libexec/gcc/$TARGET_TRIPLET/$VERSION/go1"
   move_from_pkg_gcc "${PREFIX}/info/gccgo.info.gz"
-  move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/{go,libgo.la,libgo.so.0.*,libgobegin.a}"
+  move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/{go,libgo.la,libgo.so*,libgobegin.a}"
   (cd ${PREFIX}/lib${LIBDIRSUFFIX_HST} && [ -e libgo.la -a -e libgo.so.0.* -a -e libgobegin.a ])
   # Ordinarily Slackware does not package static libraries, but in this case
   # it is useful for deploying compiled binaries on machines that do not yet
