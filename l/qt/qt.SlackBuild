@@ -37,11 +37,11 @@
 # wget http://qt.gitorious.org/qt/kde-qt/archive-tarball/4.6.2-patched
 #
 # Modifications 2010, 2011, 2012  Eric Hameleers, Eindhoven, NL
-# qt 4.7.3, 4.7.4, 4.8.0, 4.8.1, 4.8.2 are built from original nokia sources.
+# qt 4.7.3, 4.7.4, 4.8.0, 4.8.1, 4.8.2, 4.8.4 are built from original nokia sources.
 
 PKGNAM=qt
 VERSION=$(ls qt-*.tar.?z* | rev | cut -f 3- -d . | cut -f 1 -d - | rev)
-BUILD=${BUILD:-4}
+BUILD=${BUILD:-1}
 
 NUMJOBS=${NUMJOBS:--j7}
 
@@ -113,20 +113,6 @@ zcat $CWD/qt.ld-gold.patch.gz | patch -p1 --verbose || exit 1
 # Stupid idea - remove it:
 zcat $CWD/qt.webkit-no_Werror.patch.gz | patch -p1 --verbose || exit 1
 
-# Fix cursor position bug within tables:
-zcat $CWD/qt.ca89c49.cursor.position.diff.gz | patch -p1 --verbose || exit 1
-
-# Fix assistant crash:
-zcat $CWD/qt.assistant.memcpy-crash.diff.gz | patch -p0 --verbose || exit 1
-
-# Fix webkit compiling with recent glib:
-zcat $CWD/qt.webkit.glib.diff.gz | patch -p1 --verbose || exit 1
-
-# Some patches from upstream:
-zcat $CWD/QElfParser-fix-type-of-sh_size.patch.gz | patch -p1 --verbose || exit 1
-zcat $CWD/QTBUG-14724_close_orphaned_file_descriptors_after_printing.patch.gz | patch -p1 --verbose || exit 1
-zcat $CWD/QTBUG-21900_Buttons_in_Qt_applications_not_clickable_when_run_under_gnome-shell.patch.gz | patch -p1 --verbose || exit 1
-
 export CFLAGS="$SLKCFLAGS"
 export CXXFLAGS="$SLKCFLAGS"
 export OPENSOURCE_CXXFLAGS="$SLKCFLAGS"
@@ -145,6 +131,7 @@ export OPENSOURCE_CXXFLAGS="$SLKCFLAGS"
   -no-phonon \
   -nomake examples \
   -nomake demos \
+  -nomake docs \
   -no-separate-debug-info \
   -no-pch
   # No-precompiled-headers is ccache-friendly.
@@ -218,6 +205,14 @@ mkdir -p $PKG/usr/lib${LIBDIRSUFFIX}/pkgconfig
     ( cd $PKG/usr/lib${LIBDIRSUFFIX}/pkgconfig ; ln -sf /usr/lib${LIBDIRSUFFIX}/qt/lib/pkgconfig/$file . )
   done
 )
+
+# Install Qt's private headers - at least Gentoo and Fedora are adding these
+# and some software has (inevitably) started depending on them:
+# We're using `rsync -R` as easy way to preserve relative path names:
+rsync -aR \
+  include/Qt{Core,Declarative,Gui,Script}/private \
+  src/{corelib,declarative,gui,script}/*/*_p.h \
+  ${PKG}/usr/lib${LIBDIRSUFFIX}/qt/
 
 # Add menu entries for all those hidden but great Qt applications:
 # Qt logo:
