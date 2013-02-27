@@ -86,6 +86,10 @@ CFLAGS=$SLKCFLAGS \
   --libdir=/usr/lib${LIBDIRSUFFIX} \
   --mandir=/usr/man \
   --sysconfdir=/etc \
+  --with-templatedir=/etc/fonts/conf.avail \
+  --with-baseconfigdir=/etc/fonts \
+  --with-configdir=/etc/fonts/conf.d \
+  --with-xmldir=/etc/fonts \
   --localstatedir=/var \
   --enable-static=no \
   --build=$ARCH-slackware-linux
@@ -93,6 +97,15 @@ CFLAGS=$SLKCFLAGS \
 # Uses a currently non-functional sgml tool, thus '-i':
 make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG || exit 1
+
+# Upstream has changed the default templatedir to /usr/share/fontconfig/conf.avail.
+# This change, if accepted, would break any existing font package containing a
+# conf.avail directory.  The safest thing to do is to keep things in the
+# traditional location, but put a link in the new place so that font packages
+# following the new standard location will work.  Let's hear it for being
+# "more correct" at the expense of having things "just work"!
+mkdir -p $PKG/usr/share/fontconfig
+( cd $PKG/usr/share/fontconfig ; ln -sf /etc/fonts/conf.avail . )
 
 mkdir -p $PKG/usr/doc/fontconfig-$VERSION
 cp -a \
