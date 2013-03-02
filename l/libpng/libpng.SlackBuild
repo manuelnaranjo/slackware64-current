@@ -76,6 +76,8 @@ sed -i '/\t$(MAKE) $(AM_MAKEFLAGS) install-\(data\|exec\)-hook/ d' Makefile
 make -j4 || exit 1
 make install DESTDIR=$PKG
 
+rm -f $PKG/$PREFIX/lib${LIBDIRSUFFIX}/libpng{14,}.a
+
 (cd $PKG/$PREFIX
   rename '14' '' bin/*
   rm -f bin/libpng-config # I hate these crappy NIH syndrome *-config binaries
