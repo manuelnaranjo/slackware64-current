@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright 2008, 2009, 2010  Patrick J. Volkerding, Sebeka, Minnesota, USA
+# Copyright 2008, 2009, 2010, 2013  Patrick J. Volkerding, Sebeka, Minnesota, USA
 # All rights reserved.
 #
 # Redistribution and use of this script, with or without modification, is
@@ -22,7 +22,7 @@
 
 
 VERSION=${VERSION:-$(echo fontconfig-*.tar.?z* | rev | cut -f 3- -d . | cut -f 1 -d - | rev)}
-BUILD=${BUILD:-1}
+BUILD=${BUILD:-2}
 
 # Automatically determine the architecture we're building on:
 if [ -z "$ARCH" ]; then
@@ -77,12 +77,25 @@ CFLAGS="-O2" \
   --mandir=/${PREFIX}/man \
   --sysconfdir=/${PREFIX}/etc \
   --localstatedir=/${PREFIX}/var \
+  --with-templatedir=/${PREFIX}/etc/fonts/conf.avail \
+  --with-baseconfigdir=/${PREFIX}/etc/fonts \
+  --with-configdir=/${PREFIX}/etc/fonts/conf.d \
+  --with-xmldir=/${PREFIX}/etc/fonts \
   --host=${HOST_TRIPLET} \
   --enable-static=no \
   --build=$ARCH-slackware-linux
 
 make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG || exit 1
+
+# Upstream has changed the default templatedir to /usr/share/fontconfig/conf.avail.
+# This change, if accepted, would break any existing font package containing a
+# conf.avail directory.  The safest thing to do is to keep things in the
+# traditional location, but put a link in the new place so that font packages
+# following the new standard location will work.  Let's hear it for being
+# "more correct" at the expense of having things "just work"!
+mkdir -p $PKG/${PREFIX}/share/fontconfig
+( cd $PKG/${PREFIX}/share/fontconfig ; ln -sf /etc/fonts/conf.avail . )
 
 mkdir -p $PKG/${PREFIX}/doc/fontconfig-$VERSION
 cp -a \
@@ -106,7 +119,6 @@ find $PKG | xargs file | egrep "executable|shared object" \
 # Set up the default options in /etc/fonts/conf.d:
 (  cd $PKG/etc/fonts/conf.d
    for fontconf in \
-        20-fix-globaladvance.conf \
         20-unhint-small-vera.conf \
         30-urw-aliases.conf \
         30-metric-aliases.conf \
@@ -121,7 +133,12 @@ find $PKG | xargs file | egrep "executable|shared object" \
         69-unifont.conf \
         80-delicious.conf \
         90-synthetic.conf ; do
-     ln -sf ../conf.avail/$fontconf . || exit 1
+     if [ -r ../conf.avail/$fontconf ]; then
+       ln -sf ../conf.avail/$fontconf .
+     else
+       echo "ERROR:  unable to symlink ../conf.avail/$fontconf, file does not exist."
+       exit 1
+     fi
    done
    if [ ! $? = 0 ]; then
      exit 1
@@ -155,4 +172,3 @@ cat ${CWD}/fontconfig.yypkg.meta | sed \
   -e "s/%{BUILD}/${BUILD}/" \
   -e "s/%{DESCR}/${DESCR:-"No description"}/" \
   | makeypkg -o ${YYOUTPUT} -meta - "${PKG}/${PREFIX}"
-

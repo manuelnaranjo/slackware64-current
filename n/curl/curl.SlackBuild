@@ -23,7 +23,7 @@
 
 PKGNAM=curl
 VERSION=${VERSION:-$(echo curl-*.tar.bz2 | rev | cut -f 3- -d . | cut -f 1 -d - | rev)}
-BUILD=${BUILD:-1}
+BUILD=${BUILD:-2}
 
 # Automatically determine the architecture we're building on:
 if [ -z "$ARCH" ]; then
@@ -59,6 +59,8 @@ cd $TMP
 rm -rf curl-$VERSION
 tar xvf $CWD/curl-$VERSION.tar.bz2 || exit 1
 cd curl-$VERSION
+
+zcat $CWD/0001-Fix-NULL-pointer-reference-when-closing-an-unused-mu.patch.gz | patch -p1 --verbose || exit 1
 
 chown -R root:root .
 find . \

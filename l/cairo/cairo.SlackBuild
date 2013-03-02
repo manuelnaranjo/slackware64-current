@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright 2008, 2009, 2010, 2011  Patrick J. Volkerding, Sebeka, MN, USA
+# Copyright 2008, 2009, 2010, 2011, 2013  Patrick J. Volkerding, Sebeka, MN, USA
 # All rights reserved.
 #
 # Redistribution and use of this script, with or without modification, is
@@ -21,8 +21,9 @@
 #  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-VERSION=1.10.2
-BUILD=${BUILD:-2}
+PKGNAM=cairo
+VERSION=${VERSION:-$(echo $PKGNAM-*.tar.?z* | rev | cut -f 3- -d . | cut -f 1 -d - | rev)}
+BUILD=${BUILD:-1}
 
 # Automatically determine the architecture we're building on:
 if [ -z "$ARCH" ]; then
@@ -47,24 +48,20 @@ esac
 
 CWD=$(pwd)
 TMP=${TMP:-/tmp}
-PKG=$TMP/package-cairo
+PKG=$TMP/package-$PKGNAM
 rm -rf $PKG
 mkdir -p $TMP $PKG
 
 cd $TMP
-rm -rf cairo-$VERSION
-tar xvf $CWD/cairo-$VERSION.tar.?z* || exit 1
-cd cairo-$VERSION
+rm -rf $PKGNAM-$VERSION
+tar xvf $CWD/$PKGNAM-$VERSION.tar.?z* || exit 1
+cd $PKGNAM-$VERSION
 chown -R root:root .
 find . \
   \( -perm 777 -o -perm 775 -o -perm 711 -o -perm 555 -o -perm 511 \) \
   -exec chmod 755 {} \; -o \
   \( -perm 666 -o -perm 664 -o -perm 600 -o -perm 444 -o -perm 440 -o -perm 400 \) \
   -exec chmod 644 {} \;
-
-# Thanks to Ubuntu for this, but I found it at Gentoo's bugtracker
-# http://bugs.gentoo.org/show_bug.cgi?id=336696
-zcat $CWD/cairo-1.10.0-buggy_gradients.patch.gz | patch -p1 || exit 1
 
 CFLAGS="$SLKCFLAGS -Dffs=__builtin_ffs" \
 ./configure \
@@ -81,17 +78,21 @@ CFLAGS="$SLKCFLAGS -Dffs=__builtin_ffs" \
   --enable-pdf \
   --enable-svg \
   --enable-gobject \
-  --host=${HOST_TRIPLET} \
+  --enable-xml \
   --build=$ARCH-slackware-linux
+
 # None of these are 'stable' yet...
 #  --enable-tee \
 #  --enable-qt \
 #  --enable-gl \
 #  --enable-drm \
-#  --enable-xcb \
 #  --enable-xlib-xcb \
-#  --enable-xcb-drm \
-#  --enable-drm-xr \
+#  --enable-xcb-shm \
+
+# Not sure if these two are needed / useful yet; --enable-xcb is now default
+#  --enable-xcb-shm \
+#  --enable-xlib-xcb \
+
 # Skipping this, because it causes a dependency on the specific
 # version of binutils installed at compile time:
 #  --enable-trace
@@ -103,18 +104,24 @@ find $PKG | xargs file | egrep -e "executable|shared object" \
   | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : \
   | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
 
-mkdir -p $PKG/${PREFIX}/doc/cairo-$VERSION
+mkdir -p $PKG/${PREFIX}/doc/$PKGNAM-$VERSION
 cp -a \
   AUTHORS BIBLIOGRAPHY BUGS CODING_STYLE COPYING* HACKING NEWS PORTING_GUIDE README RELEASING \
-  $PKG/${PREFIX}/doc/cairo-$VERSION
-( cd $PKG/${PREFIX}/doc/cairo-$VERSION ; ln -sf /${PREFIX}/share/gtk-doc/html/cairo html )
+  $PKG/${PREFIX}/doc/$PKGNAM-$VERSION
+( cd $PKG/${PREFIX}/doc/$PKGNAM-$VERSION ; ln -sf /${PREFIX}/share/gtk-doc/html/cairo html )
 
-cat ${CWD}/cairo.yypkg.meta | sed \
-  -e "s/%{PKG}/cairo/" \
+# We do not need the entire NEWS file.
+if [ -r NEWS ]; then
+  DOCSDIR=$(echo $PKG/usr/doc/*-$VERSION)
+  cat NEWS | head -n 1000 > $DOCSDIR/NEWS
+  touch -r NEWS $DOCSDIR/NEWS
+fi
+
+cat ${CWD}/$PKGNAM.yypkg.meta | sed \
+  -e "s/%{PKG}/$PKGNAM/" \
   -e "s/%{HST}/${HOST_TRIPLET}/" \
   -e "s/%{TGT}//" \
   -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
   -e "s/%{BUILD}/${BUILD}/" \
   -e "s/%{DESCR}/${DESCR:-"No description"}/" \
   | makeypkg -o ${YYOUTPUT} -meta - "${PKG}/${PREFIX}"
-
