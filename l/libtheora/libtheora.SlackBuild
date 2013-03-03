@@ -64,6 +64,7 @@ CFLAGS="$SLKCFLAGS" \
   --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
   --disable-static \
+  --disable-examples \
   --host=${HOST_TRIPLET} \
   --build=$ARCH-slackware-linux
 
