@@ -79,6 +79,7 @@ CFLAGS="$SLKCFLAGS -Dffs=__builtin_ffs" \
   --enable-svg \
   --enable-gobject \
   --enable-xml \
+  --host=${HOST_TRIPLET} \
   --build=$ARCH-slackware-linux
 
 # None of these are 'stable' yet...
