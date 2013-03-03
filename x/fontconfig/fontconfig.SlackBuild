@@ -81,8 +81,9 @@ CFLAGS="-O2" \
   --with-baseconfigdir=/${PREFIX}/etc/fonts \
   --with-configdir=/${PREFIX}/etc/fonts/conf.d \
   --with-xmldir=/${PREFIX}/etc/fonts \
-  --host=${HOST_TRIPLET} \
   --enable-static=no \
+  --disable-docs \
+  --host=${HOST_TRIPLET} \
   --build=$ARCH-slackware-linux
 
 make $NUMJOBS || make || exit 1
