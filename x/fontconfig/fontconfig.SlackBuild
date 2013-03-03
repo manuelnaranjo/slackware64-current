@@ -96,7 +96,7 @@ make install DESTDIR=$PKG || exit 1
 # following the new standard location will work.  Let's hear it for being
 # "more correct" at the expense of having things "just work"!
 mkdir -p $PKG/${PREFIX}/share/fontconfig
-( cd $PKG/${PREFIX}/share/fontconfig ; ln -sf /etc/fonts/conf.avail . )
+( cd $PKG/${PREFIX}/share/fontconfig ; ln -sf /${PREFIX}/etc/fonts/conf.avail . )
 
 mkdir -p $PKG/${PREFIX}/doc/fontconfig-$VERSION
 cp -a \
@@ -117,8 +117,8 @@ fi
 find $PKG | xargs file | egrep "executable|shared object" \
   | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
 
-# Set up the default options in /etc/fonts/conf.d:
-(  cd $PKG/etc/fonts/conf.d
+# Set up the default options in /${PREFIX}/etc/fonts/conf.d:
+(  cd $PKG/${PREFIX}/etc/fonts/conf.d
    for fontconf in \
         20-unhint-small-vera.conf \
         30-urw-aliases.conf \
@@ -146,7 +146,7 @@ find $PKG | xargs file | egrep "executable|shared object" \
    fi
 )
 if [ ! $? = 0 ]; then
-  echo "Missing /etc/fonts/$fontconf default.  Exiting"
+  echo "Missing /${PREFIX}/etc/fonts/$fontconf default.  Exiting"
   exit 1
 fi
 
