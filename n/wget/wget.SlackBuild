@@ -36,17 +36,10 @@ if [ -z "$ARCH" ]; then
   esac
 fi
 
-if [ "$ARCH" = "i386" ]; then
-  SLKCFLAGS="-O2 -march=i386 -mtune=i686"
-elif [ "$ARCH" = "i486" ]; then
-  SLKCFLAGS="-O2 -march=i486 -mtune=i686"
-elif [ "$ARCH" = "s390" ]; then
-  SLKCFLAGS="-O2"
-elif [ "$ARCH" = "x86_64" ]; then
-  SLKCFLAGS="-O2 -fPIC"
-else
-  SLKCFLAGS="-O2"
-fi
+case "${HOST_TRIPLET}" in
+  i686-w64-mingw32) LIBDIRSUFFIX="" ;;
+  x86_64-w64-mingw32) LIBDIRSUFFIX="64" ;;
+esac
 
 CWD=$(pwd)
 TMP=${TMP:-/tmp}
@@ -67,12 +60,13 @@ find . \
 
 CFLAGS="$SLKCFLAGS" \
 ./configure  \
-  --prefix=/usr \
-  --sysconfdir=/etc \
-  --mandir=/usr/man \
-  --infodir=/usr/info \
-  --docdir=/usr/doc/wget-$VERSION \
+  --prefix=/${PREFIX} \
+  --sysconfdir=/${PREFIX}/etc \
+  --mandir=/${PREFIX}/man \
+  --infodir=/${PREFIX}/info \
+  --docdir=/${PREFIX}/doc/wget-$VERSION \
   --with-ssl=openssl \
+  --host=${HOST_TRIPLET} \
   --build=${ARCH}-slackware-linux
 
 make $NUMJOBS || make || exit 1
@@ -80,21 +74,22 @@ make install DESTDIR=$PKG || exit 1
 
 mv $PKG/etc/wgetrc $PKG/etc/wgetrc.new
 
-find $PKG | xargs file | grep -e "executable" -e "shared object" | grep ELF \
-  | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
+find $PKG | xargs file | egrep -e "executable|shared object" \
+  | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : \
+  | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
 
-rm -f $PKG/usr/info/dir 
-gzip -9 $PKG/usr/info/* $PKG/usr/man/man?/*
+rm -f $PKG/${PREFIX}/info/dir 
+gzip -9 $PKG/${PREFIX}/info/* $PKG/${PREFIX}/man/man?/*
 
-mkdir -p $PKG/usr/doc/wget-$VERSION
+mkdir -p $PKG/${PREFIX}/doc/wget-$VERSION
 cp -a \
   AUTHORS COPYING* MAILING-LIST NEWS PATCHES README* TODO \
-  $PKG/usr/doc/wget-$VERSION
+  $PKG/${PREFIX}/doc/wget-$VERSION
 
 # If there's a ChangeLog, installing at least part of the recent history
 # is useful, but don't let it get totally out of control:
 if [ -r ChangeLog ]; then
-  DOCSDIR=$(echo $PKG/usr/doc/*-$VERSION)
+  DOCSDIR=$(echo $PKG/${PREFIX}/doc/*-$VERSION)
   cat ChangeLog | head -n 1000 > $DOCSDIR/ChangeLog
   touch -r ChangeLog $DOCSDIR/ChangeLog
 fi
@@ -103,6 +98,11 @@ mkdir -p $PKG/install
 cat $CWD/slack-desc > $PKG/install/slack-desc
 zcat $CWD/doinst.sh.gz > $PKG/install/doinst.sh
 
-cd $PKG
-/sbin/makepkg -l y -c n $TMP/wget-$VERSION-$ARCH-$BUILD.txz
-
+cat ${CWD}/wget.yypkg.meta | sed \
+  -e "s/%{PKG}/wget/" \
+  -e "s/%{HST}/${HOST_TRIPLET}/" \
+  -e "s/%{TGT}//" \
+  -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
+  -e "s/%{BUILD}/${BUILD}/" \
+  -e "s/%{DESCR}/${DESCR:-"No description"}/" \
+  | makeypkg -o ${YYOUTPUT} -meta - "${PKG}/${PREFIX}"
