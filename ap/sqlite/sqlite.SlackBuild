@@ -147,7 +147,7 @@ cat ${CWD}/${PKGNAM}.yypkg.meta | sed \
   -e "s/%{PKG}/${PKGNAM}/" \
   -e "s/%{HST}/${HOST_TRIPLET}/" \
   -e "s/%{TGT}//" \
-  -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
+  -e "s/%{VER}/$(echo ${OLD_STYLE} | tr . ' ')/" \
   -e "s/%{BUILD}/${BUILD}/" \
   -e "s/%{DESCR}/${DESCR:-"No description"}/" \
   | makeypkg -o ${YYOUTPUT} -meta - "${PKG}/${PREFIX}"
