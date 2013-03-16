@@ -126,17 +126,18 @@ cp -a include/libiberty.h $PKG/${PREFIX}/include/libiberty.h
 ( cd $PKG/${PREFIX}/bin ; mv strings strings-GNU )
 ( cd $PKG/${PREFIX}/man/man1 ; mv strings.1 strings-GNU.1 )
 
-# Move ldscripts to ${PREFIX}/lib${LIBDIRSUFFIX}, and then put symlinks in place
-mv $PKG/${PREFIX}/${TARGET_TRIPLET}/lib/ldscripts $PKG/${PREFIX}/lib${LIBDIRSUFFIX}
-( cd $PKG/${PREFIX}/${TARGET_TRIPLET}
-  ln -s /${PREFIX}/lib${LIBDIRSUFFIX}/ldscripts lib/ldscripts
-  for FILE in ar as ld ld.bfd ld.gold nm objcopy objdump ranlib strip ; do
-    if [ -r "$PKG/${PREFIX}/bin/$FILE" ]; then
-      rm -f bin/$FILE
-      ln -s /${PREFIX}/bin/$FILE bin/$FILE
-    fi
-  done
-)
+# This bombs out when installing on windows since symlinks are not usable.
+# # Move ldscripts to ${PREFIX}/lib${LIBDIRSUFFIX}, and then put symlinks in place
+# mv $PKG/${PREFIX}/${TARGET_TRIPLET}/lib/ldscripts $PKG/${PREFIX}/lib${LIBDIRSUFFIX}
+# ( cd $PKG/${PREFIX}/${TARGET_TRIPLET}
+#   ln -s /${PREFIX}/lib${LIBDIRSUFFIX}/ldscripts lib/ldscripts
+#   for FILE in ar as ld ld.bfd ld.gold nm objcopy objdump ranlib strip ; do
+#     if [ -r "$PKG/${PREFIX}/bin/$FILE" ]; then
+#       rm -f bin/$FILE
+#       ln -s /${PREFIX}/bin/$FILE bin/$FILE
+#     fi
+#   done
+# )
 
 # If the requested default linker is present, make it the default:
 # Set the link differently on the system to change the default at runtime.
