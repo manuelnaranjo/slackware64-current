@@ -143,6 +143,7 @@ export CROSS_COMPILE="${HOST_TRIPLET}-"
 set +x
 
 make install INSTALL_PREFIX=$PKG1 || exit 1
+cp lib{crypto,ssl}-1.0.0.dll $PKG1/${PREFIX}/bin
 
 rm $PKG1/${PREFIX}/lib${LIBDIRSUFFIX}/lib{crypto,ssl}.a
 
