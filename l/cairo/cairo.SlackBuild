@@ -38,12 +38,8 @@ fi
 NUMJOBS=${NUMJOBS:-" -j7 "}
 
 case "${HOST_TRIPLET}" in
-  i686-w64-mingw32)
-    LIBDIRSUFFIX=""
-    ;;
-  x86_64-w64-mingw32)
-    LIBDIRSUFFIX="64"
-    ;;
+  i686-w64-mingw32) LIBDIRSUFFIX="" ;;
+  x86_64-w64-mingw32) LIBDIRSUFFIX="64" ;;
 esac
 
 CWD=$(pwd)
@@ -110,6 +106,7 @@ cp -a \
   AUTHORS BIBLIOGRAPHY BUGS CODING_STYLE COPYING* HACKING NEWS PORTING_GUIDE README RELEASING \
   $PKG/${PREFIX}/doc/$PKGNAM-$VERSION
 ( cd $PKG/${PREFIX}/doc/$PKGNAM-$VERSION ; ln -sf /${PREFIX}/share/gtk-doc/html/cairo html )
+ln -sf ../share/gtk-doc/html/cairo $PKG/${PREFIX}/doc/$PKGNAM-$VERSION/html
 
 # We do not need the entire NEWS file.
 if [ -r NEWS ]; then
