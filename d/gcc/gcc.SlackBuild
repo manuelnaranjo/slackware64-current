@@ -471,11 +471,17 @@ fi
   fi
 
   # Add, e.g., /opt/mgw32_windows_32/{include,lib} to default search paths
-  if [ -n "${YYPREFIX_TARGET_PREFIX}" ]; then
-    sed -i "/^\*link:$/ { N; s;$; -L/${YYPREFIX_TARGET_PREFIX}/lib${LIBDIRSUFFIX_TGT}; }" ${PKG_GCC}/${SPECS}
-    sed -i "/^\*cpp:$/ { N; s;$; -I/${YYPREFIX_TARGET_PREFIX}/include; }" ${PKG_GCC}/${SPECS}
-    sed -i "/^\*cc1plus:$/ { N; s;$; -I/${YYPREFIX_TARGET_PREFIX}/include; }" ${PKG_GCC}/${SPECS}
+  if [ x"${HOST_TRIPLET}" = x"${TARGET_TRIPLET}" ]; then
+    prefix_dir="!{YYPREFIX}"
+  else
+    prefix_dir="${YYPREFIX_TARGET_PREFIX}"
   fi
+
+  sed -i \
+    -e "/^\*link:$/ { N; s;$; -L/${prefix_dir}/lib${LIBDIRSUFFIX_TGT}; }" \
+    -e "/^\*cpp:$/ { N; s;$; -I/${prefix_dir}/include; }" \
+    -e "/^\*cc1plus:$/ { N; s;$; -I/${prefix_dir}/include; }" \
+    ${PKG_GCC}/${SPECS}
 
   # Make our 64bit gcc look for 32bit gcc binaries in ./32 subdirectory:
   if [ "$ARCH" = "x86_64" ]; then
@@ -497,8 +503,8 @@ fi
   compress_info_files ${PKG_GCC}
   ( cd $PKG_GCC
     # *not* ${LIBDIRSUFFIX_HST}
-    mkdir -p lib
-    ln -sf /${PREFIX}/bin/cpp lib/cpp
+    mkdir -p ${PREFIX}/lib
+    ln -sf /${PREFIX}/bin/cpp ${PREFIX}/lib/cpp
   )
 
   ( cd $PKG_GCC/${PREFIX}/bin
@@ -685,6 +691,8 @@ for COMPILER in ${ALL_COMPILERS}; do
     -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
     -e "s/%{BUILD}/${BUILD}/" \
     -e "s/%{DESCR}/$(description_of_compiler "${COMPILER}")/" \
+    -e "s;%{SPECS_FILE};lib${LIBDIRSUFFIX_HST}/gcc/${TARGET_TRIPLET}/${VERSION}/specs;" \
+    -e "s;%{PREFIX};$(basename ${PREFIX});g" \
     | makeypkg -o ${YYOUTPUT} -script - "$(pkg_of_element "${COMPILER}")/${PREFIX}"
 done
 
