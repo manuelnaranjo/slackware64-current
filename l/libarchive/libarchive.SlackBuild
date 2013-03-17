@@ -61,6 +61,12 @@ find . \
  \( -perm 666 -o -perm 664 -o -perm 600 -o -perm 444 -o -perm 440 -o -perm 400 \) \
  -exec chmod 644 {} \;
 
+case "${HOST_TRIPLET}" in
+  *-*-mingw*)
+    sed -i -e 's/\(linkname\) = archive_entry_symlink_w(a->entry)/\1 = NULL/' \
+      libarchive/archive_write_disk_windows.c ;;
+esac
+
 CFLAGS="-O2" \
 CXXFLAGS="-O2" \
 ./configure \
