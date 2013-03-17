@@ -68,6 +68,7 @@ CFLAGS="$SLKCFLAGS" \
   --infodir=/${PREFIX}/info \
   --docdir=/${PREFIX}/doc/wget-$VERSION \
   --with-ssl=openssl \
+  ${CONFIGURE_OPTIONS} \
   --host=${HOST_TRIPLET} \
   --build=${ARCH}-slackware-linux
 
