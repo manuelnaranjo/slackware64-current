@@ -100,11 +100,11 @@ mkdir -p $PKG/install
 cat $CWD/slack-desc > $PKG/install/slack-desc
 zcat $CWD/doinst.sh.gz > $PKG/install/doinst.sh
 
-cat ${CWD}/wget.yypkg.meta | sed \
+cat ${CWD}/wget.yypkg.script | sed \
   -e "s/%{PKG}/wget/" \
   -e "s/%{HST}/${HOST_TRIPLET}/" \
   -e "s/%{TGT}//" \
   -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
   -e "s/%{BUILD}/${BUILD}/" \
   -e "s/%{DESCR}/${DESCR:-"No description"}/" \
-  | makeypkg -o ${YYOUTPUT} -meta - "${PKG}/${PREFIX}"
+  | makeypkg -o ${YYOUTPUT} -script - "${PKG}/${PREFIX}"

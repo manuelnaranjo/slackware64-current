@@ -87,12 +87,12 @@ find $PKG | xargs file | egrep -e "executable|shared object" \
   | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : \
   | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
 
-cat ${CWD}/giflib.yypkg.meta | sed \
+cat ${CWD}/giflib.yypkg.script | sed \
   -e "s/%{PKG}/giflib/" \
   -e "s/%{HST}/${HOST_TRIPLET}/" \
   -e "s/%{TGT}//" \
   -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
   -e "s/%{BUILD}/${BUILD}/" \
   -e "s/%{DESCR}/${DESCR:-"No description"}/" \
-  | makeypkg -o ${YYOUTPUT} -meta - "${PKG}/${PREFIX}"
+  | makeypkg -o ${YYOUTPUT} -script - "${PKG}/${PREFIX}"
 

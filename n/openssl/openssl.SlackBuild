@@ -182,12 +182,12 @@ mkdir -p ${PREFIX}/doc/openssl-$VERSION
     $PKG1/${PREFIX}/doc/openssl-$VERSION
 )
 
-cat ${CWD}/openssl.yypkg.meta | sed \
+cat ${CWD}/openssl.yypkg.script | sed \
   -e "s/%{PKG}/openssl/" \
   -e "s/%{HST}/${HOST_TRIPLET}/" \
   -e "s/%{TGT}//" \
   -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
   -e "s/%{BUILD}/${BUILD}/" \
   -e "s/%{DESCR}/${DESCR:-"No description"}/" \
-  | makeypkg -o ${YYOUTPUT} -meta - "${PKG1}/${PREFIX}"
+  | makeypkg -o ${YYOUTPUT} -script - "${PKG1}/${PREFIX}"
 

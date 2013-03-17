@@ -100,12 +100,12 @@ fi
 mkdir -p $PKG/${PREFIX}/doc/libjpeg-$VERSION
 cp -a README $PKG/${PREFIX}/doc/libjpeg-$VERSION
 
-cat ${CWD}/libjpeg.yypkg.meta | sed \
+cat ${CWD}/libjpeg.yypkg.script | sed \
   -e "s/%{PKG}/libjpeg/" \
   -e "s/%{HST}/${HOST_TRIPLET}/" \
   -e "s/%{TGT}//" \
   -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
   -e "s/%{BUILD}/${BUILD}/" \
   -e "s/%{DESCR}/${DESCR:-"No description"}/" \
-  | makeypkg -o ${YYOUTPUT} -meta - "${PKG}/${PREFIX}"
+  | makeypkg -o ${YYOUTPUT} -script - "${PKG}/${PREFIX}"
 

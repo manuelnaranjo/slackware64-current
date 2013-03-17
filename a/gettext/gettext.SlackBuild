@@ -98,11 +98,12 @@ cp -a \
   AUTHORS BUGS intl/COPYING.LIB-2.0 intl/COPYING.LIB-2.1 INSTALL NEWS README \
   $PKG/${PREFIX}/doc/gettext-$VERSION
 
-cat ${CWD}/gettext.yypkg.meta | sed \
+cat ${CWD}/gettext.yypkg.script | sed \
+  -e "s/%{PKG}/gettext/" \
   -e "s/%{HST}/${HOST_TRIPLET}/" \
   -e "s/%{TGT}//" \
   -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
   -e "s/%{BUILD}/${BUILD}/" \
   -e "s/%{DESCR}/${DESCR:-"No description"}/" \
-  | makeypkg -o ${YYOUTPUT} -meta - "${PKG}/${PREFIX}"
+  | makeypkg -o ${YYOUTPUT} -script - "${PKG}/${PREFIX}"
 

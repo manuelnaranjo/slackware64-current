@@ -175,11 +175,13 @@ fi
 
 chown -R root:root $PKG/${PREFIX}/doc/binutils-$VERSION
 
-cat ${CWD}/binutils.yypkg.meta | sed \
+cat ${CWD}/binutils.yypkg.script | sed \
+  -e "s/%{PKG}/${PKGNAM}/" \
   -e "s/%{HST}/${HOST_TRIPLET}/" \
   -e "s/%{TGT}/${TARGET_TRIPLET}/" \
   -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
-  | makeypkg -o ${YYOUTPUT} -meta - ${PKG}/${PREFIX}
+  -e "s/%{BUILD}/${BUILD}/" \
+  | makeypkg -o ${YYOUTPUT} -script - ${PKG}/${PREFIX}
 
 cat << EOF
 

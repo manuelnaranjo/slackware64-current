@@ -130,14 +130,14 @@ package() {
   DESTDIR="$(destdir_of_package "${1}")"
   PKGNAM="sdl${1:+"-$(echo $1 | cut -f1 -d- | cut -f2 -d_)"}"
 
-  cat ${CWD}/sdl.yypkg.meta | sed \
+  cat ${CWD}/sdl.yypkg.script | sed \
     -e "s/%{PKG}/${PKGNAM}/" \
     -e "s/%{HST}/${HOST_TRIPLET}/" \
     -e "s/%{TGT}//" \
     -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
     -e "s/%{BUILD}/${BUILD}/" \
     -e "s/%{DESCR}/${DESCR:-"No description"}/" \
-    | makeypkg -o ${YYOUTPUT} -meta - "${DESTDIR}/${PREFIX}"
+    | makeypkg -o ${YYOUTPUT} -script - "${DESTDIR}/${PREFIX}"
 }
 
 build_other() {
