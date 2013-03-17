@@ -1,0 +1,12 @@
+export CONFIGURE_OPTIONS=" \
+  --enable-bsdtar=static \
+  --disable-bsdcpio \
+  --without-zlib \
+  --without-bz2lib \
+  --without-lzmadec \
+  --without-lzo2 \
+  --without-iconv \
+  --without-nettle \
+  --without-openssl \
+  --without-xml2 \
+  --without-expat"

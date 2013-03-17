@@ -75,7 +75,7 @@ CXXFLAGS="-O2" \
   --sysconfdir=/${PREFIX}/etc \
   --localstatedir=/${PREFIX}/var \
   --mandir=/${PREFIX}/man \
-  --disable-static \
+  ${CONFIGURE_OPTIONS} \
   --host=${HOST_TRIPLET} \
   --build=$ARCH-slackware-linux
 
