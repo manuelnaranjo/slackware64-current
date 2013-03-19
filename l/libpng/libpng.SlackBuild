@@ -78,14 +78,8 @@ make install DESTDIR=$PKG
 
 rm -f $PKG/$PREFIX/lib${LIBDIRSUFFIX}/libpng{14,}.a
 
-(cd $PKG/$PREFIX
-  rename '14' '' bin/*
-  rm -f bin/libpng-config # I hate these crappy NIH syndrome *-config binaries
-  rename '14' '' lib${LIBDIRSUFFIX}/*
-  rename '14' '' lib${LIBDIRSUFFIX}/pkgconfig/*.pc
-  sed -i -e 's;-lpng14;-lpng;' -e 's;include/libpng14;include/libpng;' lib${LIBDIRSUFFIX}/pkgconfig/libpng.pc
-  mv include/libpng14 include/libpng
-  )
+# I hate these crappy NIH syndrome *-config binaries
+rm -f $PKG/$PREFIX/bin/libpng-config
 
 find $PKG | xargs file | egrep "executable|shared object" \
   | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
