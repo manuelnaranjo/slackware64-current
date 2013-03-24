@@ -22,7 +22,7 @@
 
 
 VERSION=${VERSION:-$(echo gtk+-*.tar.?z* | rev | cut -f 3- -d . | cut -f 1 -d - | rev)}
-BUILD=${BUILD:-2}
+BUILD=${BUILD:-1}
 
 NUMJOBS=${NUMJOBS:-" -j7 "}
 
@@ -116,9 +116,6 @@ make install \
   DESTDIR=$PKG \
   || exit 1
 
-mkdir -p $PKG/etc/gtk-2.0/$host
-mv $PKG/etc/gtk-2.0/gtk.immodules $PKG/etc/gtk-2.0/$host/
-
 # Don't clobber im-multipress.conf
 mv $PKG/etc/gtk-2.0/im-multipress.conf $PKG/etc/gtk-2.0/im-multipress.conf.new || exit 1
 
@@ -176,7 +173,7 @@ fi
 
 mkdir -p $PKG/usr/doc/gtk+-$VERSION
 cp -a \
-  AUTHORS COPYING* NEWS README* TODO \
+  AUTHORS COPYING* NEWS README* \
   $PKG/usr/doc/gtk+-$VERSION
 ( cd $PKG/usr/doc/gtk+-$VERSION
   ln -s ../../share/gtk-doc/html/gail-libgail-util .
