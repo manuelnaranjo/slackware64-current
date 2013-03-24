@@ -94,9 +94,6 @@ make install \
   DESTDIR=$PKG \
   || exit 1
 
-# Don't clobber im-multipress.conf
-mv $PKG/etc/gtk-2.0/im-multipress.conf $PKG/etc/gtk-2.0/im-multipress.conf.new || exit 1
-
 # Install a "starter" gtkrc
 echo 'gtk-theme-name="GTK+"' > $PKG/${PREFIX}/etc/gtk-2.0/gtkrc
 
