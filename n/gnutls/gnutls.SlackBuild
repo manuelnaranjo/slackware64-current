@@ -67,8 +67,11 @@ else
   exit 1
 fi
 
-
-cd $PKGNAM-$VERSION
+if [ x"${VERSION}" = x"3.1.9.1" ]; then
+  cd $PKGNAM-3.1.9
+else
+  cd $PKGNAM-$VERSION
+fi
 chown -R root:root .
 chmod -R u+w,go+r-w,a-s .
 
