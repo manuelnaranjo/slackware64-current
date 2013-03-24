@@ -4,7 +4,7 @@
   (description "%{DESCR}") (host %{HST}) (target (%{TGT})) (predicates ())
   (comments ()))
  ((expand_%{PREFIX} (Expand %{PREFIX}/ .))
-  (specs_file_fixup
+  (specs_file_fixup-can-fail
     (SearchReplace ("%{SPECS_FILE}" "!{YYPREFIX}" "${YYPREFIX}")))
   )
  ((Reverse expand_%{PREFIX})))
