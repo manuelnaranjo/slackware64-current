@@ -22,7 +22,7 @@
 
 
 VERSION=${VERSION:-$(echo gtk+-*.tar.?z* | rev | cut -f 3- -d . | cut -f 1 -d - | rev)}
-BUILD=${BUILD:-2}
+BUILD=${BUILD:-1}
 
 NUMJOBS=${NUMJOBS:-" -j7 "}
 
@@ -94,6 +94,9 @@ make install \
   DESTDIR=$PKG \
   || exit 1
 
+# Don't clobber im-multipress.conf
+mv $PKG/etc/gtk-2.0/im-multipress.conf $PKG/etc/gtk-2.0/im-multipress.conf.new || exit 1
+
 # Install a "starter" gtkrc
 echo 'gtk-theme-name="GTK+"' > $PKG/${PREFIX}/etc/gtk-2.0/gtkrc
 
@@ -119,7 +122,7 @@ fi
 
 mkdir -p $PKG/${PREFIX}/doc/gtk+-$VERSION
 cp -a \
-  AUTHORS COPYING* NEWS README* TODO \
+  AUTHORS COPYING* NEWS README* \
   $PKG/${PREFIX}/doc/gtk+-$VERSION
 ( cd $PKG/${PREFIX}/doc/gtk+-$VERSION
   ln -s ../../share/gtk-doc/html/gail-libgail-util .

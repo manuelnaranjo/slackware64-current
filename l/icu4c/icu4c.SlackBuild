@@ -2,8 +2,8 @@
 
 # Slackware build script for icu4c
 
-# Copyright 2007-2012 Heinz Wiesinger, Amsterdam, The Netherlands
-# Copyright 2012  Patrick J. Volkerding, Sebeka, MN, USA
+# Copyright 2007-2013 Heinz Wiesinger, Amsterdam, The Netherlands
+# Copyright 2012, 2013  Patrick J. Volkerding, Sebeka, MN, USA
 # All rights reserved.
 #
 # Redistribution and use of this script, with or without modification, is
@@ -95,6 +95,7 @@ cd source/
     --disable-static \
     --sysconfdir=/${PREFIX}/etc \
     --localstatedir=/${PREFIX}/var \
+    --disable-samples \
     --host=${HOST_TRIPLET} \
     --with-cross-build=${TMP}/icu-native/source \
     --build=$ARCH-slackware-linux || exit 1
@@ -111,7 +112,7 @@ find $PKG/${PREFIX}/man -type f -exec gzip -9 {} \;
 
 mkdir -p $PKG/${PREFIX}/doc/icu4c-$VERSION
 cp -a \
-  license.html readme.html unicode-license.txt $PKG/${PREFIX}/doc/icu4c-$VERSION
+  license.html readme.html $PKG/${PREFIX}/doc/icu4c-$VERSION
 
 cat ${CWD}/${PKGNAM}.yypkg.script | sed \
   -e "s/%{PKG}/${PKGNAM}/" \
