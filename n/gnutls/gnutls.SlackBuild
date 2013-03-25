@@ -54,7 +54,11 @@ mkdir -p $TMP $PKG
 
 cd $TMP
 
-rm -rf $PKGNAM-$VERSION
+if [ x"${VERSION}" = x"3.1.9.1" ]; then
+  rm -rf $PKGNAM-3.1.9
+else
+  rm -rf $PKGNAM-$VERSION
+fi
 if [ -r $CWD/$PKGNAM-$VERSION.tar.gz ]; then
   tar xf $CWD/$PKGNAM-$VERSION.tar.gz || exit 1
 elif [ -r $CWD/$PKGNAM-$VERSION.tar.bz2 ]; then
