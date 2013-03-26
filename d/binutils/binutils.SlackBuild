@@ -59,8 +59,8 @@ DEFAULT_LD=ld.bfd
 NO_INITFINI=" --disable-initfini-array "
 
 case "${HOST_TRIPLET}" in
-  i686-w64-mingw32) LIBDIRSUFFIX="" ;;
-  x86_64-w64-mingw32) LIBDIRSUFFIX="64" ;;
+  *-*-mingw*) PLUGINS="--disable-plugins" ;;
+  *)          PLUGINS="--enable-plugins" ;;
 esac
 
 case "$ARCH" in
@@ -104,12 +104,12 @@ CFLAGS="-O2" \
   --enable-shared \
   --disable-multilib \
   --enable-64-bit-bfd \
-  --enable-plugins \
   --enable-threads \
   --enable-targets=${TARGET_TRIPLET} \
   --target=${TARGET_TRIPLET} \
   --build=${BUILD_TRIPLET} \
   --host=${HOST_TRIPLET} \
+  $PLUGINS \
   $GOLD \
   $NO_INITFINI \
   $WERROR \
