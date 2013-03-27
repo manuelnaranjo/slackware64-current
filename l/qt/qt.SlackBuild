@@ -41,7 +41,7 @@
 
 PKGNAM=qt
 VERSION=$(ls qt-*.tar.?z* | rev | cut -f 3- -d . | cut -f 1 -d - | rev)
-BUILD=${BUILD:-2}
+BUILD=${BUILD:-3}
 
 NUMJOBS=${NUMJOBS:--j7}
 
@@ -112,6 +112,9 @@ zcat $CWD/qt.ld-gold.patch.gz | patch -p1 --verbose || exit 1
 
 # Stupid idea - remove it:
 zcat $CWD/qt.webkit-no_Werror.patch.gz | patch -p1 --verbose || exit 1
+
+# Patch for boost-1.53:
+zcat $CWD/qt-everywhere-opensource-src-4.8.4-QTBUG-22829.diff.gz | patch -p1 --verbose || exit 1
 
 export CFLAGS="$SLKCFLAGS"
 export CXXFLAGS="$SLKCFLAGS"

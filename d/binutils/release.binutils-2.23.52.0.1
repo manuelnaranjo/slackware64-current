@@ -1,10 +1,15 @@
-This is the beta release of binutils 2.23.51.0.6 for Linux, which is
-based on binutils 2012 1123 in CVS on sourceware.org plus various
+This is the beta release of binutils 2.23.52.0.1 for Linux, which is
+based on binutils 2013 0226 in CVS on sourceware.org plus various
 changes. It is purely for Linux.
 
 All relevant patches in patches have been applied to the source tree.
 You can take a look at patches/README to see what have been applied and
 in what order they have been applied.
+
+Starting from the 2.23.52.0.1 release, when creating executables, BFD
+linker will issue an error for undefined weak reference which is
+defined in a shared library from DT_NEEDED.  Previously BFD linker
+will silently include the shared library from DT_NEEDED.
 
 Starting from the 2.21.51.0.3 release, you must remove .ctors/.dtors
 section sentinels when building glibc or other C run-time libraries.
@@ -115,12 +120,91 @@ endif
 
 to arch/ia64/Makefile in your kernel source tree.
 
-Please report any bugs related to binutils 2.23.51.0.6 to
+Please report any bugs related to binutils 2.23.52.0.1 to
 hjl.tools@gmail.com
 
 and
 
 http://www.sourceware.org/bugzilla/
+
+Changes from binutils 2.23.51.0.9:
+
+1. Update from binutils 2013 0226.
+2. Add Intel SAMP new instruction support.
+3. Allow dynamic R_386_SIZE32, R_X86_64_SIZE32 and R_X86_64_SIZE64
+relocations agaist TLS symbols.
+4. Fix BFD linker to set STB_GNU_UNIQUE only for definition.  PR 15167.
+5. Fix BFD linker to set STB_GNU_UNIQUE only if symbol is defined in
+regular object.  PR 15107.
+6. Don't add DT_NEEDED for references from the LTO IR input.  PR 15146.
+7. When creating executables, BFD linker will issue an error for undefined
+weak reference which is defined in a shared library from DT_NEEDED.
+PR 15149.
+8. Also trace symbol from the LTO IR input.  PR 15141.
+9. Support stripping LTO IR sections.  PR 15033.
+10. Don't allow a nested archive pointing to itself and don't generate
+bad archive.  PR 15140.
+11. Fix objcopy segfault on non-ELF input.  PR 14873.
+12. Update DWARF dump support.
+13. Improve gold.
+14. Add nios2 support.
+15. Improve mach support.
+16. Improve aarch64 support.
+17. Improve arm support.
+18. Improve avr support.
+19. Improve h8300 support.
+20. Improve meta support.
+21. Improve mips support.
+22. Improve ppc support.
+23. Improve rl78 support.
+24. Improve sparc support.
+25. Improve v850 support.
+
+Changes from binutils 2.23.51.0.8:
+
+1. Update from binutils 2013 0118.
+2. Support R_386_SIZE32, R_X86_64_SIZE32 and R_X86_64_SIZE64
+relocations.
+3. Fix x86 assembler for "xtrn@got -1".  PR 15019.
+4. Don't generate old dtags with --enable-new-dtags.
+5. Add Meta support.
+6. Improve gold.
+7. Improve aarch64 support.
+8. Improve arm support.
+9. Improve cr16 support.
+10. Improve mips support.
+11. Improve ppc support.
+12. Improve v850 support.
+13. Improve xgate support.
+
+Changes from binutils 2.23.51.0.7:
+
+1. Properly adjust h->plt.refcount.  PR 14980.
+
+Changes from binutils 2.23.51.0.6:
+
+1. Update from binutils 2012 1218.
+2. Add missing R_*_IRELATIVE relocations.  PR 14968.
+3. Remove unnecessary R_*_NONE relocations.  PR 14956.
+4. Fix ar/ranlib on 32-bit filesystems.  PR 14933.
+5. Fix a "Not enough room for program headers" linker bug.  PR 14926.
+6. Support self-assignment in a linker script to convert symbols to
+absolute.  PR 14962.
+7. Support --copy-dt-needed-entries when creating DSO.  PR 14915.
+8. Improve linker plugin DSO error handling.  PR 14904.
+9. Issue warning for plugin dummy.  PR 12760.
+10. Add -fuse-ld=bfd|gold support to ld and gold.
+11. Fix gold configure.  PR 14897.
+12. Correct gas dependency.  PR 14899.
+13. Add rdos support.
+14. Improve gold.
+15. Improve nacl support.
+16. Improve aarch64 support.
+17. Improve arm support.
+18. Improve microblaze support.
+19. Improve mips support.
+20. Improve ppc support.
+21. Improve tile support.
 
 Changes from binutils 2.23.51.0.5:
 
@@ -673,13 +757,13 @@ already been defined.  PR 12001.
 
 The file list:
 
-1. binutils-2.23.51.0.6.tar.bz2.  Source code.
+1. binutils-2.23.52.0.1.tar.bz2.  Source code.
 
 The primary sites for the beta Linux binutils are:
 
 1. http://www.kernel.org/pub/linux/devel/binutils/
 
-It is also available on linux/release/2.23.51.0.6 branch at
+It is also available on linux/release/2.23.52.0.1 branch at
 
 http://git.kernel.org/?p=linux/kernel/git/hjl/binutils.git;a=summary
 
@@ -688,4 +772,4 @@ Thanks.
 
 H.J. Lu
 hjl.tools@gmail.com
-11/26/2012
+02/27/2013
