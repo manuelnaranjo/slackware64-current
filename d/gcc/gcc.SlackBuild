@@ -474,13 +474,13 @@ fi
   if [ x"${HOST_TRIPLET}" = x"${TARGET_TRIPLET}" ]; then
     prefix_dir="!{YYPREFIX}"
   else
-    prefix_dir="${YYPREFIX_TARGET_PREFIX}"
+    prefix_dir="/${YYPREFIX_TARGET_PREFIX}"
   fi
 
   sed -i \
-    -e "/^\*link:$/ { N; s;$; -L/${prefix_dir}/lib${LIBDIRSUFFIX_TGT}; }" \
-    -e "/^\*cpp:$/ { N; s;$; -I/${prefix_dir}/include; }" \
-    -e "/^\*cc1plus:$/ { N; s;$; -I/${prefix_dir}/include; }" \
+    -e "/^\*link:$/ { N; s;$; -L${prefix_dir}/lib${LIBDIRSUFFIX_TGT}; }" \
+    -e "/^\*cpp:$/ { N; s;$; -I${prefix_dir}/include; }" \
+    -e "/^\*cc1plus:$/ { N; s;$; -I${prefix_dir}/include; }" \
     ${PKG_GCC}/${SPECS}
 
   # Make our 64bit gcc look for 32bit gcc binaries in ./32 subdirectory:
