@@ -107,6 +107,11 @@ if [ -d $PKG/${PREFIX}/man ]; then
   )
 fi
 
+# Create the etc/pango directory to avoid having to do it during the package
+# installation. I couldn't figure out how to do it in the SFX installer so I'm
+# doing it here.
+mkdir -p $PKG/${PREFIX}/etc/pango
+
 mkdir -p $PKG/${PREFIX}/doc/pango-$VERSION
 cp -a \
   AUTHORS COPYING* NEWS README* TODO \
