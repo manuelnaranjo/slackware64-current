@@ -469,7 +469,7 @@ fi
     cat gcc/specs > $PKG_GCC/${SPECS}
   fi
 
-  # Add, e.g., /opt/mgw32_windows_32/{include,lib} to default search paths
+  # Add, e.g., /opt/windows_32/{include,lib} to default search paths
   if [ x"${HOST_TRIPLET}" = x"${TARGET_TRIPLET}" ]; then
     prefix_dir="!{YYPREFIX}"
   else
@@ -504,6 +504,13 @@ fi
     # *not* ${LIBDIRSUFFIX_HST}
     mkdir -p ${PREFIX}/lib
     ln -sf /${PREFIX}/bin/cpp ${PREFIX}/lib/cpp
+    # GCC puts its files in $(toolexeclibdir) which is $(libdir)/../lib in the
+    # case of cross-compilation. There is no way to change it. A particular
+    # thought to Cygwin people who said it didn't matter since you're going to
+    # build an installer for Windows anyway and you can move the files in it,
+    # i.e. they ignore this need because you're going to be able to work-around
+    # the issue in the installer.
+    mv ${PREFIX}/lib/lib*.dll ${PREFIX}/bin/
   )
 
   ( cd $PKG_GCC/${PREFIX}/bin
