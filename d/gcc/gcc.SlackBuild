@@ -46,7 +46,7 @@
 
 PKGNAM=gcc
 VERSION=${VERSION:-$(echo $PKGNAM-*.tar.xz | rev | cut -f 3- -d . | cut -f 1 -d - | rev)}
-BUILD=${BUILD:-1}
+BUILD=${BUILD:-2}
 
 # How many jobs to run in parallel:
 NUMJOBS=" -j 7 "
@@ -136,6 +136,11 @@ cat $CWD/slack-desc.gcc-go > $PKG8/install/slack-desc
 
 cd $TMP
 tar xvf $CWD/gcc-$VERSION.tar.?z*
+
+( cd gcc-$VERSION
+  # Restore target headers that were dropped (accidentally?) in gcc-4.8.0:
+  zcat $CWD/gcc.target_h.diff.gz | patch -p1 --verbose || exit 1
+)
 
 # Copy ecj.jar into the TLD of the source. Needed for java compiler.
 # This can be retrieved from ftp://sourceware.org/pub/java
@@ -325,7 +330,7 @@ ANTLJAR=$(echo $CWD/antlr-*.jar | tail -1)
   echo
   rm -rf fastjar-$FASTJARVER
   tar xvf $CWD/fastjar-$FASTJARVER.tar.xz || exit 1
-  cd fastjar-$FASTJARVER || exit
+  cd fastjar-$FASTJARVER || exit 1
   chown -R root:root .
   find . \
     \( -perm 777 -o -perm 775 -o -perm 711 -o -perm 555 -o -perm 511 \) \
