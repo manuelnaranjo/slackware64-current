@@ -41,7 +41,7 @@
 
 PKGNAM=qt
 VERSION=$(ls qt-*.tar.?z* | rev | cut -f 3- -d . | cut -f 1 -d - | rev)
-BUILD=${BUILD:-4}
+BUILD=${BUILD:-5}
 
 NUMJOBS=${NUMJOBS:--j7}
 
@@ -115,6 +115,9 @@ zcat $CWD/qt.webkit-no_Werror.patch.gz | patch -p1 --verbose || exit 1
 
 # Patch for boost-1.53:
 zcat $CWD/qt-everywhere-opensource-src-4.8.4-QTBUG-22829.diff.gz | patch -p1 --verbose || exit 1
+
+# Fix call to QMetaObject::metaCall from updateProperty (QTBUG-29082):
+zcat $CWD/qt-fix-qvmemetadata-crash.patch.gz | patch -p1 --verbose || exit 1
 
 export CFLAGS="$SLKCFLAGS"
 export CXXFLAGS="$SLKCFLAGS"
