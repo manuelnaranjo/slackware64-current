@@ -22,7 +22,7 @@
 
 
 VERSION=${VERSION:-$(echo fontconfig-*.tar.?z* | rev | cut -f 3- -d . | cut -f 1 -d - | rev)}
-BUILD=${BUILD:-3}
+BUILD=${BUILD:-1}
 
 # Automatically determine the architecture we're building on:
 if [ -z "$ARCH" ]; then
@@ -79,9 +79,6 @@ zcat $CWD/fontconfig.dejavu.diff.gz | patch -p1 --verbose || exit 1
 # fontconfig figure it out (and possibly follow symlinks, or
 # index ugly bitmapped fonts):
 zcat $CWD/fontconfig.font.dir.list.diff.gz | patch -p1 --verbose --backup --suffix=.orig || exit 1
-
-# Upstream patch to fix 10-autohint.conf:
-zcat $CWD/fontconfig.10.autohint.diff.gz | patch -p1 --verbose --backup --suffix=.orig || exit 1
 
 CFLAGS=$SLKCFLAGS \
 ./configure \
