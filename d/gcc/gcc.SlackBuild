@@ -46,7 +46,7 @@
 
 PKGNAM=gcc
 VERSION=${VERSION:-$(echo $PKGNAM-*.tar.xz | rev | cut -f 3- -d . | cut -f 1 -d - | rev)}
-BUILD=${BUILD:-3}
+BUILD=${BUILD:-1}
 
 # How many jobs to run in parallel:
 NUMJOBS=" -j 7 "
@@ -137,13 +137,9 @@ cat $CWD/slack-desc.gcc-go > $PKG8/install/slack-desc
 cd $TMP
 tar xvf $CWD/gcc-$VERSION.tar.?z*
 
-( cd gcc-$VERSION
-  # Restore target headers that were dropped (accidentally?) in gcc-4.8.0:
-  zcat $CWD/gcc.target_h.diff.gz | patch -p1 --verbose || exit 1
-  # Fix register clobber that was breaking WINE with -O2 optimization
-  # (and probably affected other code as well):
-  zcat $CWD/regcprop.fixo2.diff.gz | patch -p2 --verbose || exit 1
-) || exit 1
+#( cd gcc-$VERSION
+#  If we had any patches, we would apply them here, but we're .diff free now.
+#) || exit 1
 
 # Copy ecj.jar into the TLD of the source. Needed for java compiler.
 # This can be retrieved from ftp://sourceware.org/pub/java
