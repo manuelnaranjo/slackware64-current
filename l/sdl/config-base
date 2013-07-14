@@ -1,2 +1,1 @@
-export SDL_BUILD_BASE=yes
-export SDL_BUILD_OTHERS=no
+export SDL_BUILD=""

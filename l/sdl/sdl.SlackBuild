@@ -45,12 +45,6 @@ case "${HOST_TRIPLET}" in
   x86_64-w64-mingw32) LIBDIRSUFFIX="64" ;;
 esac
 
-CWD=$(pwd)
-TMP=${TMP:-/tmp}
-PKG=$TMP/package-sdl
-
-set -u
-
 COMMON_CONFIGURE_OPTIONS=" \
   --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
@@ -59,25 +53,24 @@ COMMON_CONFIGURE_OPTIONS=" \
   --enable-shared=yes \
   --enable-static=no"
 
-destdir_of_package() {
-  if [ -z "${1}" ]; then
-    echo "${PKG}"
-  else
-    echo "${PKG}${1:+"-${1}"}"
-  fi
-}
+PKGNAM="sdl${SDL_BUILD:+"-${SDL_BUILD}"}"
+PKG="/tmp/package-${PKGNAM}"
 
-begin() {
-  PACKAGE="${1}"
+case "${SDL_BUILD}" in
+  "image") PACKAGE="SDL_image-${IMAGE}" ;;
+  "net") PACKAGE="SDL_net-${NET}" ;;
+  "ttf") PACKAGE="SDL_ttf-${TTF}" ;;
+  "mixer") PACKAGE="SDL_mixer-${MIXER}" ;;
+  "") PACKAGE="SDL-${VERSION}" ;;
+esac
 
-  cd $TMP
-  rm -rf "${PACKAGE}"
-  tar xf $CWD/${PACKAGE}.tar.?z* || exit 1
-  cd "${PACKAGE}" || exit 1
-
-  chown -R root:root .
-  chmod -R u+w,go+r-w,a-s .
-}
+case "${SDL_BUILD}" in
+  "image") EXTRA_CONFIGURE_ARGS=" \
+    --enable-jpg-shared=no \
+    --enable-png-shared=no \
+    --enable-tif-shared=no" ;;
+  *) EXTRA_CONFIGURE_ARGS="" ;;
+esac
 
 update_libtool() {
   LIBTOOL_RC='/bin/sh libtool --mode=compile --tag=RC'
@@ -90,8 +83,11 @@ update_libtool() {
     sed -i \
       -e '/%.o : %.rc/ s;%\.o;%.lo;' \
       -e 's;\$(WINDRES) \$< \$@;'"${LIBTOOL_RC}"' $(WINDRES) -i $< -o $@;' \
-      -e '/libSDL_[a-z]\+_la_DEPENDENCIES/ s/version\.o/version.lo/' \
+      -e '/libSDL_[a-z]\+_la_DEPENDENCIES/ s;version\.o;version.lo;' \
+      -e 's;-Wl,version.o;-Wl,.libs/version.o;' \
       Makefile.am
+
+    sed -i -e '/IMG_LIBS=/ s/-lpng/-lpng14/' configure.in
   fi
 
   sed -i \
@@ -99,79 +95,48 @@ update_libtool() {
     -e '/OBJECTS=`echo \$OBJECTS.*\.rc.*\\1.o/ s/\\1\.o/\\1.lo/' \
     configure.in
 
+  touch NEWS AUTHORS ChangeLog
   autoreconf -vif -I /usr/share/aclocal/ -I acinclude
 }
 
-make_make_install() {
-  DESTDIR="$(destdir_of_package "${1}")"
+CWD=$(pwd)
+TMP=${TMP:-/tmp}
 
-  make $NUMJOBS || make || exit 1
-  make install DESTDIR="${DESTDIR}" || exit 1
-}
-
-install_doc() {
-  DESTDIR="$(destdir_of_package "${1}")"
-
-  mkdir -p ${DESTDIR}/${PREFIX}/doc/${1}
-  cp -a CHANGES COPYING README ${DESTDIR}/${PREFIX}/doc/${1}
-}
-
-strip_compress() {
-  DESTDIR="$(destdir_of_package "${1}")"
-
-  find ${DESTDIR} | xargs file | egrep -e "executable|shared object" \
-    | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : \
-    | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
-
-  gzip -9 ${DESTDIR}/${PREFIX}/man/man?/*.?
-}
-
-package() {
-  DESTDIR="$(destdir_of_package "${1}")"
-  PKGNAM="sdl${1:+"-$(echo $1 | cut -f1 -d- | cut -f2 -d_)"}"
-
-  cat ${CWD}/sdl.yypkg.script | sed \
-    -e "s/%{PKG}/${PKGNAM}/" \
-    -e "s/%{HST}/${HOST_TRIPLET}/" \
-    -e "s/%{TGT}//" \
-    -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
-    -e "s/%{BUILD}/${BUILD}/" \
-    -e "s/%{DESCR}/${DESCR:-"No description"}/" \
-    | makeypkg -o ${YYOUTPUT} -script - "${DESTDIR}/${PREFIX}"
-}
-
-build_other() {
-  PACKAGE="${1}"
-  EXTRA_CONFIGURE_ARGS="${2}"
-
-  begin "${PACKAGE}"
-
-  update_libtool
-
-  CFLAGS="-O2" ./configure ${COMMON_CONFIGURE_OPTIONS} ${EXTRA_CONFIGURE_ARGS}
-
-  make_make_install "${PACKAGE}"
-  install_doc "${PACKAGE}"
-
-  strip_compress "${PACKAGE}"
-  package "${PACKAGE}"
-}
+set -u
 
 rm -rf $PKG $TMP/sdl-$VERSION
 mkdir -p $TMP $PKG
 
-if [ "${SDL_BUILD_BASE}" = "yes" ]; then
-  begin "SDL-$VERSION"
+cd $TMP
+rm -rf "${PACKAGE}"
+tar xf $CWD/${PACKAGE}.tar.?z* || exit 1
+cd "${PACKAGE}" || exit 1
 
-  zcat $CWD/libsdl-1.2.15-resizing.patch.gz | patch -p1 --verbose || exit 1
-  zcat $CWD/sdl-1.2.14-fix-mouse-clicking.patch.gz | patch -p1 --verbose || exit 1
-  update_libtool
+chown -R root:root .
+chmod -R u+w,go+r-w,a-s .
 
-  CFLAGS="-O2" ./configure ${COMMON_CONFIGURE_OPTIONS}
+if [ -z "${SDL_BUILD}" ]; then
+  for p in libsdl-1.2.15-resizing sdl-1.2.14-fix-mouse-clicking; do
+    zcat $CWD/$p.patch.gz | patch -p1 --verbose 1>&2 || exit 1
+  done
+fi
 
-  make_make_install ""
+update_libtool
 
-  sed -i 's/ -lmingw32//' ${PKG}/${PREFIX}/lib${LIBDIRSUFFIX}/pkgconfig/sdl.pc
+CFLAGS="-O2" ./configure ${COMMON_CONFIGURE_OPTIONS} ${EXTRA_CONFIGURE_ARGS}
+
+make $NUMJOBS || make || exit 1
+make install DESTDIR="${PKG}" || exit 1
+
+if [ -z "${SDL_BUILD}" ]; then
+  sed -i \
+    -e 's/^Libs:.*/Libs: -L${libdir} -lSDL/' \
+    -e '/^Cflags:/ s/-Dmain=SDL_main//' \
+    ${PKG}/${PREFIX}/lib${LIBDIRSUFFIX}/pkgconfig/sdl.pc
+
+  sed -i \
+    -e 's/^#define main\tSDL_main/#ifdef SDL_REDEFINE_MAIN\n\0\n#endif/' \
+    ${PKG}/${PREFIX}/include/SDL/SDL_main.h
 
   mkdir -p $PKG/${PREFIX}/doc/SDL-$VERSION/html
   cp -a docs/index.html $PKG/${PREFIX}/doc/SDL-$VERSION
@@ -179,22 +144,25 @@ if [ "${SDL_BUILD_BASE}" = "yes" ]; then
   cp -a \
     BUGS COPYING CREDITS INSTALL README* TODO WhatsNew \
     $PKG/${PREFIX}/doc/SDL-$VERSION
-
-  strip_compress ""
-  package ""
 fi
 
+# mkdir -p ${PKG}/${PREFIX}/doc/${PKGNAM}
+# cp -a CHANGES COPYING README ${PKG}/${PREFIX}/doc/${PKGNAM}
 
-if [ "${SDL_BUILD_OTHERS}" = "yes" ]; then
-  build_other "SDL_image-$IMAGE" " \
-    --enable-jpg-shared=no \
-    --enable-png-shared=no \
-    --enable-tif-shared=no"
+find ${PKG} | xargs file | egrep -e "executable|shared object" \
+  | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : \
+  | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
 
-  build_other "SDL_net-$NET" ""
+gzip -9 ${PKG}/${PREFIX}/man/man?/*.?
 
-  build_other "SDL_ttf-$TTF" ""
-fi
+cat ${CWD}/sdl.yypkg.script | sed \
+  -e "s/%{PKG}/${PKGNAM}/" \
+  -e "s/%{HST}/${HOST_TRIPLET}/" \
+  -e "s/%{TGT}//" \
+  -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
+  -e "s/%{BUILD}/${BUILD}/" \
+  -e "s/%{DESCR}/${DESCR:-"No description"}/" \
+  | makeypkg -o ${YYOUTPUT} -script - "${PKG}/${PREFIX}"
 
 
 # # Add SDL_mixer:
