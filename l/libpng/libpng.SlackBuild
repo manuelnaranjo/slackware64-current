@@ -81,6 +81,8 @@ rm -f $PKG/$PREFIX/lib${LIBDIRSUFFIX}/libpng{14,}.a
 # I hate these crappy NIH syndrome *-config binaries
 rm -f $PKG/$PREFIX/bin/libpng-config
 
+ln -s libpng14.pc $PKG/$PREFIX/lib${LIBDIRSUFFIX}/pkgconfig/libpng.pc
+
 find $PKG | xargs file | egrep "executable|shared object" \
   | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
 
