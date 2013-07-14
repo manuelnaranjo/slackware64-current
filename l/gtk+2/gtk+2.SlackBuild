@@ -94,6 +94,17 @@ make install \
   DESTDIR=$PKG \
   || exit 1
 
+# This directory needs to exist, or update-gtk-immodules will run into problems:
+mkdir -p $PKG/etc/gtk-2.0/${HOST_TRIPLET}
+
+# If this file exists, move it into the host directory:
+if [ -r $PKG/etc/gtk-2.0/gtk.immodules ]; then
+  mv $PKG/etc/gtk-2.0/gtk.immodules $PKG/etc/gtk-2.0/${HOST_TRIPLET}/
+fi
+
+# Don't clobber im-multipress.conf
+mv $PKG/etc/gtk-2.0/im-multipress.conf $PKG/etc/gtk-2.0/im-multipress.conf.new || exit 1
+
 # Install a "starter" gtkrc
 echo 'gtk-theme-name="GTK+"' > $PKG/${PREFIX}/etc/gtk-2.0/gtkrc
 
@@ -119,7 +130,7 @@ fi
 
 mkdir -p $PKG/${PREFIX}/doc/gtk+-$VERSION
 cp -a \
-  AUTHORS COPYING* NEWS README* \
+  AUTHORS COPYING* NEWS README* TODO \
   $PKG/${PREFIX}/doc/gtk+-$VERSION
 ( cd $PKG/${PREFIX}/doc/gtk+-$VERSION
   ln -s ../../share/gtk-doc/html/gail-libgail-util .

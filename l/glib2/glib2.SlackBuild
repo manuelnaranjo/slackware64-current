@@ -57,6 +57,9 @@ chmod -R u+w,go+r-w,a-s .
 
 sed -i 's;XDG_MIME_TYPE_UNKNOWN;"application/octet-stream";g' gio/gcontenttype.c
 
+# Silly upstream, using the bleeding edge.  Reconf:
+autoreconf --force --install 
+
 CFLAGS="$SLKCFLAGS" \
 ./configure \
   --prefix=/${PREFIX} \

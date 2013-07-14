@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012  Patrick J. Volkerding, Sebeka, MN, USA
+# Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013  Patrick J. Volkerding, Sebeka, MN, USA
 # All rights reserved.
 #
 # Redistribution and use of this script, with or without modification, is
@@ -41,7 +41,7 @@
 
 PKGNAM=qt
 VERSION=$(ls qt-*.tar.?z* | rev | cut -f 3- -d . | cut -f 1 -d - | rev)
-BUILD=${BUILD:-2}
+BUILD=${BUILD:-5}
 
 NUMJOBS=${NUMJOBS:--j7}
 
@@ -112,6 +112,12 @@ zcat $CWD/qt.ld-gold.patch.gz | patch -p1 --verbose || exit 1
 
 # Stupid idea - remove it:
 zcat $CWD/qt.webkit-no_Werror.patch.gz | patch -p1 --verbose || exit 1
+
+# Patch for boost-1.53:
+zcat $CWD/qt-everywhere-opensource-src-4.8.4-QTBUG-22829.diff.gz | patch -p1 --verbose || exit 1
+
+# Fix call to QMetaObject::metaCall from updateProperty (QTBUG-29082):
+zcat $CWD/qt-fix-qvmemetadata-crash.patch.gz | patch -p1 --verbose || exit 1
 
 export CFLAGS="$SLKCFLAGS"
 export CXXFLAGS="$SLKCFLAGS"
@@ -283,9 +289,11 @@ EOF
 mkdir -p $PKG/usr/doc/$PKGNAM-$VERSION
 cp -a *GPL_EXCEPTION* FAQ* INSTALL KNOWN* LICENSE* README* changes-* \
   $PKG/usr/doc/$PKGNAM-$VERSION
-( cd $PKG/usr/doc/$PKGNAM-$VERSION
-  ln -sf /usr/lib${LIBDIRSUFFIX}/qt/doc/html .
-)
+if [ -d $PKG/usr/lib${LIBDIRSUFFIX}/qt/doc/html ]; then
+  ( cd $PKG/usr/doc/$PKGNAM-$VERSION
+    ln -sf /usr/lib${LIBDIRSUFFIX}/qt/doc/html .
+  )
+fi
 
 mkdir -p $PKG/install
 zcat $CWD/doinst.sh.gz > $PKG/install/doinst.sh

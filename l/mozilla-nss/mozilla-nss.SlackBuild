@@ -1,5 +1,6 @@
 #!/bin/sh
 # Copyright 2005, 2006, 2008, 2009, 2010, 2012  Eric Hameleers, Eindhoven, NL
+# Copyright 2013  Patrick J. Volkerding, Sebeka, MN, USA
 # All rights reserved.
 #
 #   Permission to use, copy, modify, and distribute this software for
@@ -23,9 +24,9 @@
 
 PKGNAM=mozilla-nss
 SRCNAM=nss
-VERSION=${VERSION:-3.13.5}
-NSPR=${NSPR:-4.9.1}
-BUILD=${BUILD:-3}
+VERSION=${VERSION:-3.14.3}
+NSPR=${NSPR:-4.9.6}
+BUILD=${BUILD:-1}
 
 # Automatically determine the architecture we're building on:
 MARCH=$( uname -m )

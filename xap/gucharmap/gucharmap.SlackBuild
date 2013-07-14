@@ -55,7 +55,6 @@ cd $TMP
 rm -rf gucharmap-$VERSION
 tar xvf $CWD/gucharmap-$VERSION.tar.?z* || exit 1
 cd gucharmap-$VERSION || exit 1
-#zcat $CWD/gucharmap.noscrollkeeper.diff.gz | patch -p1 --verbose || exit 1
 chown -R root:root .
 find . \
   \( -perm 777 -o -perm 775 -o -perm 711 -o -perm 555 -o -perm 511 \) \
@@ -71,7 +70,6 @@ CFLAGS="-O2" \
   --localstatedir=/var/lib \
   --docdir=/${PREFIX}/doc/gucharmap-$VERSION \
   --enable-static=no \
-  --disable-scrollkeeper \
   --host=${HOST_TRIPLET} \
   --build=$ARCH-slackware-linux
 

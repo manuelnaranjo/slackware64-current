@@ -2,7 +2,7 @@
 # GCC package build script (written by volkerdi@slackware.com)
 #
 # Copyright 2003, 2004  Slackware Linux, Inc., Concord, California, USA
-# Copyright 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012  Patrick J. Volkerding, Sebeka, MN, USA
+# Copyright 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013  Patrick J. Volkerding, Sebeka, MN, USA
 # All rights reserved.
 #
 # Redistribution and use of this script, with or without modification, is
@@ -284,6 +284,10 @@ done
 cd $TMP
 tar xvf $CWD/gcc-$VERSION.tar.?z*
 
+#( cd gcc-$VERSION
+#  If we had any patches, we would apply them here, but we're .diff free now.
+#) || exit 1
+
 # Copy ecj.jar into the TLD of the source. Needed for java compiler.
 # This can be retrieved from ftp://sourceware.org/pub/java
 cp $CWD/ecj-4.5.jar gcc-$VERSION/ecj.jar
@@ -342,7 +346,7 @@ if [ -n "${PKG_GCC_JAVA}" ] ; then ( cd $TMP
   echo
   rm -rf fastjar-$FASTJARVER
   tar xvf $CWD/fastjar-$FASTJARVER.tar.xz || exit 1
-  cd fastjar-$FASTJARVER || exit
+  cd fastjar-$FASTJARVER || exit 1
   chown -R root:root .
   chmod -R u+w,go+r-w,a-s .
   for patch in $CWD/fastjar-patches/*.gz ; do
@@ -637,8 +641,9 @@ if [ -n "${PKG_GCC_JAVA}" ]; then ( cd $PKG_GCC_JAVA
   ln -s ../../../bin/ecj ${PREFIX}/lib$LIBDIRSUFFIX_HST/jvm/bin/javac
   # Don't package libffi stuff anymore.  GCC will link the internal version
   # statically, and we'll need a newer one elsewhere.
-  find . \( -name "ffi*.h" -o -name "libffi*" \) -exec rm {} +
-  rm ${PREFIX}/man/man3/ffi*
+  find . \( -name "ffi*.h" -o -name "libffi*" \) -exec rm -f {} +
+  rm -f ${PREFIX}/man/man3/ffi*
+  rm -f ${PREFIX}/info/libffi*
 ) || exit 1; fi
 
 # gcc-objc:
