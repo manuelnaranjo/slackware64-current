@@ -41,19 +41,10 @@ CWD=$(pwd)
 TMP=${TMP:-/tmp}
 PKG=$TMP/package-$PKGNAM
 
-if [ "$ARCH" = "i486" ]; then
-  SLKCFLAGS="-O2 -march=i486 -mtune=i686"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "s390" ]; then
-  SLKCFLAGS="-O2"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "x86_64" ]; then
-  SLKCFLAGS="-O2 -fPIC"
-  LIBDIRSUFFIX="64"
-else
-  SLKCFLAGS="-O2"
-  LIBDIRSUFFIX=""
-fi
+case "${HOST_TRIPLET}" in
+  i686-w64-mingw32) LIBDIRSUFFIX="" ;;
+  x86_64-w64-mingw32) LIBDIRSUFFIX="64" ;;
+esac
 
 rm -rf $PKG
 mkdir -p $TMP $PKG
@@ -62,44 +53,37 @@ rm -rf $PKGNAM-$VERSION
 tar xvf $CWD/$PKGNAM-$VERSION.tar.xz || exit 1
 cd $PKGNAM-$VERSION || exit 1
 chown -R root:root .
-find . \
- \( -perm 777 -o -perm 775 -o -perm 711 -o -perm 555 -o -perm 511 \) \
- -exec chmod 755 {} \; -o \
- \( -perm 666 -o -perm 664 -o -perm 600 -o -perm 444 -o -perm 440 -o -perm 400 \) \
- -exec chmod 644 {} \;
+chmod -R u+w,go+r-w,a-s .
 
 zcat $CWD/dbus-1.6.x-allow_root_globally.diff.gz | patch -p1 --verbose || exit 1
-zcat $CWD/dbus.set.home.diff.gz | patch -p1 --verbose || exit 1
 
-CFLAGS="$SLKCFLAGS" \
-CXXFLAGS="$SLKCFLAGS" \
+CFLAGS="-O2" \
+CXXFLAGS="-O2" \
 ./configure \
-  --prefix=/usr \
-  --libdir=/usr/lib${LIBDIRSUFFIX} \
-  --sysconfdir=/etc \
-  --localstatedir=/var \
-  --mandir=/usr/man \
-  --infodir=/usr/info \
-  --docdir=/usr/doc/$PKGNAM-$VERSION \
+  --prefix=/${PREFIX} \
+  --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
+  --sysconfdir=/${PREFIX}/etc \
+  --localstatedir=/${PREFIX}/var \
+  --mandir=/${PREFIX}/man \
+  --infodir=/${PREFIX}/info \
+  --docdir=/${PREFIX}/doc/$PKGNAM-$VERSION \
   --disable-doxygen-docs \
   --enable-shared=yes \
   --enable-static=no \
-  --enable-inotify \
-  --enable-x11-autolaunch \
-  --with-system-pid-file=/var/run/dbus/dbus.pid \
-  --with-system-socket=/var/run/dbus/system_bus_socket \
-  --with-init-scripts=slackware \
+  --with-dbus-session-bus-default-address=autolaunch \
+  --host=${HOST_TRIPLET} \
   --build=$ARCH-slackware-linux
 
 make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG
 
-find $PKG | xargs file | grep -e "executable" -e "shared object" \
-  | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
+find $PKG | xargs file | egrep -e "executable|shared object" \
+  | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : \
+  | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
 
 # Compress and link manpages, if any:
-if [ -d $PKG/usr/man ]; then
-  ( cd $PKG/usr/man
+if [ -d $PKG/${PREFIX}/man ]; then
+  ( cd $PKG/${PREFIX}/man
     for manpagedir in $(find . -type d -name "man*") ; do
       ( cd $manpagedir
         for eachpage in $( find . -type l -maxdepth 1) ; do
@@ -113,32 +97,29 @@ if [ -d $PKG/usr/man ]; then
 fi
 
 # Install a custom init script for dbus - the included one is not good for us
-rm $PKG/etc/rc.d/*
-zcat $CWD/rc.messagebus.gz > $PKG/etc/rc.d/rc.messagebus.new
-chmod 0755 $PKG/etc/rc.d/rc.messagebus.new
-
-# Fix some directory ownership
-chown messagebus $PKG/var/lib/dbus
+rm $PKG/${PREFIX}/etc/rc.d/*
 
 # Add documentation
-mkdir -p $PKG/usr/doc/$PKGNAM-$VERSION
+mkdir -p $PKG/${PREFIX}/doc/$PKGNAM-$VERSION
 cp -a \
   AUTHORS COPYING* HACKING INSTALL NEWS README* doc/*.{txt,html,dtd} \
-  $PKG/usr/doc/$PKGNAM-$VERSION
-find $PKG/usr/doc/$PKGNAM-$VERSION -type f -exec chmod 0644 {} \;
+  $PKG/${PREFIX}/doc/$PKGNAM-$VERSION
+find $PKG/${PREFIX}/doc/$PKGNAM-$VERSION -type f -exec chmod 0644 {} \;
 
 # If there's a ChangeLog, installing at least part of the recent history
 # is useful, but don't let it get totally out of control:
 if [ -r ChangeLog ]; then
-  DOCSDIR=$(echo $PKG/usr/doc/*-$VERSION)
+  DOCSDIR=$(echo $PKG/${PREFIX}/doc/*-$VERSION)
   cat ChangeLog | head -n 1000 > $DOCSDIR/ChangeLog
   touch -r ChangeLog $DOCSDIR/ChangeLog
 fi
 
-mkdir -p $PKG/install
-cat $CWD/slack-desc > $PKG/install/slack-desc
-zcat $CWD/doinst.sh.gz > $PKG/install/doinst.sh
-
-cd $PKG
-/sbin/makepkg -l y -c n $TMP/$PKGNAM-$VERSION-$ARCH-$BUILD.txz
+cat ${CWD}/${PKGNAM}.yypkg.script | sed \
+  -e "s/%{PKG}/${PKGNAM}/" \
+  -e "s/%{HST}/${HOST_TRIPLET}/" \
+  -e "s/%{TGT}//" \
+  -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
+  -e "s/%{BUILD}/${BUILD}/" \
+  -e "s/%{DESCR}/${DESCR:-"No description"}/" \
+  | makeypkg -o ${YYOUTPUT} -script - "${PKG}/${PREFIX}"
 
