@@ -26,7 +26,7 @@ PKGNAM=mozilla-nss
 SRCNAM=nss
 VERSION=${VERSION:-3.15.2}
 NSPR=${NSPR:-4.10.1}
-BUILD=${BUILD:-1}
+BUILD=${BUILD:-2}
 
 # Automatically determine the architecture we're building on:
 MARCH=$( uname -m )
@@ -85,6 +85,7 @@ export CXXFLAGS="$SLKCFLAGS"
 export BUILD_OPT=1
 export NSDISTMODE="copy"
 export NSS_USE_SYSTEM_SQLITE=1
+export NSS_ENABLE_ECC=1
 cd nss
   make nss_build_all export
 cd -
