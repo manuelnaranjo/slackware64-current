@@ -41,7 +41,7 @@
 
 PKGNAM=qt
 VERSION=$(ls qt-*.tar.?z* | rev | cut -f 3- -d . | cut -f 1 -d - | rev)
-BUILD=${BUILD:-1}
+BUILD=${BUILD:-2}
 
 NUMJOBS=${NUMJOBS:--j7}
 
@@ -170,7 +170,11 @@ sed -i "s,-ljscore,,g" $PKG/usr/lib${LIBDIRSUFFIX}/qt/lib/*.la $PKG/usr/lib${LIB
 sed -i "s,-L../JavaScriptCore/release,,g" $PKG/usr/lib${LIBDIRSUFFIX}/qt/lib/*.la $PKG/usr/lib${LIBDIRSUFFIX}/qt/lib/pkgconfig/*.pc
 
 # libwebcore is used internally.  Prevent a false dependency on this in the .la and .pc files:
-sed -i "s#-L/usr/lib${LIBDIRSUFFIX}/qt/lib -L../../WebCore/release -L../../JavaScriptCore/release -L/usr/X11R6/lib$LIBDIRSUFFIX  -lwebcore##g" $PKG/usr/lib${LIBDIRSUFFIX}/qt/lib/libQtWebKit.la $PKG/usr/lib${LIBDIRSUFFIX}/qt/lib/pkgconfig/QtWebKit.pc
+sed -i \
+  -e "s#-L/usr/lib${LIBDIRSUFFIX}/qt/lib -L../../WebCore/release -L../../JavaScriptCore/release -L/usr/X11R6/lib$LIBDIRSUFFIX  -lwebcore##g" \
+  -e "s#-L/usr/lib${LIBDIRSUFFIX}/qt/lib -L../../WebCore/release -L../../JavaScriptCore/release -L/usr/X11R6/lib  -lwebcore##g" \
+  -e "s# -lwebcore##g" \
+  $PKG/usr/lib${LIBDIRSUFFIX}/qt/lib/libQtWebKit.la $PKG/usr/lib${LIBDIRSUFFIX}/qt/lib/pkgconfig/QtWebKit.pc
 
 # Link the shared libraries into /usr/lib:
 ( cd $PKG/usr/lib${LIBDIRSUFFIX}
