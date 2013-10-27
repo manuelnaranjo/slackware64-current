@@ -340,9 +340,6 @@ if [ x"$GCC_CORE" != x"yes" ]; then ( cd gcc-$VERSION
 )
 fi
 
-# Mingw requires a kludge known as "winsup"
-mkdir -p winsup/mingw
-ln -s ${YYPREFIX_CROSS_TOOLCHAIN}/${TARGET_TRIPLET}/include winsup/mingw/include
 ln -s /${PREFIX}/${TARGET_TRIPLET} /${PREFIX}/mingw
 if [ -n "${LIBDIRSUFFIX_TGT}" ]; then
   ln -s /${PREFIX}/${TARGET_TRIPLET}/lib{,${LIBDIRSUFFIX_TGT}}
