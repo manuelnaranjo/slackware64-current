@@ -120,6 +120,7 @@ case "${TARGET_TRIPLET}" in
     ;;
   *)
     GCC_ARCHOPTS+=" --with-arch=$(echo "${TARGET_TRIPLET}" | cut -f1 -d-)"
+    WITH_OBJC_GC="--enable-objc-gc"
     ;;
 esac
 
@@ -421,7 +422,7 @@ fi
      --enable-threads \
      --enable-languages=${GCC_LANGUAGES} \
      --enable-checking=release \
-     --enable-objc-gc \
+     ${WITH_OBJC_GC} \
      --with-system-zlib \
      --with-python-dir=/lib$LIBDIRSUFFIX_HST/python2.7/site-packages \
      --disable-libunwind-exceptions \
