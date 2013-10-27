@@ -122,7 +122,7 @@ fi
 if [ "${BUILD_TRIPLET}" != "${TARGET_TRIPLET}" ]; then
   GCC_BOOTSTRAP="--disable-bootstrap"
 else
-  GCC_BOOTSTRAP="--disable-bootstrap"
+  GCC_BOOTSTRAP="--enable-bootstrap"
 fi
 
 CWD=$(pwd)
