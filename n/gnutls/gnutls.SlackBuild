@@ -92,6 +92,7 @@ CXXFLAGS="-O2" \
   --infodir=/${PREFIX}/info \
   --mandir=/${PREFIX}/man \
   --enable-static=no \
+  --disable-rpath \
   --with-included-libtasn1 \
   --build=$ARCH-slackware-linux \
   --host=${HOST_TRIPLET}
