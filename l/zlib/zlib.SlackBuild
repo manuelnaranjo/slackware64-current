@@ -79,7 +79,7 @@ CC=${HOST_TRIPLET}-gcc \
   AR="${HOST_TRIPLET}-ar" \
   RC="${HOST_TRIPLET}-windres" \
   STRIP="${HOST_STRIP}" \
-  make -j 2 -f $CWD/Makefile.yypkg || exit 1
+  make -j8 -f $CWD/Makefile.yypkg || exit 1
 
 mkdir -p $PKG/${PREFIX}/include
 cp -a zlib.h zconf.h $PKG/${PREFIX}/include
