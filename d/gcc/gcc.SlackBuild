@@ -699,7 +699,7 @@ for COMPILER in ${ALL_COMPILERS}; do
     -e "s/%{PKG}/${COMPILER}/" \
     -e "s/%{HST}/${HOST_TRIPLET}/" \
     -e "s/%{TGT}/${TARGET_TRIPLET}/" \
-    -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
+    -e "s/%{VER}/${VERSION}/" \
     -e "s/%{BUILD}/${BUILD}/" \
     -e "s/%{DESCR}/$(description_of_compiler "${COMPILER}")/" \
     -e "s;%{SPECS_FILE};lib${LIBDIRSUFFIX_HST}/gcc/${TARGET_TRIPLET}/${VERSION}/specs;" \
