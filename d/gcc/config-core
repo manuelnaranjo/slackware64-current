@@ -1,1 +1,2 @@
 export GCC_CORE="yes"
+export GCC_LANGUAGES="c,c++"

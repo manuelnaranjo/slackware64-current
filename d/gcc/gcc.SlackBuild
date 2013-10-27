@@ -90,19 +90,15 @@ fi
 BUILD_TRIPLET=${BUILD_TRIPLET:-${TARGET_TRIPLET}}
 HOST_TRIPLET=${HOST_TRIPLET:-${TARGET_TRIPLET}}
 
-GCC_CORE=${GCC_CORE:-"no"}
+GCC_CORE="${GCC_CORE:-"no"}"
+if [ x"${GCC_CORE}" = x"yes" ]; then
+  GCC_LANGUAGES=${GCC_LANGUAGES:-"c,c++"}
+else
+  GCC_LANGUAGES=${GCC_LANGUAGES:-"c,c++,ada,fortran,go,java,objc"}
+fi
 
 HOST_STRIP=${HOST_STRIP:-"strip"}
 TARGET_STRIP=${TARGET_STRIP:-"strip"}
-
-if [ x"$GCC_CORE" = x"yes" ]; then
-  GCC_LANGUAGES="c"
-else
-  GCC_LANGUAGES=c,c++,lto,objc
-  if echo "$TARGET_TRIPLET" | grep -v -q mingw; then
-    GCC_LANGUAGES+=",ada,fortran,java,go"
-  fi
-fi
 
 libdirsuffix_of_triplet() {
   case "${1}" in
