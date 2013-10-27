@@ -340,59 +340,6 @@ if [ x"$GCC_CORE" != x"yes" ]; then ( cd gcc-$VERSION
 )
 fi
 
-# Add fastjar to the gcc-java package:
-if [ -n "${PKG_GCC_JAVA}" ] ; then ( cd $TMP
-  FASTJARVER=$(echo $CWD/fastjar-*.tar.xz | rev | cut -f 3- -d . | cut -f 1 -d - | rev)
-  echo
-  echo "Building fastjar-$FASTJARVER first"
-  echo
-  rm -rf fastjar-$FASTJARVER
-  tar xvf $CWD/fastjar-$FASTJARVER.tar.xz || exit 1
-  cd fastjar-$FASTJARVER || exit 1
-  chown -R root:root .
-  chmod -R u+w,go+r-w,a-s .
-  for patch in $CWD/fastjar-patches/*.gz ; do
-    zcat $patch | patch -p1 --verbose || exit 1
-  done
-  CFLAGS="$SLKCFLAGS" \
-  CXXFLAGS="$SLKCFLAGS" \
-  ./configure \
-     --prefix=/${PREFIX} \
-     --with-sysroot=/${PREFIX} \
-     --libdir=/${PREFIX}/lib$LIBDIRSUFFIX_HST \
-     --mandir=/${PREFIX}/man \
-     --infodir=/${PREFIX}/info \
-     --build=$BUILD_TRIPLET \
-     --host=$HOST_TRIPLET \
-     --target=$TARGET_TRIPLET
-  make $NUMJOBS || exit 1
-  make install DESTDIR=${PKG_GCC_JAVA} || exit 1
-  mkdir -p ${PKG_GCC_JAVA}/${PREFIX}/doc/fastjar-$FASTJARVER
-  cp -a \
-    AUTHORS CHANGES COPYING* INSTALL NEWS README* TODO \
-    ${PKG_GCC_JAVA}/${PREFIX}/doc/fastjar-$FASTJARVER
-  install_with_length_limit "ChangeLog" "${PKG_GCC_JAVA}/${PREFIX}/doc/fastjar-${FASTJARVER}"
-  find ${PKG_GCC_JAVA} -type f | xargs file | egrep -e "executable|shared object" | grep "${HOST_EXE_FORMAT}" \
-    | cut -f 1 -d : | xargs "${HOST_STRIP}" --strip-unneeded 2> /dev/null
-  # Compress and if needed symlink the man pages:
-  if [ -d ${PKG_GCC_JAVA}/${PREFIX}/man ]; then
-    ( cd ${PKG_GCC_JAVA}/${PREFIX}/man
-      for manpagedir in $(find . -type d -name "man*") ; do
-        ( cd $manpagedir
-          for eachpage in $( find . -type l -maxdepth 1) ; do
-            ln -s $( readlink $eachpage ).gz $eachpage.gz
-            rm $eachpage
-          done
-          gzip -9 *.?
-        )
-      done
-    )
-  fi
-  compress_info_files ${PKG_GCC_JAVA}
-  echo
-) || exit 1
-fi
-
 # Mingw requires a kludge known as "winsup"
 mkdir -p winsup/mingw
 ln -s ${YYPREFIX_CROSS_TOOLCHAIN}/${TARGET_TRIPLET}/include winsup/mingw/include
