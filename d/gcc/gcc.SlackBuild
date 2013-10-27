@@ -165,6 +165,7 @@ if echo ${GCC_LANGUAGES} | grep -q 'java'; then
   ALL_PKGS+=" ${PKG_GCC_JAVA}"
   ALL_COMPILERS+=" gcc-java"
   ALL_LIBS+=" libffi libjava"
+  WITH_LIBGCJ="--enable-libgcj"
 fi
 if echo ${GCC_LANGUAGES} | grep -q 'objc'; then
   PKG_GCC_OBJC=$TMP/package-gcc-objc
@@ -439,6 +440,7 @@ fi
      --with-antlr-jar=$ANTLJAR \
      --enable-java-awt=gtk \
      --disable-gtktest \
+     ${WITH_LIBGCJ} \
      --enable-sjlj-exceptions \
      --build=$BUILD_TRIPLET \
      --host=$HOST_TRIPLET \
