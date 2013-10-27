@@ -60,6 +60,11 @@ find . \
 
 sed -i 's/IN6_ARE_ADDR_EQUAL (\(&cur->data.d6\), \(&ip->data.d6\))/(memcmp(\1, \2, sizeof (struct in6_addr)) == 0)/' src/host.c
 
+# Fix an issue in gnulib; upstream patch at
+# http://git.savannah.gnu.org/gitweb/?p=gnulib.git;a=commit;h=86725346a1b116f3c2da26c124288f5f4495bf69
+# but wget is still using an old copy of gnulib.
+find . -name 'msvc-inval.c' -exec sed -i 's/\<cdecl\>/__cdecl/' {} +
+
 CFLAGS="$SLKCFLAGS" \
 ./configure  \
   --prefix=/${PREFIX} \
