@@ -349,11 +349,6 @@ fi
 ( mkdir gcc.build.lnx;
   cd gcc.build.lnx;
 
-  # I think it is incorrect to include this option (as it will end up set
-  # to i486 on x86 platforms), and we want to tune the binary structure
-  # for i686, as that is where almost all of the optimization speedups
-  # are to be found.
-  # Correct me if my take on this is wrong.
 
   CFLAGS="$SLKCFLAGS" \
   CXXFLAGS="$SLKCFLAGS" \
