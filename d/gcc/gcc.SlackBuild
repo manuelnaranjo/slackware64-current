@@ -111,13 +111,17 @@ LIBDIRSUFFIX_TGT="$(libdirsuffix_of_triplet "${TARGET_TRIPLET}")"
 LIBDIRSUFFIX_HST="$(libdirsuffix_of_triplet "${HOST_TRIPLET}")"
 
 GCC_ARCHOPTS="--disable-multilib"
-if ! echo "${TARGET_TRIPLET}" | grep -q 'x86_64'; then
-  if echo "${TARGET_TRIPLET}" | grep -q mingw; then
+
+case "${TARGET_TRIPLET}" in
+  i686-*-mingw*)
     GCC_ARCHOPTS+=" --with-arch=pentium3"
-  else
+    ;;
+  x86_64-*-mingw*)
+    ;;
+  *)
     GCC_ARCHOPTS+=" --with-arch=$(echo "${TARGET_TRIPLET}" | cut -f1 -d-)"
-  fi
-fi
+    ;;
+esac
 
 if [ "${BUILD_TRIPLET}" != "${TARGET_TRIPLET}" ]; then
   GCC_BOOTSTRAP="--disable-bootstrap"
