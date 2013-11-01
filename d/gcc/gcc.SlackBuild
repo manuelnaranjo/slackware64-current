@@ -44,7 +44,7 @@
 # I see no reason to continue 386 support in the latest Slackware (and indeed
 # it's no longer easily possible).
 
-PKGNAM=gcc
+PKGNAM="gcc"
 VERSION=${VERSION:-$(echo $PKGNAM-*.tar.xz | rev | cut -f 3- -d . | cut -f 1 -d - | rev)}
 BUILD=${BUILD:-1}
 PREFIX=${PREFIX:-usr}
@@ -550,7 +550,7 @@ if [ -n "${PKG_GCC_GNAT}" ]; then ( cd $PKG_GCC_GNAT
 
 # gcc-java:
 if [ -n "${PKG_GCC_JAVA}" ]; then ( cd $PKG_GCC_JAVA
-  # used to mv fastjar too
+  # this used to mv fastjar too
   move_from_pkg_gcc "${PREFIX}/bin/{aot-compile,gappletviewer,gc-analyze,*gcj*,gij,gjar,gjarsigner,gjdoc,gkeytool,grmid,grmic,grmiregistry,gserialver,gtnameserv,gjavah,gorbd,jcf-dump,jv-*}"
   # Move some Java only C++ headers from the C++ package:
   (DIR="${PREFIX}/include/c++/$VERSION";
