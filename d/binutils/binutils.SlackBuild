@@ -80,7 +80,8 @@ mkdir -p $TMP $PKG
 cd $TMP
 rm -rf binutils-$VERSION
 tar xvf $CWD/binutils-$VERSION.tar.gz || \
-  tar xvf $CWD/binutils-$VERSION.tar.bz2 || exit 1
+  tar xvf $CWD/binutils-$VERSION.tar.bz2 || \
+  tar xvf $CWD/binutils-$VERSION.tar.xz || exit 1
 cd binutils-$VERSION
 
 # Use dynamic symbol table if addr2line can't find ordinary symbols:
