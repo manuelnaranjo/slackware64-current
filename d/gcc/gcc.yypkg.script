@@ -3,8 +3,7 @@
   (packager_email adrien@notk.org) (packager_name "Adrien Nader")
   (description "%{DESCR}") (host %{HST}) (target (%{TGT})) (predicates ())
   (comments ()))
- ((expand_%{PREFIX} (Expand %{PREFIX}/ .))
-  (specs_file_fixup-can-fail
+ ((specs_file_fixup-can-fail
     (SearchReplace ("%{SPECS_FILE}" "!{YYPREFIX}" "${YYPREFIX}")))
   )
- ((Reverse expand_%{PREFIX})))
+ ())
