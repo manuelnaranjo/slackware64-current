@@ -78,7 +78,7 @@ cat ${CWD}/libogg.yypkg.script | sed \
   -e "s/%{PKG}/libogg/" \
   -e "s/%{HST}/${HOST_TRIPLET}/" \
   -e "s/%{TGT}//" \
-  -e "s/%{VER}/$(echo ${VERSION} | tr . ' ')/" \
+  -e "s/%{VER}/${VERSION}/" \
   -e "s/%{BUILD}/${BUILD}/" \
   -e "s/%{DESCR}/${DESCR:-"No description"}/" \
   | makeypkg -o ${YYOUTPUT} -script - "${PKG}/${PREFIX}"
