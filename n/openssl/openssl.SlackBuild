@@ -118,6 +118,13 @@ sed -i '/\*DSO_WIN32\*)	sfx="eay32.dll"; pfx=;;/ { s/eay32// ; s/pfx=;/pfx=lib;/
 # ... this one doesn't
 sed -i '/\*DSO_WIN32\*) sfx="eay32.dll"; pfx=;;/ { s/eay32// ; s/pfx=;/pfx=lib;/} ' engines/ccgost/Makefile
 
+find doc -name '*.pod' -exec sed -i 's/=item \([0-9]\+\)/=item Z<>\1/' {} +
+sed -i 's/=head1 NOTES/=back\n\n\0/' doc/crypto/X509_STORE_CTX_get_error.pod
+sed -i \
+  -e 's/=item > 0/=over 4\n\n\0/' \
+  -e 's/=cut/=back\n\n\0/' \
+  doc/ssl/SSL_CTX_use_psk_identity_hint.pod
+
 # These are the known patent issues with OpenSSL:
 # name   #         expires
 # MDC-2: 4,908,861  2007-03-13, included.  :-)
