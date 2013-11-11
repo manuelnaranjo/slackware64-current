@@ -133,6 +133,7 @@ sed -i \
 
 ./Configure \
  --prefix=/${PREFIX} \
+ --libdir="lib${LIBDIRSUFFIX}" \
  --openssldir=/${PREFIX}/etc/ssl \
  no-idea \
  no-rc5 \
