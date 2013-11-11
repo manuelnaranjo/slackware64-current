@@ -76,6 +76,9 @@ chmod -R u+w,go+r-w,a-s .
 sed -i -e 's/libopts_la_LDFLAGS      = -version-info  36:4:11/\0 @LTLIBINTL@/' src/libopts/Makefile.am
 sed -i -e 's/libopts_la_LDFLAGS = -version-info  36:4:11/\0 @LTLIBINTL@/' src/libopts/Makefile.in
 
+sed -i -e 's/  struct sigaction new_action, old_action;/#ifndef _WIN32\n\0\n#endif/' src/cli.c
+
+
 CFLAGS="-O2" \
 CXXFLAGS="-O2" \
 ./configure \
