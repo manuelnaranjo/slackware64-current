@@ -81,6 +81,9 @@ CXXFLAGS="$SLKCFLAGS" \
   --host=${HOST_TRIPLET} \
   --build=$ARCH-slackware-linux || exit 1
 
+find -name 'Makefile' \
+  -exec sed -i 's;\(toolexeclibdir = $(libdir)\)/../lib;\1;' {} +
+
 make -j7 || exit 1
 make install DESTDIR=$PKG || exit 1
 
