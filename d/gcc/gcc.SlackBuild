@@ -352,9 +352,6 @@ case "${HOST_TRIPLET},${TARGET_TRIPLET}" in
     ;;
 esac
 
-if [ ! -e /${PREFIX}/mingw ]; then
-  ln -s /${PREFIX}/${TARGET_TRIPLET} /${PREFIX}/mingw
-fi
 if [ -n "${LIBDIRSUFFIX_TGT}" ]; then
   ln -s /${PREFIX}/${TARGET_TRIPLET}/lib{,${LIBDIRSUFFIX_TGT}}
 fi
