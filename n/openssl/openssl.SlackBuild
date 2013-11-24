@@ -178,6 +178,11 @@ if [ -d $PKG1/${PREFIX}/man ]; then
   )
 fi
 
+# Remove the "SSL.3.gz" which points to "ssl.3.gz"; it breaks on Windows because
+# of the non-case-sensitivity since we try to "rm" the symlink before creating
+# it.
+rm $PKG1/${PREFIX}/man/man3/SSL.3.gz
+
 cd $PKG1
 chmod 755 ${PREFIX}/lib${LIBDIRSUFFIX}/pkgconfig
 sed -i -e "s#lib\$#lib${LIBDIRSUFFIX}#" ${PREFIX}/lib${LIBDIRSUFFIX}/pkgconfig/*.pc
