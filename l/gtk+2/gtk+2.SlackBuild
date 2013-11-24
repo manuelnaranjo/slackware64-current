@@ -71,6 +71,9 @@ zcat $CWD/fix_build_issues_on_tutorial_and_faq.diff.gz | patch -p1 --verbose || 
 zcat $CWD/gtk+-2.24.x.icon-compat.diff.gz | patch -p1 --verbose || exit 1
 zcat $CWD/gtk+-2.24.x.icon-compat.am.diff.gz | patch -p1 --verbose || exit 1
 
+libtoolize --force
+autoreconf -fiv
+
 CFLAGS="-O2" \
 ./configure \
   --prefix=/${PREFIX} \
