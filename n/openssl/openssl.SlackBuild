@@ -168,6 +168,12 @@ if [ -d $PKG1/${PREFIX}/man ]; then
   ( cd $PKG1/${PREFIX}/man
     for manpagedir in $(find . -type d -name "man*") ; do
       ( cd $manpagedir
+        # Remove the links similare to "SSL.3.gz" which points to "ssl.3.gz";
+        # it breaks on Windows because of the non-case-sensitivity since we try
+        # to "rm" the symlink before creating it.
+        for eachpage in $( find . \! -type l -maxdepth 1 -printf '%f\n') ; do
+          find . -iname "${eachpage}" \! -name "${eachpage}"
+        done
         for eachpage in $( find . -type l -maxdepth 1) ; do
           ln -s $( readlink $eachpage ).gz $eachpage.gz
           rm $eachpage
@@ -177,11 +183,6 @@ if [ -d $PKG1/${PREFIX}/man ]; then
     done
   )
 fi
-
-# Remove the "SSL.3.gz" which points to "ssl.3.gz"; it breaks on Windows because
-# of the non-case-sensitivity since we try to "rm" the symlink before creating
-# it.
-rm $PKG1/${PREFIX}/man/man3/SSL.3.gz
 
 cd $PKG1
 chmod 755 ${PREFIX}/lib${LIBDIRSUFFIX}/pkgconfig
