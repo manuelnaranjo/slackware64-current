@@ -172,7 +172,7 @@ if [ -d $PKG1/${PREFIX}/man ]; then
         # it breaks on Windows because of the non-case-sensitivity since we try
         # to "rm" the symlink before creating it.
         for eachpage in $( find . \! -type l -maxdepth 1 -printf '%f\n') ; do
-          find . -iname "${eachpage}" \! -name "${eachpage}"
+          find . -iname "${eachpage}" \! -name "${eachpage}" -exec rm {} +
         done
         for eachpage in $( find . -type l -maxdepth 1) ; do
           ln -s $( readlink $eachpage ).gz $eachpage.gz
