@@ -111,12 +111,10 @@ LIBDIRSUFFIX_TGT="$(libdirsuffix_of_triplet "${TARGET_TRIPLET}")"
 LIBDIRSUFFIX_HST="$(libdirsuffix_of_triplet "${HOST_TRIPLET}")"
 
 GCC_ARCHOPTS="--disable-multilib"
-SJLJ_EXECEPTIONS=""
 
 case "${TARGET_TRIPLET}" in
   i686-*-mingw*)
     GCC_ARCHOPTS+=" --with-arch=pentium3"
-    SJLJ_EXECEPTIONS="--enable-sjlj-exceptions"
     ;;
   x86_64-*-mingw*)
     ;;
@@ -390,7 +388,6 @@ fi
      --enable-java-awt=gtk \
      --disable-gtktest \
      ${WITH_LIBGCJ} \
-     ${SJLJ_EXECEPTIONS} \
      --build=$BUILD_TRIPLET \
      --host=$HOST_TRIPLET \
      --target=$TARGET_TRIPLET || exit 1
