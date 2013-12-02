@@ -58,6 +58,8 @@ cd $PKGNAM-$VERSION || exit 1
 chown -R root:root .
 chmod -R u+w,go+r-w,a-s .
 
+sed -i 's/#include "soup-requester.h"/\0\n#include <string.h>/' libsoup/soup-request-file.c
+
 CFLAGS="$SLKCFLAGS" \
 ./configure \
   --prefix=/${PREFIX} \
