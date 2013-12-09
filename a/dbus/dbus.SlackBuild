@@ -70,7 +70,7 @@ CXXFLAGS="-O2" \
   --disable-doxygen-docs \
   --enable-shared=yes \
   --enable-static=no \
-  --with-dbus-session-bus-default-address=autolaunch \
+  --with-dbus-session-bus-default-address=autolaunch: \
   --host=${HOST_TRIPLET} \
   --build=$ARCH-slackware-linux
 
