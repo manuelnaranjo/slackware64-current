@@ -124,6 +124,11 @@ case "${TARGET_TRIPLET}" in
     ;;
 esac
 
+case "${HOST_TRIPLET}" in
+  *-*-mingw*) EXE=".exe" ;;
+  *)          EXE="" ;;
+esac
+
 if [ "${BUILD_TRIPLET}" != "${TARGET_TRIPLET}" ]; then
   GCC_BOOTSTRAP="--disable-bootstrap"
 else
@@ -491,33 +496,32 @@ fi
   )
 
   ( cd $PKG_GCC/${PREFIX}/bin
-    rename '.exe' '' *.exe
     mv ${TARGET_TRIPLET}-gfortran ${TARGET_TRIPLET}-gfortran-gcc
     for bin in gcc g++ gfortran-gcc gcc-{ar,nm,ranlib} gcj gcjh; do
-      if [ -e ${bin} ]; then
-        mv ${bin} ${TARGET_TRIPLET}-${bin}-${VERSION}
+      if [ -e ${bin}${EXE} ]; then
+        mv ${bin}${EXE} ${TARGET_TRIPLET}-${bin}-${VERSION}${EXE}
       fi
-      if [ -e ${TARGET_TRIPLET}-${bin} ]; then
-        mv ${TARGET_TRIPLET}-${bin} ${TARGET_TRIPLET}-${bin}-${VERSION}
+      if [ -e ${TARGET_TRIPLET}-${bin}${EXE} ]; then
+        mv ${TARGET_TRIPLET}-${bin}${EXE} ${TARGET_TRIPLET}-${bin}-${VERSION}${EXE}
       fi
     done
-    symlink_to "${TARGET_TRIPLET}-gcc-${VERSION}" ${TARGET_TRIPLET}-gcc
-    symlink_to "${TARGET_TRIPLET}-g++-${VERSION}" ${TARGET_TRIPLET}-{c++,g++}
+    symlink_to "${TARGET_TRIPLET}-gcc-${VERSION}${EXE}" ${TARGET_TRIPLET}-gcc${EXE}
+    symlink_to "${TARGET_TRIPLET}-g++-${VERSION}${EXE}" ${TARGET_TRIPLET}-{c++,g++}${EXE}
     if [ -n "${PKG_GCC_GFORTRAN}" ]; then
       symlink_to "${TARGET_TRIPLET}-gfortran-${VERSION}${EXE}" ${TARGET_TRIPLET}-{gfortran,g95,g77}${EXE}
     fi
     if [ x"${HOST_TRIPLET}" = x"${TARGET_TRIPLET}" ]; then
       for bin in gcc gcc-{ar,nm,ranlib}; do
-        symlink_to "${TARGET_TRIPLET}-${bin}-${VERSION}" ${bin} ${bin}-${VERSION}
+        symlink_to "${TARGET_TRIPLET}-${bin}-${VERSION}${EXE}" ${bin} ${bin}-${VERSION}${EXE}
       done
-      symlink_to "${TARGET_TRIPLET}-gcc-${VERSION}" cc
-      symlink_to "${TARGET_TRIPLET}-g++-${VERSION}" g++ c++
+      symlink_to "${TARGET_TRIPLET}-gcc-${VERSION}${EXE}" cc${EXE}
+      symlink_to "${TARGET_TRIPLET}-g++-${VERSION}${EXE}" g++${EXE} c++${EXE}
       if [ -n "${PKG_GCC_JAVA}" ]; then
-        symlink_to "${TARGET_TRIPLET}-gcj-${VERSION}" gcj gcj-${VERSION}
-        symlink_to "${TARGET_TRIPLET}-gcjh-${VERSION}" gcjh gcjh-${VERSION}
+        symlink_to "${TARGET_TRIPLET}-gcj-${VERSION}${EXE}${EXE}" gcj gcj-${VERSION}${EXE}
+        symlink_to "${TARGET_TRIPLET}-gcjh-${VERSION}${EXE}${EXE}" gcjh gcjh-${VERSION}${EXE}
       fi
       if [ -n "${PKG_GCC_GFORTRAN}" ]; then
-        symlink_to "${TARGET_TRIPLET}-gfortran-${VERSION}" gfortran fortran {f,g}{95,77}
+        symlink_to "${TARGET_TRIPLET}-gfortran-${VERSION}${EXE}" gfortran${EXE} fortran${EXE} {f,g}{95,77}${EXE}
       fi
     fi
   )
@@ -525,8 +529,13 @@ fi
   ( cd $PKG_GCC/${PREFIX}/man
     gzip -9 */*
     cd man1
-    ln -sf g++.1.gz c++.1.gz
-    ln -sf gcc.1.gz cc.1.gz
+    # For cross-toolchains, the g++ and gcc manpages are prefixed with the
+    # target triplet; we could create ${TARGET_TRIPLET}-cc manpages but I don't
+    # think anyone would try to read them so skip them entirely.
+    if [ "${HOST_TRIPLET}" = "${TARGET_TRIPLET}" ]; then
+      ln -sf g++.1.gz c++.1.gz
+      ln -sf gcc.1.gz cc.1.gz
+    fi
   )
 
   ## build the txz package
