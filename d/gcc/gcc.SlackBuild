@@ -503,7 +503,9 @@ fi
     done
     symlink_to "${TARGET_TRIPLET}-gcc-${VERSION}" ${TARGET_TRIPLET}-gcc
     symlink_to "${TARGET_TRIPLET}-g++-${VERSION}" ${TARGET_TRIPLET}-{c++,g++}
-    symlink_to "${TARGET_TRIPLET}-gfortran-${VERSION}" ${TARGET_TRIPLET}-{gfortran,g95,g77}
+    if [ -n "${PKG_GCC_GFORTRAN}" ]; then
+      symlink_to "${TARGET_TRIPLET}-gfortran-${VERSION}${EXE}" ${TARGET_TRIPLET}-{gfortran,g95,g77}${EXE}
+    fi
     if [ x"${HOST_TRIPLET}" = x"${TARGET_TRIPLET}" ]; then
       for bin in gcc gcc-{ar,nm,ranlib}; do
         symlink_to "${TARGET_TRIPLET}-${bin}-${VERSION}" ${bin} ${bin}-${VERSION}
