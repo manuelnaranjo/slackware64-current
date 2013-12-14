@@ -219,8 +219,8 @@ doc_dir_of_element() {
 # If there's a new file, installing at least part of the recent history
 # is useful, but don't let it get totally out of control:
 install_with_length_limit() {
-  FILE="$1"
-  DOCSDIR="$2"
+  local FILE="$1"
+  local DOCSDIR="$2"
   if [ -r "$FILE" ]; then
     cat "$FILE" | head -n 1000 > "${DOCSDIR}/${FILE}"
     touch -r "$FILE" "${DOCSDIR}/${FILE}"
@@ -230,12 +230,12 @@ install_with_length_limit() {
 # move_from_pkg_gcc "${GLOB}"
 # When issuing "make install", everything gets installed in a single directory
 # and then moved to the corresponding package. This function moves files
-# matching a glob (given as $1) from ${PKG_GCC} to the current package
+# matching expression (given as $*) from ${PKG_GCC} to the current package
 # directory.
 move_from_pkg_gcc() {
-  SRC_DIR="$(dirname "$1")"
+  local SRC_DIR="$(dirname "$1")"
   mkdir -p "${SRC_DIR}"
-  DEST_DIR="$(cd "${SRC_DIR}" && pwd)"
+  local DEST_DIR="$(cd "${SRC_DIR}" && pwd)"
   (cd "${PKG_GCC}" && eval mv $* "${DEST_DIR}")
 }
 
@@ -243,7 +243,7 @@ move_from_pkg_gcc() {
 # A common operation is to symlink several files to one in order to be able to
 # use several names for it: gcc, x86_64-slackware-linux-gcc, cc, ...
 symlink_to() {
-  LINK_TARGET="$1"
+  local LINK_TARGET="$1"
   shift
   for bin in $*; do
     ln -sf "${LINK_TARGET}" "${bin}"
@@ -257,7 +257,7 @@ compress_info_files() {
 }
 
 description_of_compiler() {
-  PKG="${1}"
+  local PKG="${1}"
   cat "${CWD}/slack-desc.${PKG}" \
     | sed -e 's;/;\\/;g' \
     | sed -n "/^${PKG}:/ s#^${PKG}: ##p" \
