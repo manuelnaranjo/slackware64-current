@@ -24,9 +24,9 @@
 
 PKGNAM=mozilla-nss
 SRCNAM=nss
-VERSION=${VERSION:-3.15.2}
-NSPR=${NSPR:-4.10.1}
-BUILD=${BUILD:-2}
+VERSION=${VERSION:-3.15.3}
+NSPR=${NSPR:-4.10.2}
+BUILD=${BUILD:-1}
 
 # Automatically determine the architecture we're building on:
 MARCH=$( uname -m )

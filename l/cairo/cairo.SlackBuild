@@ -65,26 +65,23 @@ CFLAGS="$SLKCFLAGS" \
   --disable-quartz \
   --disable-static \
   --disable-trace \
-  --enable-freetype \
   --enable-ps \
   --enable-pdf \
   --enable-svg \
+  --enable-ft \
   --enable-gobject \
-  --enable-xml \
   --host=${HOST_TRIPLET} \
   --build=$ARCH-slackware-linux
 
 # None of these are 'stable' yet...
-#  --enable-tee \
 #  --enable-qt \
-#  --enable-gl \
 #  --enable-drm \
-#  --enable-xlib-xcb \
-#  --enable-xcb-shm \
 
 # Not sure if these two are needed / useful yet; --enable-xcb is now default
 #  --enable-xcb-shm \
+#  ^^ may cause GTK+3 instability
 #  --enable-xlib-xcb \
+#  ^^  this one caused a GIMP slowdown
 
 # Skipping this, because it causes a dependency on the specific
 # version of binutils installed at compile time:
