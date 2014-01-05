@@ -514,7 +514,7 @@ fi
     fi
     if [ x"${HOST_TRIPLET}" = x"${TARGET_TRIPLET}" ]; then
       for bin in gcc gcc-{ar,nm,ranlib}; do
-        symlink_to "${TARGET_TRIPLET}-${bin}-${VERSION}${EXE}" ${bin} ${bin}-${VERSION}${EXE}
+        symlink_to "${TARGET_TRIPLET}-${bin}-${VERSION}${EXE}" ${bin}${EXE} ${bin}-${VERSION}${EXE}
       done
       symlink_to "${TARGET_TRIPLET}-gcc-${VERSION}${EXE}" cc${EXE}
       symlink_to "${TARGET_TRIPLET}-g++-${VERSION}${EXE}" g++${EXE} c++${EXE}
