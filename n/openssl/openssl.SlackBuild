@@ -155,6 +155,11 @@ cp lib{crypto,ssl}-1.0.0.dll $PKG1/${PREFIX}/bin
 
 rm $PKG1/${PREFIX}/lib${LIBDIRSUFFIX}/lib{crypto,ssl}.a
 
+# !PATCH
+case "${HOST_TRIPLET}" in
+  *-*-mingw*) mv "$PKG/${PREFIX}/bin/openssl" "$PKG/${PREFIX}/bin/openssl.exe";;
+esac
+
 find $PKG1 | xargs file | egrep "executable|shared object" \
   | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : \
   | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
