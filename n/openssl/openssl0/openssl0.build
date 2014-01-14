@@ -56,6 +56,9 @@ rm -rf $PKG1 openssl-$VERSION
 tar xvf $CWD/openssl-$VERSION.tar.gz || exit 1
 cd openssl-$VERSION
 
+# Fix pod syntax errors which are fatal wih a newer perl:
+zcat $CWD/fix-pod-syntax.patch.gz | patch -p1 --verbose || exit 1
+
 # Use .so.0, not .so.0.9.8:
 zcat $CWD/openssl.soname.diff.gz | patch -p1 --backup --verbose --suffix=.orig || exit 1
 if [ "$ARCH" = "i486" ]; then
