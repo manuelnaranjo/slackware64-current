@@ -675,10 +675,10 @@ fi
 
 strip_f "current ar archive" "" "${TARGET_STRIP} -g"
 
-for COMPILER in ${ALL_COMPILERS}; do
-  ( cd "$(pkg_of_element "${COMPILER}")"
-    makepkg -l y -c n $TMP/${COMPILER}-${VERSION}-${ARCH}-${BUILD}.txz )
-done
+# for COMPILER in ${ALL_COMPILERS}; do
+#   ( cd "$(pkg_of_element "${COMPILER}")"
+#     makepkg -l y -c n $TMP/${COMPILER}-${VERSION}-${ARCH}-${BUILD}.txz )
+# done
 
 for COMPILER in ${ALL_COMPILERS}; do
   cat ${CWD}/$PKGNAM.yypkg.script | sed \
