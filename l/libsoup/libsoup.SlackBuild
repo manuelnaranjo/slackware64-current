@@ -69,6 +69,7 @@ CFLAGS="$SLKCFLAGS" \
   --disable-static \
   --with-gnome \
   --host=${HOST_TRIPLET} \
+  --without-apache-httpd \
   --build=$ARCH-slackware-linux || exit 1
 
 make $NUMJOBS || make || exit 1
