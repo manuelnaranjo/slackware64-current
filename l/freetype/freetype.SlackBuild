@@ -76,7 +76,12 @@ zcat $CWD/freetype.illadvisederror.diff.gz | patch -p1 --verbose || exit 1
 #zcat $CWD/freetype.subpixel.rendering.diff.gz | patch -p1 --verbose || exit 1
 
 chown -R root:root .
-CFLAGS="-O2" make setup CFG="--prefix=/${PREFIX} --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} --build=$ARCH-slackware-linux --host=${HOST_TRIPLET}"
+CFLAGS="-O2" \
+  LIBPNG_CFLAGS="$(pkg-config --cflags libpng)" \
+  LIBPNG_LDFLAGS="$(pkg-config --libs libpng)" \
+  make setup \
+  CFG="--prefix=/${PREFIX} --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} --build=$ARCH-slackware-linux --host=${HOST_TRIPLET}"
+
 make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG
 
