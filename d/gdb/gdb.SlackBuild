@@ -37,11 +37,10 @@ if [ -z "$ARCH" ]; then
   esac
 fi
 
-if [ "$ARCH" = "x86_64" ]; then
-  LIBDIRSUFFIX="64"
-else
-  LIBDIRSUFFIX=""
-fi
+case "${HOST_TRIPLET}" in
+  i686-w64-mingw32) LIBDIRSUFFIX="" ;;
+  x86_64-w64-mingw32) LIBDIRSUFFIX="64" ;;
+esac
 
 CWD=$(pwd)
 TMP=${TMP:-/tmp}
@@ -62,11 +61,11 @@ find . \
   -exec chmod 644 {} \;
 
 ./configure \
-  --prefix=/usr \
-  --libdir=/usr/lib${LIBDIRSUFFIX} \
-  --mandir=/usr/man \
-  --infodir=/usr/info \
-  --with-python \
+  --prefix=/${PREFIX} \
+  --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
+  --mandir=/${PREFIX}/man \
+  --infodir=/${PREFIX}/info \
+  --host=${HOST_TRIPLET} \
   --build=$ARCH-slackware-linux
 
 ( cd readline ; make )
@@ -75,29 +74,30 @@ make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG || exit 1
 
 # None of this stuff has ever been included in this package:
-rm -f $PKG/usr/lib${LIBDIRSUFFIX}/{libbfd*,libiberty*,libopcodes*}
-rmdir $PKG/usr/lib${LIBDIRSUFFIX} 2> /dev/null
-rm -f $PKG/usr/info/{annotate*,bfd*,configure*,standards*}
-rm -rf $PKG/usr/include
+rm -f $PKG/${PREFIX}/lib${LIBDIRSUFFIX}/{libbfd*,libiberty*,libopcodes*}
+rmdir $PKG/${PREFIX}/lib${LIBDIRSUFFIX} 2> /dev/null
+rm -f $PKG/${PREFIX}/info/{annotate*,bfd*,configure*,standards*}
+rm -rf $PKG/${PREFIX}/include
 
 # Use the -tui option if you want this.
 # Including a whole extra copy of the gdb binary is obnoxious:
-rm -f $PKG/usr/bin/gdbtui $PKG/usr/man/man1/gdbtui.1*
+rm -f $PKG/${PREFIX}/bin/gdbtui $PKG/${PREFIX}/man/man1/gdbtui.1*
 
-mkdir -p $PKG/usr/doc/gdb-$VERSION/gdb
-cp -a COPYING* README $PKG/usr/doc/gdb-$VERSION
+mkdir -p $PKG/${PREFIX}/doc/gdb-$VERSION/gdb
+cp -a COPYING* README $PKG/${PREFIX}/doc/gdb-$VERSION
 cd gdb
-cp -a NEWS README $PKG/usr/doc/gdb-$VERSION/gdb
-cp -a gdbserver/README $PKG/usr/doc/gdb-$VERSION/README.gdbserver
-find $PKG/usr/doc/gdb-$VERSION -type f -exec chmod 644 {} \;
+cp -a NEWS README $PKG/${PREFIX}/doc/gdb-$VERSION/gdb
+cp -a gdbserver/README $PKG/${PREFIX}/doc/gdb-$VERSION/README.gdbserver
+find $PKG/${PREFIX}/doc/gdb-$VERSION -type f -exec chmod 644 {} \;
 
 # Strip binaries:
-find $PKG | xargs file | grep -e "executable" -e "shared object" \
-  | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
+find $PKG | xargs file | egrep -e "executable|shared object" \
+  | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : \
+  | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
 
 # Compress and link manpages, if any:
-if [ -d $PKG/usr/man ]; then
-  ( cd $PKG/usr/man
+if [ -d $PKG/${PREFIX}/man ]; then
+  ( cd $PKG/${PREFIX}/man
     for manpagedir in $(find . -type d -name "man*") ; do
       ( cd $manpagedir
         for eachpage in $( find . -type l -maxdepth 1) ; do
@@ -111,17 +111,18 @@ if [ -d $PKG/usr/man ]; then
 fi
 
 # Compress info files, if any:
-if [ -d $PKG/usr/info ]; then
-  ( cd $PKG/usr/info
+if [ -d $PKG/${PREFIX}/info ]; then
+  ( cd $PKG/${PREFIX}/info
     rm -f dir
     gzip -9 *
   )
 fi
 
-mkdir -p $PKG/install
-cat $CWD/slack-desc > $PKG/install/slack-desc
-
-# Build the package:
-cd $PKG
-/sbin/makepkg -l y -c n $TMP/gdb-$VERSION-$ARCH-$BUILD.txz
-
+cat ${CWD}/gdb.yypkg.script | sed \
+  -e "s/%{PKG}/gdb/" \
+  -e "s/%{HST}/${HOST_TRIPLET}/" \
+  -e "s/%{TGT}//" \
+  -e "s/%{VER}/${VERSION}/" \
+  -e "s/%{BUILD}/${BUILD}/" \
+  -e "s/%{DESCR}/${DESCR:-"No description"}/" \
+  | makeypkg -o ${YYOUTPUT} -script - "${PKG}/${PREFIX}"

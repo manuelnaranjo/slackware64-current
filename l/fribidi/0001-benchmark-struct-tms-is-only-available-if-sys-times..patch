@@ -1,0 +1,27 @@
+From 8a87bd65b2b145cf8333c5d5ad3325dfc33d589f Mon Sep 17 00:00:00 2001
+From: Adrien Nader <adrien@notk.org>
+Date: Tue, 4 Feb 2014 22:06:20 +0100
+Subject: [PATCH] benchmark: "struct tms" is only available if "sys/times.h"
+ is.
+
+---
+ bin/fribidi-benchmark.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/bin/fribidi-benchmark.c b/bin/fribidi-benchmark.c
+index da4e1aa..629f213 100644
+--- a/bin/fribidi-benchmark.c
++++ b/bin/fribidi-benchmark.c
+@@ -123,8 +123,8 @@ utime (
+   void
+ )
+ {
+-  struct tms tb;
+ #if HAVE_SYS_TIMES_H+0
++  struct tms tb;
+   times (&tb);
+   return 0.01 * tb.tms_utime;
+ #else
+-- 
+1.8.4
+

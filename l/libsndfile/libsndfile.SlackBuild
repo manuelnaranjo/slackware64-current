@@ -40,16 +40,10 @@ CWD=$(pwd)
 TMP=${TMP:-/tmp}
 PKG=$TMP/package-$PKGNAM
 
-if [ "$ARCH" = "i486" ]; then
-  SLKCFLAGS="-O2 -march=i486 -mtune=i686"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "x86_64" ]; then
-  SLKCFLAGS="-O2 -fPIC"
-  LIBDIRSUFFIX="64"
-else
-  SLKCFLAGS="-O2"
-  LIBDIRSUFFIX=""
-fi
+case "${HOST_TRIPLET}" in
+  i686-w64-mingw32) LIBDIRSUFFIX="" ;;
+  x86_64-w64-mingw32) LIBDIRSUFFIX="64" ;;
+esac
 
 rm -rf $PKG
 mkdir -p $TMP $PKG
@@ -64,40 +58,44 @@ chmod -R a-s,u+w,go+r-w .
 CFLAGS="$SLKCFLAGS" \
 CXXFLAGS="$SLKCFLAGS" \
   ./configure \
-  --prefix=/usr \
-  --libdir=/usr/lib${LIBDIRSUFFIX} \
+  --prefix=/${PREFIX} \
+  --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
   --sysconfdir=/etc \
   --localstatedir=/var \
-  --mandir=/usr/man \
-  --docdir=/usr/doc/$PKGNAM-$VERSION \
-  --htmldir=/usr/doc/$PKGNAM-$VERSION/html \
+  --mandir=/${PREFIX}/man \
+  --docdir=/${PREFIX}/doc/$PKGNAM-$VERSION \
+  --htmldir=/${PREFIX}/doc/$PKGNAM-$VERSION/html \
   --disable-static \
+  --host=${HOST_TRIPLET} \
   --build=$ARCH-slackware-linux
 
-make htmldocdir=/usr/doc/$PKGNAM-$VERSION/html || exit 1
-make htmldocdir=/usr/doc/$PKGNAM-$VERSION/html DESTDIR=$PKG install
+make htmldocdir=/${PREFIX}/doc/$PKGNAM-$VERSION/html || exit 1
+make htmldocdir=/${PREFIX}/doc/$PKGNAM-$VERSION/html DESTDIR=$PKG install
 
-find $PKG | xargs file | grep -e "executable" -e "shared object" | grep ELF \
-  | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
+find $PKG | xargs file | egrep -e "executable|shared object" \
+  | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : \
+  | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
 
-find $PKG/usr/man -type f -exec gzip -9 {} \;
+find $PKG/${PREFIX}/man -type f -exec gzip -9 {} \;
 
-mkdir -p $PKG/usr/doc/$PKGNAM-$VERSION
+mkdir -p $PKG/${PREFIX}/doc/$PKGNAM-$VERSION
 cp -a \
   AUTHORS COPYING* INSTALL NEWS README* \
-  $PKG/usr/doc/$PKGNAM-$VERSION
+  $PKG/${PREFIX}/doc/$PKGNAM-$VERSION
 
 # If there's a ChangeLog, installing at least part of the recent history
 # is useful, but don't let it get totally out of control:
 if [ -r ChangeLog ]; then
-  DOCSDIR=$(echo $PKG/usr/doc/${PKGNAM}-$VERSION)
+  DOCSDIR=$(echo $PKG/${PREFIX}/doc/${PKGNAM}-$VERSION)
   cat ChangeLog | head -n 1000 > $DOCSDIR/ChangeLog
   touch -r ChangeLog $DOCSDIR/ChangeLog
 fi
 
-mkdir -p $PKG/install
-cat $CWD/slack-desc > $PKG/install/slack-desc
-
-cd $PKG
-/sbin/makepkg -l y -c n $TMP/$PKGNAM-$VERSION-$ARCH-$BUILD.txz
-
+cat ${CWD}/libsndfile.yypkg.script | sed \
+  -e "s/%{PKG}/libsndfile/" \
+  -e "s/%{HST}/${HOST_TRIPLET}/" \
+  -e "s/%{TGT}//" \
+  -e "s/%{VER}/${VERSION}/" \
+  -e "s/%{BUILD}/${BUILD}/" \
+  -e "s/%{DESCR}/${DESCR:-"No description"}/" \
+  | makeypkg -o ${YYOUTPUT} -script - "${PKG}/${PREFIX}"
