@@ -37,11 +37,10 @@ fi
 
 NUMJOBS=${NUMJOBS:-" -j7 "}
 
-if [ "$ARCH" = "x86_64" ]; then
-  LIBDIRSUFFIX="64"
-else
-  LIBDIRSUFFIX=""
-fi
+case "${HOST_TRIPLET}" in
+  i686-w64-mingw32) LIBDIRSUFFIX="" ;;
+  x86_64-w64-mingw32) LIBDIRSUFFIX="64" ;;
+esac
 
 CWD=$(pwd)
 TMP=${TMP:-/tmp}
@@ -61,28 +60,36 @@ find . \
   -exec chmod 644 {} \;
 
 #zcat $CWD/libao.use_new_alsa_api.diff.gz | patch -p1 --verbose
+
+sed -i '/AC_CHECK_LIB(pthread, pthread_kill)/ s/pthread/winpthread/' configure.ac
+autoreconf -fiv
 ./configure \
-  --prefix=/usr \
-  --libdir=/usr/lib${LIBDIRSUFFIX} \
+  --prefix=/${PREFIX} \
+  --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
+  --host=${HOST_TRIPLET} \
+  --disable-esd \
   --build=$ARCH-slackware-linux
 
 make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG || exit 1
 
-find $PKG | xargs file | grep -e "executable" -e "shared object" | grep ELF \
-  | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
+find $PKG | xargs file | egrep -e "executable|shared object" \
+  | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : \
+  | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
 
-mv $PKG/usr/share/man $PKG/usr
-gzip -9 $PKG/usr/man/man?/*.?
+mv $PKG/${PREFIX}/share/man $PKG/${PREFIX}
+gzip -9 $PKG/${PREFIX}/man/man?/*.?
 
-mv $PKG/usr/share/doc $PKG/usr
+mv $PKG/${PREFIX}/share/doc $PKG/${PREFIX}
 cp -a \
   AUTHORS COPYING* README* TODO \
-  $PKG/usr/doc/libao-$VERSION
+  $PKG/${PREFIX}/doc/libao-$VERSION
 
-mkdir -p $PKG/install
-cat $CWD/slack-desc > $PKG/install/slack-desc
-
-cd $PKG
-/sbin/makepkg -l y -c n $TMP/libao-$VERSION-$ARCH-$BUILD.txz
-
+cat ${CWD}/libao.yypkg.script | sed \
+  -e "s/%{PKG}/libao/" \
+  -e "s/%{HST}/${HOST_TRIPLET}/" \
+  -e "s/%{TGT}//" \
+  -e "s/%{VER}/${VERSION}/" \
+  -e "s/%{BUILD}/${BUILD}/" \
+  -e "s/%{DESCR}/${DESCR:-"No description"}/" \
+  | makeypkg -o ${YYOUTPUT} -script - "${PKG}/${PREFIX}"
