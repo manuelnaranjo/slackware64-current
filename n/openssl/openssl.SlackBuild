@@ -211,5 +211,5 @@ cat ${CWD}/openssl.yypkg.script | sed \
   -e "s/%{VER}/${VERSION}/" \
   -e "s/%{BUILD}/${BUILD}/" \
   -e "s/%{DESCR}/${DESCR:-"No description"}/" \
-  | makeypkg -o ${YYOUTPUT} -script - "${PKG1}/${PREFIX}"
+  | yypkg --makepkg --output ${YYOUTPUT} --script - --directory "${PKG1}/${PREFIX}"
 

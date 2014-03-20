@@ -92,4 +92,4 @@ cat ${CWD}/libao.yypkg.script | sed \
   -e "s/%{VER}/${VERSION}/" \
   -e "s/%{BUILD}/${BUILD}/" \
   -e "s/%{DESCR}/${DESCR:-"No description"}/" \
-  | makeypkg -o ${YYOUTPUT} -script - "${PKG}/${PREFIX}"
+  | yypkg --makepkg --output ${YYOUTPUT} --script - --directory "${PKG}/${PREFIX}"
