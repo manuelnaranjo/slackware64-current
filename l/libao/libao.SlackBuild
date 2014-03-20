@@ -61,6 +61,7 @@ find . \
 
 #zcat $CWD/libao.use_new_alsa_api.diff.gz | patch -p1 --verbose
 
+sed -i '/^libao_la_LDFLAGS =/ s/.*/\0 -lksuser/' src/Makefile.am
 sed -i '/AC_CHECK_LIB(pthread, pthread_kill)/ s/pthread/winpthread/' configure.ac
 autoreconf -fiv
 ./configure \
