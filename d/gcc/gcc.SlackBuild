@@ -455,7 +455,7 @@ fi
   if [ x"${HOST_TRIPLET}" = x"${TARGET_TRIPLET}" ]; then
     prefix_dir="!{YYPREFIX}"
   else
-    prefix_dir="/${YYPREFIX_TARGET_PREFIX}"
+    prefix_dir="/${YYPREFIX_TARGET}"
   fi
 
   sed -i \
