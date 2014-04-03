@@ -61,6 +61,7 @@ CFLAGS="$SLKCFLAGS" \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
   --mandir=/${PREFIX}/man \
   --sysconfdir=/etc \
+  --disable-xlib \
   --disable-gtk-doc \
   --disable-quartz \
   --disable-static \
