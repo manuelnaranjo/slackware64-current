@@ -44,7 +44,7 @@ esac
 
 CWD=$(pwd)
 TMP=${TMP:-/tmp}
-PKG=/tmp/package-fribidi
+PKG=${TMP}/package-fribidi
 rm -rf $PKG
 mkdir -p $TMP $PKG
 
