@@ -63,11 +63,7 @@ zcat $CWD/openssl.soname.diff.gz | patch -p1 --backup --verbose --suffix=.orig |
 
 case "${HOST_TRIPLET}" in
   i686-w64-mingw32)
-    LIBDIRSUFFIX=""
     zcat $CWD/openssl.optsx86.diff.gz | patch -p1 --backup --verbose --suffix=.orig || exit 1
-    ;;
-  x86_64-w64-mingw32)
-    LIBDIRSUFFIX="64"
     ;;
 esac
 

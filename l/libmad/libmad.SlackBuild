@@ -39,11 +39,9 @@ NUMJOBS=${NUMJOBS:-" -j7 "}
 
 case "${HOST_TRIPLET}" in
   i686-w64-mingw32)
-    LIBDIRSUFFIX=""
     ENABLE_FPM="i686"
     ;;
   x86_64-w64-mingw32)
-    LIBDIRSUFFIX="64"
     ENABLE_FPM="64bit"
     ;;
 esac

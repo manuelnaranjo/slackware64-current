@@ -40,11 +40,6 @@ CWD=$(pwd)
 TMP=${TMP:-/tmp}
 PKG=$TMP/package-$PKGNAM
 
-case "${HOST_TRIPLET}" in
-  i686-w64-mingw32) LIBDIRSUFFIX="" ;;
-  x86_64-w64-mingw32) LIBDIRSUFFIX="64" ;;
-esac
-
 rm -rf $PKG
 mkdir -p $TMP $PKG
 cd $TMP || exit 1

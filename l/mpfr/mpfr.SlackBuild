@@ -40,15 +40,6 @@ if [ -z "$ARCH" ]; then
   esac
 fi
 
-case "${HOST_TRIPLET}" in
-  i686-w64-mingw32)
-    LIBDIRSUFFIX=""
-    ;;
-  x86_64-w64-mingw32)
-    LIBDIRSUFFIX="64"
-    ;;
-esac
-
 case "$ARCH" in
     arm*) BUILD_TRIPLET=$ARCH-slackware-linux-gnueabi ;;
     *)    BUILD_TRIPLET=$ARCH-slackware-linux ;;
