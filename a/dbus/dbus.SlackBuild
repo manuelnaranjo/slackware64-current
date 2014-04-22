@@ -52,6 +52,9 @@ chmod -R u+w,go+r-w,a-s .
 
 # zcat $CWD/dbus-1.6.x-allow_root_globally.diff.gz | patch -p1 --verbose || exit 1
 
+# PATCH
+sed -i -e '/THREAD_LIBS="$THREAD_LIBS -lrt"/ s/ -lrt//' configure
+
 CFLAGS="-O2" \
 CXXFLAGS="-O2" \
 LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
