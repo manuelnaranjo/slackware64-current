@@ -138,7 +138,7 @@ fi
 CWD=$(pwd)
 # Temporary build location.  This should *NOT* be a directory
 # path a non-root user could create later...
-TMP=${TMP:-"/gcc-$(mcookie)"}
+TMP=${TMP:-"/gcc-$(mcookie)"}/gcc
 
 # This is the main DESTDIR target:
 PKG_GCC=$TMP/package-gcc
@@ -378,7 +378,7 @@ fi
      --enable-shared \
      ${GCC_BOOTSTRAP} \
      ${GCC_ARCHOPTS} \
-     --enable-threads \
+     --enable-threads=posix \
      --enable-languages=${GCC_LANGUAGES} \
      --enable-checking=release \
      ${WITH_OBJC_GC} \
