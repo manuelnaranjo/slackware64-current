@@ -84,7 +84,6 @@ LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
   --mandir=/${PREFIX}/man \
   --enable-static=no \
   --disable-rpath \
-  --with-included-libtasn1 \
   --build=$ARCH-slackware-linux \
   --host=${HOST_TRIPLET}
 
