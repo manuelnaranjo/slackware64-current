@@ -84,6 +84,7 @@ LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
   --mandir=/${PREFIX}/man \
   --enable-static=no \
   --disable-rpath \
+  --enable-threads=win32 \
   --build=$ARCH-slackware-linux \
   --host=${HOST_TRIPLET}
 
