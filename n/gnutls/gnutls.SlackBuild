@@ -69,6 +69,8 @@ sed -i -e 's/libopts_la_LDFLAGS = -version-info  36:4:11/\0 @LTLIBINTL@/' src/li
 
 sed -i -e 's/  struct sigaction new_action, old_action;/#ifndef _WIN32\n\0\n#endif/' src/cli.c
 
+# sed -i -e 's/if ENABLE_CXX/\0_THIS_EXAMPLE_DOES_NOT_BUILD_OR_MAYBE_IT_IS_THE_CXX_SUPPORT/' doc/examples/Makefile.am
+sed -i -e 's/ENABLE_CXX_TRUE/THIS_DOES_NOT_WORK/' doc/examples/Makefile.in
 
 CFLAGS="-O2" \
 CXXFLAGS="-O2" \
