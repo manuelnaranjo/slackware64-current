@@ -65,7 +65,8 @@ sed -i \
   -e "s/\(for gni_arg46 in\) \('size_t'\) \('int'\) \('socklen_t'\) \('unsigned int'\) \('DWORD'\); do/\1 \6 \2 \3 \4 \5; do/" \
   configure
 
-CFLAGS="$SLKCFLAGS" \
+CFLAGS="-O2" \
+LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 ./configure \
   --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \

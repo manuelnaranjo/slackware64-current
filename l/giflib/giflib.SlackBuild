@@ -49,6 +49,7 @@ chown -R root:root .
 chmod -R u+w,go+r-w,a-s .
 
 CFLAGS="-O2" \
+LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 ./configure \
   --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \

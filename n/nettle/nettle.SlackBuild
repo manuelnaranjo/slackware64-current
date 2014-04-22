@@ -59,6 +59,7 @@ find . \
 # so I don't see any potential legal implications...  --rworkman
 CFLAGS="-O2" \
 CXXFLAGS="-O2" \
+LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 ./configure \
   --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \

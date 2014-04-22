@@ -54,7 +54,8 @@ chmod -R u+w,go+r-w,a-s .
 find . -iname '*.def' -exec sed -i 's/\r//' {} +
 
 # Configure:
-CFLAGS="$SLKCFLAGS" \
+CFLAGS="-O2" \
+LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 ./configure \
   --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \

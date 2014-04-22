@@ -57,7 +57,8 @@ find . \
   -exec chmod 644 {} \;
 
 CFLAGS="-O2 -D_FILE_OFFSET_BITS=64" \
-CXXFLAGS="$SLKCFLAGS" \
+CXXFLAGS="-O2" \
+LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 ./configure \
   --prefix=/${PREFIX} \
   --sysconfdir=/${PREFIX}/etc \

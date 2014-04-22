@@ -118,7 +118,9 @@ fi
 
 update_libtool
 
-CFLAGS="-O2" ./configure ${COMMON_CONFIGURE_OPTIONS} ${EXTRA_CONFIGURE_ARGS}
+CFLAGS="-O2" \
+LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
+  ./configure ${COMMON_CONFIGURE_OPTIONS} ${EXTRA_CONFIGURE_ARGS}
 
 make $NUMJOBS || make || exit 1
 make install DESTDIR="${PKG}" || exit 1

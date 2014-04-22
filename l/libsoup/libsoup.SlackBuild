@@ -51,7 +51,8 @@ chmod -R u+w,go+r-w,a-s .
 
 sed -i 's/#include "soup-requester.h"/\0\n#include <string.h>/' libsoup/soup-request-file.c
 
-CFLAGS="$SLKCFLAGS" \
+CFLAGS="-O2" \
+LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 ./configure \
   --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \

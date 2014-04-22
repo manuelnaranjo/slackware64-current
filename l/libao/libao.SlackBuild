@@ -59,7 +59,8 @@ find . \
 sed -i '/^libao_la_LDFLAGS =/ s/.*/\0 -lksuser/' src/Makefile.am
 sed -i '/AC_CHECK_LIB(pthread, pthread_kill)/ s/pthread/winpthread/' configure.ac
 autoreconf -fiv
-CFLAGS="-Wall -Wextra -O2" \
+CFLAGS="-O2 -Wall -Wextra" \
+LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 ./configure \
   --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \

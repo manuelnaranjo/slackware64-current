@@ -55,7 +55,8 @@ find . \
 
 sed -i -e 's/mkdir(directory, 0755);/mkdir(directory);/' libxslt/security.c
 
-CFLAGS="$SLKCFLAGS" \
+CFLAGS="-O2" \
+LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 ./configure \
   --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \

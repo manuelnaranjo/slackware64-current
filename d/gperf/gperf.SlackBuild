@@ -54,6 +54,7 @@ chmod -R u+w,go+r-w,a-s .
 
 # Configure:
 CFLAGS="-O2" \
+LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 ./configure \
   --prefix=/${PREFIX} \
   --sysconfdir=/${PREFIX}/etc \

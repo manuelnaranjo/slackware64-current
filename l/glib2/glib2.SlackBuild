@@ -58,7 +58,8 @@ sed -i '/g_sprintf (t_str, "%ld", t);/ s;^;// ;' glib/tests/gdatetime.c
 # Silly upstream, using the bleeding edge.  Reconf:
 autoreconf --force --install 
 
-CFLAGS="$SLKCFLAGS" \
+CFLAGS="-O2" \
+LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 ./configure \
   --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \

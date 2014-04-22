@@ -69,7 +69,8 @@ sed -i 's/^libmad_la_LDFLAGS =	-version-info \$(version_info)$/\0 -no-undefined/
 autoreconf -fiv
 
 # Configure:
-CFLAGS="$SLKCFLAGS" \
+CFLAGS="-O2" \
+LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 ./configure \
   --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \

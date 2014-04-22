@@ -79,7 +79,7 @@ find . \
   -exec chmod 644 {} \;
 
 echo Building ...
-export LDFLAGS="-lz"
+export LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX} -lz"
 export CFLAGS="$SLKCFLAGS"
 export CXXFLAGS="$SLKCFLAGS"
 export BUILD_OPT=1

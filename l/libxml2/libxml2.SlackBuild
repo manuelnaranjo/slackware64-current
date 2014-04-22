@@ -56,7 +56,8 @@ find . \
 
 zcat $CWD/libxml2.do-not-check-crc.diff.gz | patch -p1 --verbose || exit 1
 
-CFLAGS="$SLKCFLAGS" \
+CFLAGS="-O2" \
+LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 ./configure \
 r --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \

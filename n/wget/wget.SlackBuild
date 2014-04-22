@@ -60,7 +60,8 @@ sed -i 's/IN6_ARE_ADDR_EQUAL (\(&cur->data.d6\), \(&ip->data.d6\))/(memcmp(\1, \
 # but wget is still using an old copy of gnulib.
 find . -name 'msvc-inval.c' -exec sed -i 's/\<cdecl\>/__cdecl/' {} +
 
-CFLAGS="$SLKCFLAGS" \
+CFLAGS="-O2" \
+LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 ./configure  \
   --prefix=/${PREFIX} \
   --sysconfdir=/${PREFIX}/etc \

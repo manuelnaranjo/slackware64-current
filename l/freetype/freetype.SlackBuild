@@ -68,6 +68,7 @@ zcat $CWD/freetype.illadvisederror.diff.gz | patch -p1 --verbose || exit 1
 
 chown -R root:root .
 CFLAGS="-O2" \
+LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
   LIBPNG_CFLAGS="$(pkg-config --cflags libpng)" \
   LIBPNG_LDFLAGS="$(pkg-config --libs libpng)" \
   make setup \

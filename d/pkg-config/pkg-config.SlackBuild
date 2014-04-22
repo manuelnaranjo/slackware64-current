@@ -50,6 +50,7 @@ chown -R root:root .
 chmod -R u+w,go+r-w,a-s .
 
 CFLAGS="$SLKCFLAGS" \
+LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 ./configure \
   --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \

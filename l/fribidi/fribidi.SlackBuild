@@ -56,7 +56,8 @@ find . -perm 777 -exec chmod 755 {} \;
 find . -perm 775 -exec chmod 755 {} \;
 find . -perm 664 -exec chmod 644 {} \;
 chown -R root:root .
-CFLAGS="$SLKCFLAGS" \
+CFLAGS="-O2" \
+LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 ./configure --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
   --mandir=/${PREFIX}/man \

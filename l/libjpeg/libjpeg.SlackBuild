@@ -58,6 +58,7 @@ find . \
 zcat $CWD/jpeg.CVE-2013-6629.diff.gz | patch -p1 --verbose || exit 1
 
 CFLAGS="-O2" \
+LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 ./configure \
   --prefix=/${PREFIX} \
   --mandir=/${PREFIX}/man \

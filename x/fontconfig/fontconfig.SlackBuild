@@ -66,8 +66,8 @@ zcat $CWD/fontconfig.dejavu.diff.gz | patch -p1 --verbose || exit 1
 # index ugly bitmapped fonts):
 # zcat $CWD/fontconfig.font.dir.list.diff.gz | patch -p1 --verbose --backup --suffix=.orig || exit 1
 
-CFLAGS=$SLKCFLAGS \
 CFLAGS="-O2" \
+LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 ./configure \
   --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \

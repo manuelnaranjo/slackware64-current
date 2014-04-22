@@ -72,6 +72,7 @@ sed -i -e 's/  struct sigaction new_action, old_action;/#ifndef _WIN32\n\0\n#end
 
 CFLAGS="-O2" \
 CXXFLAGS="-O2" \
+LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 ./configure \
   --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \

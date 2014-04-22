@@ -57,8 +57,9 @@ find . \
 # but libtasn1 (like wget) is still using an old copy of gnulib.
 find . -name 'msvc-inval.c' -exec sed -i 's/\<cdecl\>/__cdecl/' {} +
 
-CFLAGS="$SLKCFLAGS" \
-CXXFLAGS="$SLKCFLAGS" \
+CFLAGS="-O2" \
+CXXFLAGS="-O2" \
+LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 ./configure \
   --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
