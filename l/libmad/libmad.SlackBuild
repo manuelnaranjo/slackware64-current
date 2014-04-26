@@ -39,7 +39,7 @@ NUMJOBS=${NUMJOBS:-" -j7 "}
 
 case "${HOST_TRIPLET}" in
   i686-w64-mingw32)
-    ENABLE_FPM="i686"
+    ENABLE_FPM="intel"
     ;;
   x86_64-w64-mingw32)
     ENABLE_FPM="64bit"
@@ -65,7 +65,10 @@ find . \
   \( -perm 666 -o -perm 664 -o -perm 600 -o -perm 444 -o -perm 440 -o -perm 400 \) \
   -exec chmod 644 {} \;
 
-sed -i 's/^libmad_la_LDFLAGS =	-version-info \$(version_info)$/\0 -no-undefined/' Makefile.am
+cp ${CWD}/configure.ac ${CWD}/Makefile.am ${CWD}/mad.pc.in .
+
+sed -i '/bin_PROGRAMS = minimad/ s/minimad//' Makefile.am
+
 autoreconf -fiv
 
 # Configure:
@@ -89,9 +92,9 @@ make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG || exit 1
 
 # This is what happens when every distro makes up its own standards
-mkdir -p $PKG/${PREFIX}/lib${LIBDIRSUFFIX}/pkgconfig
-sed -e "s#/lib#/lib${LIBDIRSUFFIX}#" $CWD/mad.pc \
-  > $PKG/${PREFIX}/lib${LIBDIRSUFFIX}/pkgconfig/mad.pc
+# mkdir -p $PKG/${PREFIX}/lib${LIBDIRSUFFIX}/pkgconfig
+# sed -e "s#/lib#/lib${LIBDIRSUFFIX}#" $CWD/mad.pc \
+#   > $PKG/${PREFIX}/lib${LIBDIRSUFFIX}/pkgconfig/mad.pc
 
 find $PKG | xargs file | egrep -e "executable|shared object" \
   | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : \

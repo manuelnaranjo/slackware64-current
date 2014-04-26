@@ -1,0 +1,12 @@
+PACKAGE_TARNAME=@PACKAGE_TARNAME@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: MAD
+Description: libmad library
+Version: @VERSION@
+Libs: -L${libdir} -lmad
+Libs.private:
+Cflags: -I${includedir}
