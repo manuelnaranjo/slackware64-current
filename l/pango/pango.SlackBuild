@@ -55,6 +55,11 @@ find . \
   \( -perm 666 -o -perm 664 -o -perm 600 -o -perm 444 -o -perm 440 -o -perm 400 \) \
   -exec chmod 644 {} \;
 
+# PATCH
+sed -i \
+  "/g_build_filename (root, \"lib..pango\", NULL);/ s/lib/lib${LIBDIRSUFFIX}/" \
+  pango/pango-utils.c
+
 CFLAGS="-O2" \
 LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 ./configure \
