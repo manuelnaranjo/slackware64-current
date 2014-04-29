@@ -1,8 +1,0 @@
-export CONFIGURE_OPTIONS=" \
-  --without-ssl \
-  --without-zlib \
-  --without-opie \
-  --without-digest \
-  --without-ntlm \
-  --disable-nls \
-  --disable-iri"
