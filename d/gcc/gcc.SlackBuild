@@ -459,7 +459,7 @@ fi
   fi
 
   sed -i \
-    -e "/^\*lib:$/ { N; s;$; -L${prefix_dir}/lib${LIBDIRSUFFIX_TGT}; }" \
+    -e "/^\*link:$/ { N; s;$; -L${prefix_dir}/lib${LIBDIRSUFFIX_TGT}; }" \
     -e "/^\*cpp:$/ { N; s;$; -I${prefix_dir}/include; }" \
     -e "/^\*cc1plus:$/ { N; s;$; -I${prefix_dir}/include; }" \
     ${PKG_GCC}/${SPECS}
