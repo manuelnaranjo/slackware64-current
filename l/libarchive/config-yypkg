@@ -1,5 +1,6 @@
 export CONFIGURE_OPTIONS=" \
-  --enable-bsdtar=static \
+  --disable-shared \
+  --disable-bsdtar \
   --disable-bsdcpio \
   --without-zlib \
   --without-bz2lib \
