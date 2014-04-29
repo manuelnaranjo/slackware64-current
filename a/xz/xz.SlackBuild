@@ -63,7 +63,7 @@ LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
   --disable-threads \
   --disable-nls \
   --enable-shared \
-  --disable-static \
+  ${DISABLE_STATIC---disable-static} \
   --disable-rpath \
   --program-prefix= \
   --program-suffix= \

@@ -1,0 +1,1 @@
+export DISABLE_STATIC="--disable-static"
