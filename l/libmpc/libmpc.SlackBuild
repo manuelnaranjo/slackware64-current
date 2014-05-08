@@ -54,8 +54,10 @@ tar xvf $CWD/$SRCNAM-$VERSION.tar.?z* || exit 1
 cd $SRCNAM-$VERSION
 chown -R root:root .
 
-sed -i -e 's/LDFLAGS="$LDFLAGS -no-undefined"//' configure
-sed -i -e 's/libmpc_la_LDFLAGS = -version-info 2:0:0/\0 -no-undefined/' src/Makefile.in
+sed -i -e '/LDFLAGS="\$LDFLAGS -no-undefined"/ d' acinclude.m4
+sed -i -e 's/libmpc_la_LDFLAGS = -version-info 2:0:0/\0 -no-undefined/' src/Makefile.am
+
+autoreconf -fiv
 
 CFLAGS="-O2" \
 LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
