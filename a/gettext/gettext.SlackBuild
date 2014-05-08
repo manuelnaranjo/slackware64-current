@@ -82,7 +82,7 @@ gzip -9 $PKG/${PREFIX}/man/man?/*
 ( cd $PKG/${PREFIX}/doc/gettext-$VERSION
   if [ -r $PKG/${PREFIX}/share/gettext/ABOUT-NLS ]; then
     rm -f ABOUT-NLS
-    ln -sf /${PREFIX}/share/gettext/ABOUT-NLS .
+    ln -sf ../../share/gettext/ABOUT-NLS .
   fi
 )
 
