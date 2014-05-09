@@ -25,7 +25,7 @@
 
 PKGNAM=binutils
 VERSION=${VERSION:-$(echo $PKGNAM-*.tar.xz | rev | cut -f 3- -d . | cut -f 1 -d - | rev)}
-BUILD=${BUILD:-2}
+BUILD=${BUILD:-1}
 
 # Automatically determine the architecture we're building on:
 MARCH=$( uname -m )
@@ -100,16 +100,10 @@ tar xvf $CWD/binutils-$VERSION.tar.xz || \
   tar xvf $CWD/binutils-$VERSION.tar.bz2 || exit 1
 cd binutils-$VERSION
 
-# Use dynamic symbol table if addr2line can't find ordinary symbols:
-zcat $CWD/binutils.addr2line.dynsymtab.diff.gz | patch -p1 --verbose || exit 1
 # Export the demangle.h header file:
 zcat $CWD/binutils.export.demangle.h.diff.gz | patch -p1 --verbose || exit 1
 # Don't check to see if "config.h" was included in the installed headers:
 zcat $CWD/binutils.no-config-h-check.diff.gz | patch -p1 --verbose || exit 1
-# Revert a patch that broke library linking for weak symbols:
-zcat $CWD/binutils.revert.pr15149.diff.gz | patch -p1 --verbose || exit 1
-# Prepare for texinfo-5.x...  someday:
-zcat $CWD/binutils.texinfo5.diff.gz | patch -p1 --verbose || exit 1
 
 chown -R root:root .
 find . \
