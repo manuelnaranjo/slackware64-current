@@ -45,7 +45,7 @@ rm -rf $PKG
 mkdir -p $TMP $PKG
 cd $TMP
 rm -rf libao-$VERSION
-tar xvf $CWD/libao-$VERSION.tar.gz
+tar xvf $CWD/libao-$VERSION.tar.gz || exit 1
 cd libao-$VERSION
 chown -R root:root .
 find . \
