@@ -59,6 +59,12 @@ find icu \
 
 cp -a icu icu-native
 
+sed -i \
+  -e '/^IMPORT_LIB_EXT = \.lib$/ s/lib/dll.a/' \
+  -e '/^LIBPREFIX=$/ s/$/lib/' \
+  -e '/^LIBICU = \$(STATIC_PREFIX_WHEN_USED)/ s/\$(STATIC_PREFIX_WHEN_USED)/lib/' \
+  icu/source/config/mh-mingw*
+
 (cd icu-native/source/ &&
   CFLAGS="-O0" CXXFLAGS="-O0" \
   ./configure \
@@ -105,14 +111,7 @@ mkdir -p $PKG/${PREFIX}/doc/icu4c-$VERSION
 cp -a \
   license.html readme.html $PKG/${PREFIX}/doc/icu4c-$VERSION
 
-(cd ${PKG}/${PREFIX}/lib${LIBDIRSUFFIX} && \
-  for f in icu*.lib; do
-    mv "$f" "lib${f//.lib}.dll.a"
-  done
-  for f in icu*.dll; do
-    mv "$f" "lib${f}"
-  done
-)
+(cd ${PKG}/${PREFIX} && mv lib${LIBDIRSUFFIX}/lib*.dll bin)
 
 cat ${CWD}/${PKGNAM}.yypkg.script | sed \
   -e "s/%{PKG}/${PKGNAM}/" \
