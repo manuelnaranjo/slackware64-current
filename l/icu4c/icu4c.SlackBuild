@@ -101,6 +101,10 @@ cd source/
   make install DESTDIR=$PKG || exit 1
 cd -
 
+(cd ${PKG}/${PREFIX} && mv lib${LIBDIRSUFFIX}/lib*.dll bin)
+
+sed -i '/^Libs:/ s/51//g' ${PKG}/${PREFIX}/lib${LIBDIRSUFFIX}/pkgconfig/*.pc
+
 find $PKG | xargs file | egrep "executable|shared object" \
   | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : \
   | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null || true
@@ -110,8 +114,6 @@ find $PKG/${PREFIX}/man -type f -exec gzip -9 {} \;
 mkdir -p $PKG/${PREFIX}/doc/icu4c-$VERSION
 cp -a \
   license.html readme.html $PKG/${PREFIX}/doc/icu4c-$VERSION
-
-(cd ${PKG}/${PREFIX} && mv lib${LIBDIRSUFFIX}/lib*.dll bin)
 
 cat ${CWD}/${PKGNAM}.yypkg.script | sed \
   -e "s/%{PKG}/${PKGNAM}/" \
