@@ -452,17 +452,15 @@ fi
   fi
 
   # Add, e.g., /opt/windows_32/{include,lib} to default search paths
-  if [ x"${HOST_TRIPLET}" = x"${TARGET_TRIPLET}" ]; then
-    prefix_dir="!{YYPREFIX}"
-  else
+  if [ x"${HOST_TRIPLET}" != x"${TARGET_TRIPLET}" ]; then
     prefix_dir="/${YYPREFIX_TARGET}"
-  fi
 
-  sed -i \
-    -e "/^\*lib:$/ { N; s;$; -L${prefix_dir}/lib${LIBDIRSUFFIX_TGT}; }" \
-    -e "/^\*cpp:$/ { N; s;$; -I${prefix_dir}/include; }" \
-    -e "/^\*cc1plus:$/ { N; s;$; -I${prefix_dir}/include; }" \
-    ${PKG_GCC}/${SPECS}
+    sed -i \
+      -e "/^\*lib:$/ { N; s;$; -L${prefix_dir}/lib${LIBDIRSUFFIX_TGT}; }" \
+      -e "/^\*cpp:$/ { N; s;$; -I${prefix_dir}/include; }" \
+      -e "/^\*cc1plus:$/ { N; s;$; -I${prefix_dir}/include; }" \
+      ${PKG_GCC}/${SPECS}
+  fi
 
   # Make our 64bit gcc look for 32bit gcc binaries in ./32 subdirectory:
   if [ "$ARCH" = "x86_64" ]; then
