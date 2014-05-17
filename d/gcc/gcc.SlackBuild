@@ -46,7 +46,7 @@
 
 PKGNAM="gcc"
 VERSION=${VERSION:-$(echo $PKGNAM-*.tar.xz | rev | cut -f 3- -d . | cut -f 1 -d - | rev)}
-BUILD=${BUILD:-1}
+BUILD=${BUILD:-2}
 PREFIX=${PREFIX:-usr}
 
 # How many jobs to run in parallel:
