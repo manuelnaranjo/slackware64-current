@@ -686,7 +686,6 @@ for COMPILER in ${ALL_COMPILERS}; do
     -e "s/%{VER}/${VERSION}/" \
     -e "s/%{BUILD}/${BUILD}/" \
     -e "s/%{DESCR}/$(description_of_compiler "${COMPILER}")/" \
-    -e "s;%{SPECS_FILE};lib${LIBDIRSUFFIX_HST}/gcc/${TARGET_TRIPLET}/${VERSION}/specs;" \
     | yypkg --makepkg --output ${YYOUTPUT} --script - --directory "$(pkg_of_element "${COMPILER}")/${PREFIX}"
 done
 
