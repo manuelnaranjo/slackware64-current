@@ -37,20 +37,6 @@ fi
 
 NUMJOBS=${NUMJOBS:-" -j7 "}
 
-if [ "$ARCH" = "i486" ]; then
-  SLKCFLAGS="-O2 -march=i486 -mtune=i686"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "s390" ]; then
-  SLKCFLAGS="-O2"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "x86_64" ]; then
-  SLKCFLAGS="-O2 -fPIC"
-  LIBDIRSUFFIX="64"
-else
-  SLKCFLAGS="-O2"
-  LIBDIRSUFFIX=""
-fi
-
 CWD=$(pwd)
 TMP=${TMP:-/tmp}
 PKG=$TMP/package-${PKGNAM}
@@ -70,18 +56,22 @@ find . \
   \( -perm 666 -o -perm 664 -o -perm 600 -o -perm 444 -o -perm 440 -o -perm 400 \) \
   -exec chmod 644 {} \;
 
+# PATCH
+sed -i '/libid3tag_la_LDFLAGS/ s/$/ -no-undefined/' Makefile.am
+autoreconf -fiv
+
 # Configure:
-CFLAGS="$SLKCFLAGS" \
+CFLAGS="-O2" \
+LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 ./configure \
-  --prefix=/usr \
-  --libdir=/usr/lib${LIBDIRSUFFIX} \
-  --sysconfdir=/etc \
-  --mandir=/usr/man \
+  --prefix=/${PREFIX} \
+  --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
+  --sysconfdir=/${PREFIX}/etc \
+  --mandir=/${PREFIX}/man \
   --disable-static \
   --disable-debugging \
-  --program-prefix= \
-  --program-suffix= \
-  --build=$ARCH-slackware-linux
+  --host=${HOST_TRIPLET} \
+  --build=${BUILD_TRIPLET}
 
 # Build and install:
 make $NUMJOBS || make || exit 1
@@ -90,16 +80,17 @@ make install DESTDIR=$PKG || exit 1
 # Someone, somewhere, decided that id3tag.pc was "missing", and
 # now software is starting to think it's a standard feature.
 # Bah!
-mkdir -p $PKG/usr/lib${LIBDIRSUFFIX}/pkgconfig
-cat $CWD/id3tag.pc | sed -e "s#/lib#/lib${LIBDIRSUFFIX}#" > $PKG/usr/lib${LIBDIRSUFFIX}/pkgconfig/id3tag.pc
+mkdir -p $PKG/${PREFIX}/lib${LIBDIRSUFFIX}/pkgconfig
+cat $CWD/id3tag.pc | sed -e "s#/lib#/lib${LIBDIRSUFFIX}#" > $PKG/${PREFIX}/lib${LIBDIRSUFFIX}/pkgconfig/id3tag.pc
 
-# Strip binaries:
-find $PKG | xargs file | grep -e "executable" -e "shared object" | grep ELF \
-  | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
+# Strip files
+find $PKG | xargs file | egrep -e "executable|shared object" \
+  | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : \
+  | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
 
 # Compress and link manpages, if any:
-if [ -d $PKG/usr/man ]; then
-  ( cd $PKG/usr/man
+if [ -d $PKG/${PREFIX}/man ]; then
+  ( cd $PKG/${PREFIX}/man
     for manpagedir in $(find . -type d -name "man*") ; do
       ( cd $manpagedir
         for eachpage in $( find . -type l -maxdepth 1) ; do
@@ -113,22 +104,27 @@ if [ -d $PKG/usr/man ]; then
 fi
 
 # Compress info files, if any:
-if [ -d $PKG/usr/info ]; then
-  ( cd $PKG/usr/info
+if [ -d $PKG/${PREFIX}/info ]; then
+  ( cd $PKG/${PREFIX}/info
     rm -f dir
     gzip -9 *
   )
 fi
 
 # Add a documentation directory:
-mkdir -p $PKG/usr/doc/${PKGNAM}-$VERSION
+mkdir -p $PKG/${PREFIX}/doc/${PKGNAM}-$VERSION
 cp -a \
   CHANGES COPYING COPYRIGHT CREDITS README TODO VERSION \
-  $PKG/usr/doc/${PKGNAM}-$VERSION
+  $PKG/${PREFIX}/doc/${PKGNAM}-$VERSION
 
 mkdir -p $PKG/install
 cat $CWD/slack-desc > $PKG/install/slack-desc
 
-cd $PKG
-/sbin/makepkg -l y -c n $TMP/${PKGNAM}-$VERSION-$ARCH-$BUILD.txz
-
+cat ${CWD}/${PKGNAM}.yypkg.script | sed \
+  -e "s/%{PKG}/${PKGNAM}/" \
+  -e "s/%{HST}/${HOST_TRIPLET}/" \
+  -e "s/%{TGT}//" \
+  -e "s/%{VER}/${VERSION}/" \
+  -e "s/%{BUILD}/${BUILD}/" \
+  -e "s/%{DESCR}/${DESCR:-"No description"}/" \
+  | yypkg --makepkg --output ${YYOUTPUT} --script - --directory "${PKG}/${PREFIX}"
