@@ -540,7 +540,7 @@ fi
   #  makepkg -l y -c n $TMP/gcc-$VERSION-$ARCH-$BUILD.txz
   #)
   # keep a log
-) 2>&1 && RES="true" || RES="false" } | tee $TMP/gcc.build.log
+) 2>&1 && RES="true" || RES="false"; } | tee $TMP/gcc.build.log
 if ! ${RES}; then
   exit 1
 fi
