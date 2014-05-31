@@ -1,0 +1,69 @@
+From 221f3c250387eecbd2bf4aa954ae2f03994d1994 Mon Sep 17 00:00:00 2001
+From: Leon Bottou <leon@bottou.org>
+Date: Sun, 6 Apr 2014 12:19:01 -0400
+Subject: [PATCH 105/117] Fixed small bugs from Maks
+
+---
+ libdjvu/DjVuDumpHelper.cpp | 2 +-
+ libdjvu/DjVuFile.cpp       | 2 +-
+ libdjvu/GUnicode.cpp       | 2 +-
+ libdjvu/ddjvuapi.cpp       | 4 ++--
+ 4 files changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/libdjvu/DjVuDumpHelper.cpp b/libdjvu/DjVuDumpHelper.cpp
+index de19845..ef69bb6 100644
+--- a/libdjvu/DjVuDumpHelper.cpp
++++ b/libdjvu/DjVuDumpHelper.cpp
+@@ -106,7 +106,7 @@ display_djvu_info(ByteStream & out_str, IFFByteStream &iff,
+     out_str.format( ", v%d", info.version);
+   if (size >= 8)
+     out_str.format( ", %d dpi", info.dpi);
+-  if (size >= 8)
++  if (size >= 9)
+     out_str.format( ", gamma=%3.1f", info.gamma);
+ }
+ 
+diff --git a/libdjvu/DjVuFile.cpp b/libdjvu/DjVuFile.cpp
+index e8abce0..eea3404 100644
+--- a/libdjvu/DjVuFile.cpp
++++ b/libdjvu/DjVuFile.cpp
+@@ -983,7 +983,7 @@ DjVuFile::decode_chunk( const GUTF8String &id, const GP<ByteStream> &gbs,
+   }
+   
+   // FG44 (foreground wavelets)
+-  else if (chkid == "FG44" && (djvu || djvu))
++  else if (chkid == "FG44" && (djvu || djvi))
+   {
+     if (fgpm || fgbc)
+       G_THROW( ERR_MSG("DjVuFile.dupl_foregrnd") );
+diff --git a/libdjvu/GUnicode.cpp b/libdjvu/GUnicode.cpp
+index ca6f9f0..d305483 100644
+--- a/libdjvu/GUnicode.cpp
++++ b/libdjvu/GUnicode.cpp
+@@ -307,7 +307,7 @@ GStringRep::Unicode::create(
+   {
+     retval=create(xbuf,bufsize,XUTF8);
+   }else if(!e->cmp("UTF16")|| !e->cmp("UTF-16")
+-    || !e->cmp("UCS2") || !e->cmp("UCS2"))
++        || !e->cmp("UCS2") || !e->cmp("UCS-2"))
+   {
+     retval=create(xbuf,bufsize,XUTF16);
+   }else if(!e->cmp("UCS4") || !e->cmp("UCS-4"))
+diff --git a/libdjvu/ddjvuapi.cpp b/libdjvu/ddjvuapi.cpp
+index 5a6904f..b6ceedb 100644
+--- a/libdjvu/ddjvuapi.cpp
++++ b/libdjvu/ddjvuapi.cpp
+@@ -3120,8 +3120,8 @@ ddjvu_savejob_s::notify_file_flags_changed(const DjVuFile *file,
+                                            long mask, long)
+ {
+   if (mask & (DjVuFile::ALL_DATA_PRESENT | DjVuFile::DATA_PRESENT |
+-              DjVuFile::DECODE_FAILED | DjVuFile::DECODE_STOPPED |
+-              DjVuFile::STOPPED | DjVuFile::DECODE_STOPPED ))
++              DjVuFile::DECODE_FAILED | DjVuFile::DECODE_STOPPED | 
++              DjVuFile::STOPPED ))
+     {
+       GMonitorLock lock(&monitor);
+       monitor.signal();
+-- 
+1.8.4
+

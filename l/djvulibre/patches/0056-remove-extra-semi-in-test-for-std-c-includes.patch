@@ -1,0 +1,39 @@
+From 9ad44a1813025d288b3e7d17afe6bae32a286439 Mon Sep 17 00:00:00 2001
+From: Leon Bottou <leon@bottou.org>
+Date: Sun, 10 Feb 2013 09:10:16 -0500
+Subject: [PATCH 056/117] remove extra semi in test for std c++ includes.
+
+---
+ config/acinclude.m4 | 2 +-
+ configure           | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/config/acinclude.m4 b/config/acinclude.m4
+index 3eb61f1..c07caac 100644
+--- a/config/acinclude.m4
++++ b/config/acinclude.m4
+@@ -244,7 +244,7 @@ ac_cv_cxx_stdincludes,
+ [AC_LANG_SAVE
+  AC_LANG_CPLUSPLUS
+  AC_TRY_COMPILE([#include <new>
+-struct X { int a; X(int a):a(a){}; };
++struct X { int a; X(int a):a(a){} };
+ X* foo(void *x) { return new(x) X(2); } ],[],
+  ac_cv_cxx_stdincludes=yes, ac_cv_cxx_stdincludes=no)
+  AC_LANG_RESTORE
+diff --git a/configure b/configure
+index df6f3ca..008977d 100755
+--- a/configure
++++ b/configure
+@@ -15953,7 +15953,7 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+ /* end confdefs.h.  */
+ #include <new>
+-struct X { int a; X(int a):a(a){}; };
++struct X { int a; X(int a):a(a){} };
+ X* foo(void *x) { return new(x) X(2); }
+ int
+ main ()
+-- 
+1.8.4
+

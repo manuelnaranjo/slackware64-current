@@ -1,0 +1,35 @@
+From 809342b7ce516ddbdcf6a4b6ee66abd2f0764da7 Mon Sep 17 00:00:00 2001
+From: Leon Bottou <leon@bottou.org>
+Date: Sun, 4 May 2014 20:51:01 -0400
+Subject: [PATCH 109/117] Added code to define "inline" when using C.
+
+---
+ libdjvu/miniexp.h | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/libdjvu/miniexp.h b/libdjvu/miniexp.h
+index 1160baf..570ee62 100644
+--- a/libdjvu/miniexp.h
++++ b/libdjvu/miniexp.h
+@@ -39,6 +39,18 @@ extern "C" {
+ # define MINILISPAPI /**/
+ #endif
+ 
++#ifndef __cplusplus
++# ifndef inline
++#  if defined(__GNUC__)
++#   define inline __inline__
++#  elif defined(_MSC_VER)
++#   define inline __inline
++#  else
++#   define inline /**/
++#  endif
++# endif
++#endif
++
+ #include <stddef.h>  
+ 
+ /* -------------------------------------------------- */
+-- 
+1.8.4
+

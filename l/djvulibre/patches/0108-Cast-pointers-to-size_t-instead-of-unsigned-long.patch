@@ -1,0 +1,123 @@
+From a5400f2c0ce00655e56d257f6426373f5af09895 Mon Sep 17 00:00:00 2001
+From: Leon Bottou <leon@bottou.org>
+Date: Sun, 6 Apr 2014 15:31:17 -0400
+Subject: [PATCH 108/117] Cast pointers to size_t instead of unsigned long
+
+---
+ libdjvu/DjVuPort.cpp        | 8 ++++----
+ libdjvu/GBitmap.cpp         | 2 +-
+ libdjvu/GContainer.h        | 2 +-
+ libdjvu/IW44EncodeCodec.cpp | 4 ++--
+ libdjvu/IW44Image.cpp       | 6 +++---
+ 5 files changed, 11 insertions(+), 11 deletions(-)
+
+diff --git a/libdjvu/DjVuPort.cpp b/libdjvu/DjVuPort.cpp
+index b02fa30..926b4b9 100644
+--- a/libdjvu/DjVuPort.cpp
++++ b/libdjvu/DjVuPort.cpp
+@@ -430,7 +430,7 @@ DjVuPortcaster::add_to_closure(GMap<const void *, void *> & set,
+ {
+   // Assuming that the map's already locked
+   // GCriticalSectionLock lock(&map_lock);
+-  set[dst]= (void*) (unsigned long) distance;
++  set[dst]= (void*) (size_t) distance;
+   if (route_map.contains(dst))
+     {
+       GList<void *> & list=*(GList<void *> *) route_map[dst];
+@@ -466,11 +466,11 @@ DjVuPortcaster::compute_closure(const DjVuPort * src, GPList<DjVuPort> &list, bo
+        // Sort in depth order
+        int max_dist=0;
+        for(pos=set;pos;++pos)
+-         if (max_dist < (int)(long)set[pos])
+-           max_dist = (int)(long)set[pos];
++         if (max_dist < (int)(size_t)set[pos])
++           max_dist = (int)(size_t)set[pos];
+        GArray<GList<const void*> > lists(0,max_dist);
+        for(pos=set;pos;++pos)
+-         lists[(int)(long)set[pos]].append(set.key(pos));
++         lists[(int)(size_t)set[pos]].append(set.key(pos));
+        for(int dist=0;dist<=max_dist;dist++)
+          for(pos=lists[dist];pos;++pos)
+            {
+diff --git a/libdjvu/GBitmap.cpp b/libdjvu/GBitmap.cpp
+index a4d8c64..80e4b94 100644
+--- a/libdjvu/GBitmap.cpp
++++ b/libdjvu/GBitmap.cpp
+@@ -469,7 +469,7 @@ GBitmap::share()
+ {
+   if (!monitorptr)
+     {
+-      unsigned long x = (unsigned long)this;
++      size_t x = (size_t)this;
+       monitorptr = &monitors[(x^(x>>5)) % NMONITORS];
+     }
+ }
+diff --git a/libdjvu/GContainer.h b/libdjvu/GContainer.h
+index ef7681b..b5e9da4 100644
+--- a/libdjvu/GContainer.h
++++ b/libdjvu/GContainer.h
+@@ -178,7 +178,7 @@ hash(const unsigned long & x)
+ static inline unsigned int 
+ hash(const void * const & x) 
+ { 
+-  return (unsigned long) x; 
++  return (unsigned int)(size_t) x; 
+ }
+ 
+ /** Hashing function (float). */
+diff --git a/libdjvu/IW44EncodeCodec.cpp b/libdjvu/IW44EncodeCodec.cpp
+index 49081b7..d45bce9 100644
+--- a/libdjvu/IW44EncodeCodec.cpp
++++ b/libdjvu/IW44EncodeCodec.cpp
+@@ -310,7 +310,7 @@ static const int   d16[] = {16,16};
+ static inline void
+ mmx_fv_1 ( short* &q, short* e, int s, int s3 )
+ {
+-  while (q<e && (((long)q)&0x7))
++  while (q<e && (((size_t)q)&0x7))
+     {
+       int a = (int)q[-s] + (int)q[s];
+       int b = (int)q[-s3] + (int)q[s3];
+@@ -353,7 +353,7 @@ mmx_fv_1 ( short* &q, short* e, int s, int s3 )
+ static inline void
+ mmx_fv_2 ( short* &q, short* e, int s, int s3 )
+ {
+-  while (q<e && (((long)q)&0x7))
++  while (q<e && (((size_t)q)&0x7))
+     {
+       int a = (int)q[-s] + (int)q[s];
+       int b = (int)q[-s3] + (int)q[s3];
+diff --git a/libdjvu/IW44Image.cpp b/libdjvu/IW44Image.cpp
+index 4a19fb5..ed3d7b2 100644
+--- a/libdjvu/IW44Image.cpp
++++ b/libdjvu/IW44Image.cpp
+@@ -167,7 +167,7 @@ static const int   d16[] = {16,16};
+ static void
+ mmx_bv_1 ( short* &q, short* e, int s, int s3 )
+ {
+-  while (q<e && (((long)q)&0x7))
++  while (q<e && (((size_t)q)&0x7))
+     {
+       int a = (int)q[-s] + (int)q[s];
+       int b = (int)q[-s3] + (int)q[s3];
+@@ -211,7 +211,7 @@ mmx_bv_1 ( short* &q, short* e, int s, int s3 )
+ static void
+ mmx_bv_2 ( short* &q, short* e, int s, int s3 )
+ {
+-  while (q<e && (((long)q)&0x7))
++  while (q<e && (((size_t)q)&0x7))
+     {
+       int a = (int)q[-s] + (int)q[s];
+       int b = (int)q[-s3] + (int)q[s3];
+@@ -649,7 +649,7 @@ IW44Image::Map::allocp(int n)
+   // Allocate enough room for pointers plus alignment
+   short *p = alloc( (n+1) * sizeof(short*) / sizeof(short) );
+   // Align on pointer size
+-  while ( ((long)p) & (sizeof(short*)-1) )
++  while ( ((size_t)p) & (sizeof(short*)-1) )
+     p += 1;
+   // Cast and return
+   return (short**)p;
+-- 
+1.8.4
+

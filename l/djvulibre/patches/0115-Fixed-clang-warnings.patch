@@ -1,0 +1,213 @@
+From 308a3a10d5a027882c3ba80fd2d9087d2a63d099 Mon Sep 17 00:00:00 2001
+From: Leon Bottou <leon@bottou.org>
+Date: Thu, 22 May 2014 09:47:57 -0400
+Subject: [PATCH 115/117] Fixed clang warnings
+
+---
+ libdjvu/DjVuToPS.cpp |  4 ++--
+ libdjvu/GString.cpp  |  9 ++++++---
+ libdjvu/ddjvuapi.cpp | 24 ++++++++++++------------
+ tools/c44.cpp        |  2 +-
+ tools/tiff2pdf.c     |  2 +-
+ 5 files changed, 22 insertions(+), 19 deletions(-)
+
+diff --git a/libdjvu/DjVuToPS.cpp b/libdjvu/DjVuToPS.cpp
+index 6914ff9..f72a4c9 100644
+--- a/libdjvu/DjVuToPS.cpp
++++ b/libdjvu/DjVuToPS.cpp
+@@ -2210,7 +2210,7 @@ public:
+   double decode_done;
+   GURL decode_page_url;
+   virtual void notify_file_flags_changed(const DjVuFile*,long,long);
+-  virtual void notify_decode_progress(const DjVuPort*,double);
++  virtual void notify_decode_progress(const DjVuPort*,float);
+ };
+ 
+ DjVuToPS::DecodePort::
+@@ -2247,7 +2247,7 @@ notify_file_flags_changed(const DjVuFile *source,
+ 
+ void 
+ DjVuToPS::DecodePort::
+-notify_decode_progress(const DjVuPort *source, double done)
++notify_decode_progress(const DjVuPort *source, float done)
+ {
+   // WARNING! This function is called from another thread
+   if (source->inherits("DjVuFile"))
+diff --git a/libdjvu/GString.cpp b/libdjvu/GString.cpp
+index caf2415..a232540 100644
+--- a/libdjvu/GString.cpp
++++ b/libdjvu/GString.cpp
+@@ -2259,8 +2259,9 @@ GStringRep::UTF8::toLong(
+     endpos=edata-data;
+   }else
+   {
++    GP<GStringRep> ptr = GStringRep::UTF8::create();
+     endpos=(-1);
+-    GP<GStringRep> ptr=ptr->strdup(data+pos);
++    ptr=ptr->strdup(data+pos);
+     if(ptr)
+       ptr=ptr->toNative(NOT_ESCAPED);
+     if(ptr)
+@@ -2304,8 +2305,9 @@ GStringRep::UTF8::toULong(
+     endpos=edata-data;
+   }else
+   {
++    GP<GStringRep> ptr = GStringRep::UTF8::create();
+     endpos=(-1);
+-    GP<GStringRep> ptr=ptr->strdup(data+pos);
++    ptr=ptr->strdup(data+pos);
+     if(ptr)
+       ptr=ptr->toNative(NOT_ESCAPED);
+     if(ptr)
+@@ -2348,8 +2350,9 @@ GStringRep::UTF8::toDouble(const int pos, int &endpos) const
+     endpos=edata-data;
+   }else
+   {
++    GP<GStringRep> ptr = GStringRep::UTF8::create();
+     endpos=(-1);
+-    GP<GStringRep> ptr=ptr->strdup(data+pos);
++    ptr=ptr->strdup(data+pos);
+     if(ptr)
+       ptr=ptr->toNative(NOT_ESCAPED);
+     if(ptr)
+diff --git a/libdjvu/ddjvuapi.cpp b/libdjvu/ddjvuapi.cpp
+index b6ceedb..ff0c3cc 100644
+--- a/libdjvu/ddjvuapi.cpp
++++ b/libdjvu/ddjvuapi.cpp
+@@ -167,7 +167,7 @@ struct DJVUNS ddjvu_job_s : public DjVuPort
+   bool released;
+   ddjvu_job_s();
+   // virtual port functions:
+-  virtual bool inherits(const GUTF8String&);
++  virtual bool inherits(const GUTF8String&) const;
+   virtual bool notify_error(const DjVuPort*, const GUTF8String&);  
+   virtual bool notify_status(const DjVuPort*, const GUTF8String&);
+   // default implementation of virtual job functions:
+@@ -192,7 +192,7 @@ struct DJVUNS ddjvu_document_s : public ddjvu_job_s
+   virtual ddjvu_status_t status();
+   virtual void release();
+   // virtual port functions:
+-  virtual bool inherits(const GUTF8String&);
++  virtual bool inherits(const GUTF8String&) const;
+   virtual bool notify_error(const DjVuPort*, const GUTF8String&);  
+   virtual bool notify_status(const DjVuPort*, const GUTF8String&);
+   virtual void notify_doc_flags_changed(const DjVuDocument*, long, long);
+@@ -211,7 +211,7 @@ struct DJVUNS ddjvu_page_s : public ddjvu_job_s
+   virtual ddjvu_status_t status();
+   virtual void release();
+   // virtual port functions:
+-  virtual bool inherits(const GUTF8String&);
++  virtual bool inherits(const GUTF8String&) const;
+   virtual bool notify_error(const DjVuPort*, const GUTF8String&);  
+   virtual bool notify_status(const DjVuPort*, const GUTF8String&);
+   virtual void notify_file_flags_changed(const DjVuFile*, long, long);
+@@ -580,7 +580,7 @@ ddjvu_job_s::ddjvu_job_s()
+ }
+ 
+ bool
+-ddjvu_job_s::inherits(const GUTF8String &classname)
++ddjvu_job_s::inherits(const GUTF8String &classname) const
+ {
+   return (classname == "ddjvu_job_s") 
+     || DjVuPort::inherits(classname);
+@@ -810,7 +810,7 @@ ddjvu_document_s::status()
+ }
+ 
+ bool
+-ddjvu_document_s::inherits(const GUTF8String &classname)
++ddjvu_document_s::inherits(const GUTF8String &classname) const
+ {
+   return (classname == "ddjvu_document_s")
+     || ddjvu_job_s::inherits(classname);
+@@ -1639,7 +1639,7 @@ ddjvu_page_s::status()
+ }
+ 
+ bool
+-ddjvu_page_s::inherits(const GUTF8String &classname)
++ddjvu_page_s::inherits(const GUTF8String &classname) const
+ {
+   return (classname == "ddjvu_page_s")
+     || ddjvu_job_s::inherits(classname);
+@@ -2653,7 +2653,7 @@ struct DJVUNS ddjvu_runnablejob_s : public ddjvu_job_s
+   // thread function
+   virtual ddjvu_status_t run() = 0;
+   // virtual port functions:
+-  virtual bool inherits(const GUTF8String&);
++  virtual bool inherits(const GUTF8String&) const;
+   virtual ddjvu_status_t status();
+   virtual void stop();
+ private:
+@@ -2734,7 +2734,7 @@ ddjvu_runnablejob_s::cbstart(void *arg)
+ }
+ 
+ bool 
+-ddjvu_runnablejob_s::inherits(const GUTF8String &classname)
++ddjvu_runnablejob_s::inherits(const GUTF8String &classname) const
+ {
+   return (classname == "ddjvu_runnablejob_s") 
+     || ddjvu_job_s::inherits(classname);
+@@ -2763,7 +2763,7 @@ struct DJVUNS ddjvu_printjob_s : public ddjvu_runnablejob_s
+   GP<ByteStream> obs;
+   virtual ddjvu_status_t run();
+   // virtual port functions:
+-  virtual bool inherits(const GUTF8String&);
++  virtual bool inherits(const GUTF8String&) const;
+   // progress
+   static void cbrefresh(void*);
+   static void cbprogress(double, void*);
+@@ -2773,7 +2773,7 @@ struct DJVUNS ddjvu_printjob_s : public ddjvu_runnablejob_s
+ };
+ 
+ bool 
+-ddjvu_printjob_s::inherits(const GUTF8String &classname)
++ddjvu_printjob_s::inherits(const GUTF8String &classname) const
+ {
+   return (classname == "ddjvu_printjob_s") 
+     || ddjvu_runnablejob_s::inherits(classname);
+@@ -3101,7 +3101,7 @@ struct DJVUNS ddjvu_savejob_s : public ddjvu_runnablejob_s
+   // thread routine
+   virtual ddjvu_status_t run();
+   // virtual port functions:
+-  virtual bool inherits(const GUTF8String&);
++  virtual bool inherits(const GUTF8String&) const;
+   virtual void notify_file_flags_changed(const DjVuFile*, long, long);
+   // helpers
+   bool parse_pagespec(const char *s, int npages, bool *flags);
+@@ -3109,7 +3109,7 @@ struct DJVUNS ddjvu_savejob_s : public ddjvu_runnablejob_s
+ };
+ 
+ bool 
+-ddjvu_savejob_s::inherits(const GUTF8String &classname)
++ddjvu_savejob_s::inherits(const GUTF8String &classname) const
+ {
+   return (classname == "ddjvu_savejob_s") 
+     || ddjvu_runnablejob_s::inherits(classname);
+diff --git a/tools/c44.cpp b/tools/c44.cpp
+index d3fc515..60be497 100644
+--- a/tools/c44.cpp
++++ b/tools/c44.cpp
+@@ -696,7 +696,7 @@ main(int argc, char **argv)
+       ByteStream &ibs=*gibs;
+       char prefix[16];
+       memset(prefix, 0, sizeof(prefix));
+-      if (ibs.read((void*)prefix, sizeof(prefix)) < 0)
++      if (ibs.readall((void*)prefix, sizeof(prefix)) < sizeof(prefix))
+         G_THROW( ERR_MSG("c44.failed_pnm_header") );
+ #ifdef DEFAULT_JPEG_TO_HALF_SIZE
+       // Default specification for jpeg files
+diff --git a/tools/tiff2pdf.c b/tools/tiff2pdf.c
+index dc23f19..0367578 100644
+--- a/tools/tiff2pdf.c
++++ b/tools/tiff2pdf.c
+@@ -3527,7 +3527,7 @@ static void t2p_tile_collapse_left(
+ 	tsize_t edgescanwidth=0;
+ 	
+ 	edgescanwidth = (scanwidth * edgetilewidth + (tilewidth - 1))/ tilewidth;
+-	for(i=i;i<tilelength;i++){
++	for(i=0;i<tilelength;i++){
+ 		_TIFFmemcpy( 
+ 			&(((char*)buffer)[edgescanwidth*i]), 
+ 			&(((char*)buffer)[scanwidth*i]), 
+-- 
+1.8.4
+

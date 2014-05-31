@@ -1,0 +1,39 @@
+From eeed42ae84262fee0234c883f8be0ce1983e5499 Mon Sep 17 00:00:00 2001
+From: Leon Bottou <leon@bottou.org>
+Date: Sat, 18 May 2013 09:50:10 -0800
+Subject: [PATCH 077/117] fix for filename conversion
+
+---
+ libdjvu/GURL.cpp  | 2 +-
+ tools/djvused.cpp | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/libdjvu/GURL.cpp b/libdjvu/GURL.cpp
+index a80078c..116af52 100644
+--- a/libdjvu/GURL.cpp
++++ b/libdjvu/GURL.cpp
+@@ -484,7 +484,7 @@ GURL::protocol(const GUTF8String& url)
+   const char * const url_ptr=url;
+   const char * ptr=url_ptr;
+   for(char c=*ptr;
+-      c && (isalnum(c) || c == '+' || c == '-' || c == '.');
++      c && isascii(c) && (isalnum(c) || c == '+' || c == '-' || c == '.');
+       c=*(++ptr)) EMPTY_LOOP;
+   if (ptr[0]==colon && ptr[1]=='/' && ptr[2]=='/')
+     return GUTF8String(url_ptr, ptr-url_ptr);
+diff --git a/tools/djvused.cpp b/tools/djvused.cpp
+index d9259d9..31ab6e6 100644
+--- a/tools/djvused.cpp
++++ b/tools/djvused.cpp
+@@ -2213,7 +2213,7 @@ main(int argc, char **argv)
+           else if (!strcmp(argv[i],"-u"))
+             utf8 = true;
+           else if (!strcmp(argv[i],"-f") && i+1<argc && !g().cmdbs) 
+-            g().cmdbs = ByteStream::create(GURL::Filename::UTF8(argv[++i]), "r");
++            g().cmdbs = ByteStream::create(GURL::Filename::UTF8(GNativeString(argv[++i])), "r");
+           else if (!strcmp(argv[i],"-e") && !g().cmdbs && ++i<argc) 
+             g().cmdbs = ByteStream::create_static(argv[i],strlen(argv[i]));
+           else if (argv[i][0] != '-' && !g().djvufile)
+-- 
+1.8.4
+

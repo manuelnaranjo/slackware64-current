@@ -1,0 +1,38 @@
+From 8f4126d3ab3afc256e8c4571a6bf788700293a77 Mon Sep 17 00:00:00 2001
+From: Leon Bottou <leon@bottou.org>
+Date: Wed, 13 Feb 2013 09:01:31 -0500
+Subject: [PATCH 060/117] more mingw fixes
+
+---
+ libdjvu/GString.cpp | 14 +++++---------
+ 1 file changed, 5 insertions(+), 9 deletions(-)
+
+diff --git a/libdjvu/GString.cpp b/libdjvu/GString.cpp
+index dd5ddf6..467acb8 100644
+--- a/libdjvu/GString.cpp
++++ b/libdjvu/GString.cpp
+@@ -88,16 +88,12 @@
+ #endif
+ #include <ctype.h>
+ 
+-#ifndef DO_CHANGELOCALE
+-#define DO_CHANGELOCALE 1
+-#ifdef UNIX
+-#if THREADMODEL != COTHREADS
+-#if THREADMODEL != NOTHREADS
+-#undef DO_CHANGELOCALE
+-#define DO_CHANGELOCALE 0
+-#endif
+-#endif 
++#ifndef LC_NUMERIC          //MingW
++# undef DO_CHANGELOCALE
++# define LC_NUMERIC 0
+ #endif
++#ifndef DO_CHANGELOCALE
++# define DO_CHANGELOCALE 0
+ #endif
+ 
+ 
+-- 
+1.8.4
+

@@ -1,0 +1,25 @@
+From 7e18bc0abf958066f736b2dea936d8dbf89dd5f3 Mon Sep 17 00:00:00 2001
+From: Leon Bottou <leon@bottou.org>
+Date: Thu, 27 Jun 2013 07:56:05 -0400
+Subject: [PATCH 088/117] fixed trivial crash
+
+---
+ tools/djvused.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tools/djvused.cpp b/tools/djvused.cpp
+index 7f9b4ef..66f8821 100644
+--- a/tools/djvused.cpp
++++ b/tools/djvused.cpp
+@@ -2286,7 +2286,7 @@ main(int argc, char **argv)
+             utf8 = true;
+           else if (!strcmp(argv[i],"-f") && i+1<argc && !g().cmdbs) 
+             g().cmdbs = ByteStream::create(GURL::Filename::UTF8(GNativeString(argv[++i])), "r");
+-          else if (!strcmp(argv[i],"-e") && !g().cmdbs && ++i<argc) 
++          else if (!strcmp(argv[i],"-e") && !g().cmdbs && i+1<argc && ++i) 
+             g().cmdbs = ByteStream::create_static(argv[i],strlen(argv[i]));
+           else if (argv[i][0] != '-' && !g().djvufile)
+             g().djvufile = GNativeString(argv[i]);
+-- 
+1.8.4
+

@@ -1,0 +1,104 @@
+From 7d500a03d34cb438f2b643d6530d1f79c249d833 Mon Sep 17 00:00:00 2001
+From: Leon Bottou <leon@bottou.org>
+Date: Fri, 29 Mar 2013 14:14:00 -0800
+Subject: [PATCH 063/117] windows recompile reveals issues
+
+---
+ libdjvu/GException.cpp               | 15 +++++----------
+ libdjvu/JPEGDecoder.cpp              |  8 ++++++--
+ win32/djvulibre/djvulibre-install.sh |  2 +-
+ win32/djvulibre/djvulibre.nsi        |  2 +-
+ 4 files changed, 13 insertions(+), 14 deletions(-)
+
+diff --git a/libdjvu/GException.cpp b/libdjvu/GException.cpp
+index 89da70f..ddec4c1 100644
+--- a/libdjvu/GException.cpp
++++ b/libdjvu/GException.cpp
+@@ -257,21 +257,16 @@ GExceptionHandler::rethrow(void)
+ // This is not activated when C++ memory management
+ // is overidden.  The overriding functions handle
+ // memory exceptions by themselves.
+-# if defined(_MSC_VER)
+-// Microsoft is different!
+-static int throw_memory_error(size_t) { G_THROW(GException::outofmemory); return 0; }
+-static int (*old_handler)(size_t) = _set_new_handler(throw_memory_error);
+-# else // !_MSC_VER
+-// Standard C++
+ static void throw_memory_error() { G_THROW(GException::outofmemory); }
+-#  if !defined(WIN32) && !defined(__CYGWIN32__) && !defined(OS2)
++# if defined(WIN32) || defined(__CYGWIN32__) || defined(OS2)
++static void (*old_handler)() = std::set_new_handler(throw_memory_error);
++# else 
+ #   ifdef HAVE_STDINCLUDES
+ static void (*old_handler)() = std::set_new_handler(throw_memory_error);
+ #   else
+ static void (*old_handler)() = set_new_handler(throw_memory_error);
+-#   endif // HAVE_STDINCLUDES
+-#  endif // ! WIN32
+-# endif // !_MSC_VER
++#  endif // HAVE_STDINCLUDES
++# endif // ! WIN32
+ #endif // !NEED_DJVU_MEMORY
+ 
+ 
+diff --git a/libdjvu/JPEGDecoder.cpp b/libdjvu/JPEGDecoder.cpp
+index f22f77a..05f68ff 100644
+--- a/libdjvu/JPEGDecoder.cpp
++++ b/libdjvu/JPEGDecoder.cpp
+@@ -62,21 +62,25 @@
+ 
+ #ifdef NEED_JPEG_DECODER
+ 
+-#include "JPEGDecoder.h"
+-
+ #ifdef __cplusplus
+ extern "C" {
+ #endif
+ #undef HAVE_STDLIB_H
+ #undef HAVE_STDDEF_H
++#define INT32 jpeg_INT32
++#define INT16 jpeg_INT16
+ #include <stdio.h>
+ #include <jconfig.h>
+ #include <jpeglib.h>
+ #include <jerror.h>
++#undef FAR
++#undef INT32
++#undef INT16
+ #ifdef __cplusplus
+ }
+ #endif
+ 
++#include "JPEGDecoder.h"
+ #include "ByteStream.h"
+ #include "GPixmap.h"
+ #ifdef LIBJPEGNAME
+diff --git a/win32/djvulibre/djvulibre-install.sh b/win32/djvulibre/djvulibre-install.sh
+index 75ee3f7..abe7b01 100755
+--- a/win32/djvulibre/djvulibre-install.sh
++++ b/win32/djvulibre/djvulibre-install.sh
+@@ -26,7 +26,7 @@ djdll="libdjvulibre.dll libjpeg.dll libtiff.dll libz.dll"
+ for n in $djdll $djexe ; do 
+     run cp $dwdir/$n $target ; done
+ 
+-qtdll="QtCore4.dll QtGui4.dll QtNetwork4.dll"
++qtdll="QtCore4.dll QtGui4.dll QtNetwork4.dll QtOpenGL4.dll"
+ qtssl="ssleay32.dll libeay32.dll libssl32.dll"
+ qtplug="accessible codecs imageformats"
+ for n in $qtdll ; do 
+diff --git a/win32/djvulibre/djvulibre.nsi b/win32/djvulibre/djvulibre.nsi
+index 8613e24..df2fd65 100755
+--- a/win32/djvulibre/djvulibre.nsi
++++ b/win32/djvulibre/djvulibre.nsi
+@@ -2,7 +2,7 @@
+ 
+ ; HM NIS Edit Wizard helper defines
+ !define PRODUCT_NAME "DjVuLibre+DjView"
+-!define PRODUCT_VERSION "3.5.25.3+4.9"
++!define PRODUCT_VERSION "3.5.25.3+4.9.1"
+ !define PRODUCT_PUBLISHER "DjVuZone"
+ !define PRODUCT_WEB_SITE "http://djvu.sourceforge.net"
+ !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\djview.exe"
+-- 
+1.8.4
+

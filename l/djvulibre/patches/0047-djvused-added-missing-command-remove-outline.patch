@@ -1,0 +1,41 @@
+From 26d4ce1d1ffe293554a79bfde6b70c7b0b9c8c7b Mon Sep 17 00:00:00 2001
+From: Leon Bottou <leon@bottou.org>
+Date: Tue, 2 Oct 2012 19:04:49 -0700
+Subject: [PATCH 047/117] djvused: added missing command remove-outline.
+
+---
+ tools/djvused.cpp | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/tools/djvused.cpp b/tools/djvused.cpp
+index e9df80f..c739418 100644
+--- a/tools/djvused.cpp
++++ b/tools/djvused.cpp
+@@ -1871,6 +1871,16 @@ command_set_outline(ParsingByteStream &pbs)
+     }
+ }
+ 
++void
++command_remove_outline(ParsingByteStream &pbs)
++{
++  if (g().doc->get_djvm_nav())
++    {
++      g().doc->set_djvm_nav(0);
++      modified = true;
++    }
++}
++
+ static bool
+ callback_thumbnails(int page_num, void *)
+ {
+@@ -2094,6 +2104,7 @@ static GMap<GUTF8String,CommandFunc> &command_map() {
+     xcommand_map["remove-ant"] = command_remove_ant;
+     xcommand_map["remove-meta"] = command_remove_meta;
+     xcommand_map["remove-txt"] = command_remove_txt;
++    xcommand_map["remove-outline"] = command_remove_outline;
+     xcommand_map["remove-thumbnails"] = command_remove_thumbnails;
+     xcommand_map["remove-xmp"] = command_remove_xmp;
+     xcommand_map["set-page-title"] = command_set_page_title;
+-- 
+1.8.4
+

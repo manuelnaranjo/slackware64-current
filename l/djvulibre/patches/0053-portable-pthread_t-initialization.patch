@@ -1,0 +1,57 @@
+From 138918d75cabeff4facb360950406930d55473f3 Mon Sep 17 00:00:00 2001
+From: Leon Bottou <leon@bottou.org>
+Date: Mon, 4 Feb 2013 11:56:16 -0500
+Subject: [PATCH 053/117] portable pthread_t initialization
+
+---
+ libdjvu/GThreads.cpp | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/libdjvu/GThreads.cpp b/libdjvu/GThreads.cpp
+index 253fed8..4b6551f 100644
+--- a/libdjvu/GThreads.cpp
++++ b/libdjvu/GThreads.cpp
+@@ -387,6 +387,7 @@ GMonitor::wait(unsigned long timeout)
+ #define pthread_condattr_default   NULL
+ #endif
+ 
++static pthread_t pthread_null; // portable zero initialization!
+ 
+ void *
+ GThread::start(void *arg)
+@@ -440,13 +441,13 @@ GThread::start(void *arg)
+ // GThread
+ 
+ GThread::GThread(int stacksize) : 
+-  hthr(0), xentry(0), xarg(0)
++  hthr(pthread_null), xentry(0), xarg(0)
+ {
+ }
+ 
+ GThread::~GThread()
+ {
+-  hthr = 0;
++  hthr = pthread_null;
+ }
+ 
+ int  
+@@ -506,7 +507,7 @@ GThread::current()
+ // -- GMonitor
+ 
+ GMonitor::GMonitor()
+-  : ok(0), count(1), locker(0)
++  : ok(0), count(1), locker(pthread_null)
+ {
+   // none of this should be necessary ... in theory.
+ #ifdef PTHREAD_MUTEX_INITIALIZER
+@@ -549,7 +550,6 @@ GMonitor::enter()
+ void 
+ GMonitor::leave()
+ {
+-  static pthread_t pthread_null;
+   pthread_t self = pthread_self();
+   if (ok && (count>0 || !pthread_equal(locker, self)))
+     G_THROW( ERR_MSG("GThreads.not_acq_broad") );
+-- 
+1.8.4
+

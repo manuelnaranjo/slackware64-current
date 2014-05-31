@@ -1,0 +1,36 @@
+From 51c730048ab00c91423a65419b6bb3db35925eab Mon Sep 17 00:00:00 2001
+From: Leon Bottou <leon@bottou.org>
+Date: Mon, 20 May 2013 18:25:43 -0800
+Subject: [PATCH 079/117] locale changes for win32
+
+---
+ tools/djvused.cpp | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/tools/djvused.cpp b/tools/djvused.cpp
+index 31ab6e6..25b8a89 100644
+--- a/tools/djvused.cpp
++++ b/tools/djvused.cpp
+@@ -66,6 +66,9 @@
+ #include <stdarg.h>
+ #include <errno.h>
+ #include <locale.h>
++#ifdef WIN32
++# include <mbctype.h>
++#endif
+ 
+ #include "IW44Image.h"
+ #include "GOS.h"
+@@ -2200,6 +2203,9 @@ main(int argc, char **argv)
+   setlocale(LC_ALL,"");
+   setlocale(LC_NUMERIC,"C");
+   djvu_programname(argv[0]);
++#ifdef WIN32
++  _setmbcp(_MB_CP_OEM);
++#endif
+   G_TRY
+      {
+       { // extra nesting for windows
+-- 
+1.8.4
+

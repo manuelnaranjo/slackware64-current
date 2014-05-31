@@ -1,0 +1,30 @@
+From fddde05ab7d3f6f90e0fb7c7691ed7d5bb6ddb15 Mon Sep 17 00:00:00 2001
+From: Leon Bottou <leon@bottou.org>
+Date: Sun, 6 Apr 2014 15:07:10 -0400
+Subject: [PATCH 107/117] Added the magic win32-dll option in LT_INIT (see bug
+ 224)
+
+diff --git a/configure.ac b/configure.ac
+index 9dcf8d1..da87853 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -71,7 +71,6 @@ AC_SUBST(DLLFLAGS)
+ case "$host" in
+   *-mingw32)
+      DLLFLAGS="$DLLFLAGS -Wl,--export-all-symbols"
+-     LIBS=-lmsvcp60
+   ;;
+   *-darwin* | *-macos10*)
+      if test -d /opt/local ; then
+@@ -109,7 +108,7 @@ RM="$RM -f"
+ 
+ # Libtool & Compilers
+ AC_DISABLE_STATIC
+-LT_INIT
++LT_INIT([win32-dll])
+ AC_PROG_CC
+ AC_PROG_CXX
+ AC_SUBST(LIBTOOL_DEPS)
+-- 
+1.8.4
+

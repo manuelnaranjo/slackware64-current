@@ -1,0 +1,59 @@
+From f794f2d6dfbdc3799a190fb6f76f2bc353098e78 Mon Sep 17 00:00:00 2001
+From: Leon Bottou <leon@bottou.org>
+Date: Mon, 16 Sep 2013 09:31:49 -0400
+Subject: [PATCH 094/117] meta-data --> metadata.
+
+---
+ tools/djvused.1 | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/tools/djvused.1 b/tools/djvused.1
+index 4c919c6..bcb1621 100644
+--- a/tools/djvused.1
++++ b/tools/djvused.1
+@@ -372,27 +372,27 @@ with option
+ .BR -f .
+ .TP
+ .BI "print-meta"
+-Print the meta-data part of the annotations for the selected component file.
++Print the metadata part of the annotations for the selected component file.
+ This command displays a subset of the information printed by command
+ .B print-ant
+-using a different syntax.  Meta-data are organized as key\-value pairs.
++using a different syntax.  metadata are organized as key\-value pairs.
+ Each printed line contains the key name such as
+ .BR "author" ", " "title" ",etc.,"
+ followed by a tab character ("\\t") and
+ a double-quoted string representing the 
+ .SM UTF-8
+-encoded meta-data value.
++encoded metadata value.
+ .TP
+ .BI "remove-meta"
+-Remove the meta-data part of the annotations of 
++Remove the metadata part of the annotations of 
+ the selected component files.
+ .TP
+ .BI "set-meta [" "djvusedmetafile" "]"
+-Set the meta-data part of the annotations of the selected component file.
++Set the metadata part of the annotations of the selected component file.
+ The remaining part of the annotations is left unchanged.
+ The optional argument
+ .I djvusedmetafile
+-names a file containing the meta-data.
++names a file containing the metadata.
+ This file must contain data similar to what is produced
+ by command
+ .BR print-meta . 
+@@ -886,7 +886,7 @@ Clicking the icon reveals the text.
+ .RE
+ .TP
+ .BI "(metadata ... (" key " " value ") ... )"
+-Define meta-data entries.
++Define metadata entries.
+ Each entry is identified by a symbol
+ .I key
+ representing the nature of the meta data entry.
+-- 
+1.8.4
+
