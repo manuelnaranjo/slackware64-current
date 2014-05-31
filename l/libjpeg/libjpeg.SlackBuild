@@ -21,7 +21,7 @@
 #  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-VERSION=${VERSION:-v8a}
+VERSION=${VERSION:-v9a}
 BUILD=${BUILD:-2}
 
 # Automatically determine the architecture we're building on:
@@ -54,8 +54,6 @@ find . \
   -exec chmod 755 {} \; -o \
   \( -perm 666 -o -perm 664 -o -perm 600 -o -perm 444 -o -perm 440 -o -perm 400 \) \
   -exec chmod 644 {} \;
-
-zcat $CWD/jpeg.CVE-2013-6629.diff.gz | patch -p1 --verbose || exit 1
 
 CFLAGS="-O2" \
 LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
