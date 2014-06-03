@@ -58,27 +58,31 @@ find . \
   \( -perm 666 -o -perm 664 -o -perm 600 -o -perm 444 -o -perm 440 -o -perm 400 \) \
   -exec chmod 644 {} \;
 
-mkdir -p $PKG/usr/share/fonts/TTF/
-cp -a ttf/*.ttf $PKG/usr/share/fonts/TTF/
+mkdir -p $PKG/${PREFIX}/share/fonts/TTF/
+cp -a ttf/*.ttf $PKG/${PREFIX}/share/fonts/TTF/
 
-mkdir -p $PKG/etc/fonts/conf.avail
-mkdir -p $PKG/etc/fonts/conf.d
+mkdir -p $PKG/${PREFIX}/etc/fonts/conf.avail
+mkdir -p $PKG/${PREFIX}/etc/fonts/conf.d
 ( cd fontconfig
   for file in * ; do
-    cp -a $file $PKG/etc/fonts/conf.avail
-    ( cd $PKG/etc/fonts/conf.d ; ln -sf ../conf.avail/$file . )
+    cp -a $file $PKG/${PREFIX}/etc/fonts/conf.avail
+    ( cd $PKG/${PREFIX}/etc/fonts/conf.d ; ln -sf ../conf.avail/$file . )
   done
 )
 
-mkdir -p $PKG/usr/doc/dejavu-fonts-ttf-$VERSION
+mkdir -p $PKG/${PREFIX}/doc/dejavu-fonts-ttf-$VERSION
 cp -a \
   AUTHORS BUGS LICENSE NEWS README* *.txt \
-  $PKG/usr/doc/dejavu-fonts-ttf-$VERSION
+  $PKG/${PREFIX}/doc/dejavu-fonts-ttf-$VERSION
 
 mkdir -p $PKG/install
-cat $CWD/slack-desc > $PKG/install/slack-desc
 zcat $CWD/doinst.sh.gz > $PKG/install/doinst.sh
 
-cd $PKG
-/sbin/makepkg -l y -c n $TMP/dejavu-fonts-ttf-$(echo $VERSION | tr - _ )-$ARCH-$BUILD.txz
-
+cat ${CWD}/${PKGNAM}.yypkg.script | sed \
+  -e "s/%{PKG}/${PKGNAM}/" \
+  -e "s/%{HST}/${HOST_TRIPLET}/" \
+  -e "s/%{TGT}//" \
+  -e "s/%{VER}/${VERSION}/" \
+  -e "s/%{BUILD}/${BUILD}/" \
+  -e "s/%{DESCR}/${DESCR:-"No description"}/" \
+  | yypkg --makepkg --output ${YYOUTPUT} --script - --directory "${PKG}/${PREFIX}"
