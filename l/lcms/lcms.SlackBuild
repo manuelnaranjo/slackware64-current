@@ -71,7 +71,6 @@ find $PKG | xargs file | egrep -e "executable|shared object" \
   | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : \
   | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
 
-
 gzip -9 $PKG/${PREFIX}/man/man?/*.?
 
 mkdir -p $PKG/${PREFIX}/doc/lcms-$VERSION
@@ -87,9 +86,6 @@ if [ -r ChangeLog ]; then
   cat ChangeLog | head -n 1000 > $DOCSDIR/ChangeLog
   touch -r ChangeLog $DOCSDIR/ChangeLog
 fi
-
-mkdir -p $PKG/install
-cat $CWD/slack-desc > $PKG/install/slack-desc
 
 cat ${CWD}/lcms.yypkg.script | sed \
   -e "s/%{PKG}/lcms/" \
