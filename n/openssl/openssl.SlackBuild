@@ -58,7 +58,7 @@ tar xvf $CWD/openssl-$VERSION.tar.gz || exit 1
 cd openssl-$VERSION
 
 # Fix pod syntax errors which are fatal wih a newer perl:
-zcat $CWD/fix-pod-syntax.patch.gz | patch -p1 --verbose || exit 1
+find . -name "*.pod" -exec sed -i "s/^\=item \([0-9]\)\(\ \|$\)/\=item C<\1>/g" {} \;
 
 # Use .so.1, not .so.1.0.0:
 zcat $CWD/openssl.soname.diff.gz | patch -p1 --backup --verbose --suffix=.orig || exit 1
@@ -193,15 +193,14 @@ mkdir -p $PKG2/usr/doc/openssl-$VERSION
 ( cd $TMP/openssl-$VERSION
   cp -a CHANGES CHANGES.SSLeay FAQ INSTALL INSTALL.MacOS INSTALL.VMS INSTALL.W32 \
   LICENSE NEWS README README.ENGINE $PKG2/usr/doc/openssl-$VERSION
+  # If there's a CHANGES file, installing at least part of the recent history
+  # is useful, but don't let it get totally out of control:
+  if [ -r CHANGES ]; then
+    DOCSDIR=$(echo $PKG2/usr/doc/*-$VERSION)
+    cat CHANGES | head -n 2000 > $DOCSDIR/CHANGES
+    touch -r CHANGES $DOCSDIR/CHANGES
+  fi
 )
-
-# If there's a CHANGES file, installing at least part of the recent history
-# is useful, but don't let it get totally out of control:
-if [ -r CHANGES ]; then
-  DOCSDIR=$(echo $PKG2/usr/doc/*-$VERSION)
-  cat CHANGES | head -n 2000 > $DOCSDIR/CHANGES
-  touch -r CHANGES $DOCSDIR/CHANGES
-fi
 
 find $PKG2/usr/doc/openssl-$VERSION -type d -exec chmod 755 {} \;
 find $PKG2/usr/doc/openssl-$VERSION -type f -exec chmod 644 {} \;
