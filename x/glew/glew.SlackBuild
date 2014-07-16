@@ -77,6 +77,9 @@ cat $TEMPFILE > config/config.guess ; rm -f $TEMPFILE
 make $NUMJOBS OPT="$SLKCFLAGS" || make OPT="$SLKCFLAGS" || exit 1
 make install GLEW_DEST=$PKG/usr || exit 1
 
+chmod 755 $PKG/usr/lib${LIBDIRSUFFIX}/libGLEW.so.*
+rm -f $PKG/usr/lib${LIBDIRSUFFIX}/libGLEW.a
+
 ( cd $PKG
   find . | xargs file | grep "executable"    | grep ELF | cut -f 1 -d : | \
     xargs strip --strip-unneeded 2> /dev/null || true
