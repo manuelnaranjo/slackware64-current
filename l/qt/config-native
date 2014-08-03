@@ -1,0 +1,21 @@
+export CONFIGURE_OPTIONS=" \
+  -no-sql-sqlite \
+  -no-sql-mysql \
+  -no-sql-psql \
+  -no-qml-debug \
+  -no-mtdev \
+  -no-journald \
+  -no-gif \
+  -no-libpng \
+  -no-libjpeg \
+  -no-harfbuzz \
+  -no-openssl \
+  -no-xinput2 \
+  -no-xcb-xlib \
+  -no-widgets \
+  -no-iconv \
+  -no-evdev \
+  -no-icu \
+  -no-xcb \
+  -no-opengl \
+"

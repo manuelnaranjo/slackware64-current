@@ -1,0 +1,29 @@
+From 2112fbba9efb67caadf7064e44f68ac98ee89843 Mon Sep 17 00:00:00 2001
+From: Adrien Nader <adrien@notk.org>
+Date: Sat, 8 Feb 2014 00:31:41 +0100
+Subject: [PATCH 2/3] Use widl instead of midl. Also set QMAKE_DLLTOOL to
+ dlltool.
+
+---
+ qtbase/mkspecs/win32-g++/qmake.conf | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/qtbase/mkspecs/win32-g++/qmake.conf b/qtbase/mkspecs/win32-g++/qmake.conf
+index d514b6d..73bc91f 100644
+--- a/qtbase/mkspecs/win32-g++/qmake.conf
++++ b/qtbase/mkspecs/win32-g++/qmake.conf
+@@ -102,9 +102,10 @@ QMAKE_LIBS_QT_ENTRY     = -lmingw32 -lqtmain
+     include(../common/shell-win32.conf)
+ }
+ 
+-QMAKE_IDL               = midl
++QMAKE_IDL               = $${CROSS_COMPILE}widl
+ QMAKE_LIB               = $${CROSS_COMPILE}ar -ru
+ QMAKE_RC                = $${CROSS_COMPILE}windres
++QMAKE_DLLTOOL           = $${CROSS_COMPILE}dlltool
+ 
+ QMAKE_STRIP             = $${CROSS_COMPILE}strip
+ QMAKE_STRIPFLAGS_LIB   += --strip-unneeded
+-- 
+1.8.4
+

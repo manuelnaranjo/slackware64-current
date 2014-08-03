@@ -1,0 +1,66 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>
+<head>
+<title>mingw-qt5-qtbase.git - mingw-qt5-qtbase</title>
+<meta name='generator' content='cgit v0.9.2'/>
+<meta name='robots' content='index, nofollow'/>
+<link rel='stylesheet' type='text/css' href='/cgit-data/cgit.css'/>
+<link rel='alternate' title='Atom feed' href='http://pkgs.fedoraproject.org/cgit/mingw-qt5-qtbase.git/atom/qt5-use-system-zlib-in-host-libs.patch?h=master' type='application/atom+xml'/>
+</head>
+<body>
+<div id='cgit'><table id='header'>
+<tr>
+<td class='logo' rowspan='2'><a href='/cgit/'><img src='/cgit-data/cgit.png' alt='cgit logo'/></a></td>
+<td class='main'><a href='/cgit/'>index</a> : <a title='mingw-qt5-qtbase.git' href='/cgit/mingw-qt5-qtbase.git/'>mingw-qt5-qtbase.git</a></td><td class='form'><form method='get' action=''>
+<select name='h' onchange='this.form.submit();'>
+<option value='f17'>f17</option>
+<option value='f18'>f18</option>
+<option value='f19'>f19</option>
+<option value='f20'>f20</option>
+<option value='master' selected='selected'>master</option>
+</select> <input type='submit' name='' value='switch'/></form></td></tr>
+<tr><td class='sub'>mingw-qt5-qtbase</td><td class='sub right'>Jon Ciesla</td></tr></table>
+<table class='tabs'><tr><td>
+<a href='/cgit/mingw-qt5-qtbase.git/'>summary</a><a href='/cgit/mingw-qt5-qtbase.git/refs/'>refs</a><a href='/cgit/mingw-qt5-qtbase.git/log/qt5-use-system-zlib-in-host-libs.patch'>log</a><a class='active' href='/cgit/mingw-qt5-qtbase.git/tree/qt5-use-system-zlib-in-host-libs.patch'>tree</a><a href='/cgit/mingw-qt5-qtbase.git/commit/qt5-use-system-zlib-in-host-libs.patch'>commit</a><a href='/cgit/mingw-qt5-qtbase.git/diff/qt5-use-system-zlib-in-host-libs.patch'>diff</a><a href='/cgit/mingw-qt5-qtbase.git/stats/qt5-use-system-zlib-in-host-libs.patch'>stats</a></td><td class='form'><form class='right' method='get' action='/cgit/mingw-qt5-qtbase.git/log/qt5-use-system-zlib-in-host-libs.patch'>
+<select name='qt'>
+<option value='grep'>log msg</option>
+<option value='author'>author</option>
+<option value='committer'>committer</option>
+<option value='range'>range</option>
+</select>
+<input class='txt' type='text' size='10' name='q' value=''/>
+<input type='submit' value='search'/>
+</form>
+</td></tr></table>
+<div class='path'>path: <a href='/cgit/mingw-qt5-qtbase.git/tree/'>root</a>/<a href='/cgit/mingw-qt5-qtbase.git/tree/qt5-use-system-zlib-in-host-libs.patch'>qt5-use-system-zlib-in-host-libs.patch</a></div><div class='content'>blob: eccd9e490d61c059b797010a14f30c7fefc57db4 (<a href='/cgit/mingw-qt5-qtbase.git/plain/qt5-use-system-zlib-in-host-libs.patch'>plain</a>)
+<table summary='blob content' class='blob'>
+<tr><td class='linenumbers'><pre><a class='no' id='n1' name='n1' href='#n1'>1</a>
+<a class='no' id='n2' name='n2' href='#n2'>2</a>
+<a class='no' id='n3' name='n3' href='#n3'>3</a>
+<a class='no' id='n4' name='n4' href='#n4'>4</a>
+<a class='no' id='n5' name='n5' href='#n5'>5</a>
+<a class='no' id='n6' name='n6' href='#n6'>6</a>
+<a class='no' id='n7' name='n7' href='#n7'>7</a>
+<a class='no' id='n8' name='n8' href='#n8'>8</a>
+<a class='no' id='n9' name='n9' href='#n9'>9</a>
+<a class='no' id='n10' name='n10' href='#n10'>10</a>
+<a class='no' id='n11' name='n11' href='#n11'>11</a>
+</pre></td>
+<td class='lines'><pre><code>--- a/src/tools/bootstrap/bootstrap.pro	2014-01-01 13:22:42.367935800 -0600
++++ b/src/tools/bootstrap/bootstrap.pro	2014-01-02 23:38:20.707687700 -0600
+@@ -148,7 +148,7 @@ macx {
+ 
+ *-g++*: QMAKE_CXXFLAGS += -ffunction-sections
+ 
+-if(contains(QT_CONFIG, zlib)|cross_compile):include(../../3rdparty/zlib.pri)
++if(contains(QT_CONFIG, zlib)):include(../../3rdparty/zlib.pri)
+ else:include(../../3rdparty/zlib_dependency.pri)
+ 
+ win32:LIBS += -luser32 -lole32 -ladvapi32
+</code></pre></td></tr></table>
+</div> <!-- class=content -->
+<div class='footer'>generated  by cgit v0.9.2 at 2014-02-04 19:42:00 (GMT)</div>
+</div> <!-- id=cgit -->
+</body>
+</html>
