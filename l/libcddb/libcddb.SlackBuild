@@ -56,13 +56,16 @@ find . \
   \( -perm 666 -o -perm 664 -o -perm 600 -o -perm 444 -o -perm 440 -o -perm 400 \) \
   -exec chmod 644 {} \;
 
+sed -i '/SEARCH_ALL = ~0,/ s/SEARCH_ALL/LAAAAAPPPPIIIIIINNNNNN/' include/cddb/cddb_conn.h
 # Configure:
-CFLAGS="$SLKCFLAGS" \
+CFLAGS="-O2" \
+LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 ./configure \
-  --prefix=/usr \
-  --libdir=/usr/lib${LIBDIRSUFFIX} \
-  --mandir=/usr/man \
+  --prefix=/${PREFIX} \
+  --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
+  --mandir=/${PREFIX}/man \
   --disable-static \
+  --host=${HOST_TRIPLET} \
   --build=$ARCH-slackware-linux
 
 # Build and install:
@@ -70,12 +73,13 @@ make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG || exit 1
 
 # Strip binaries:
-find $PKG | xargs file | grep -e "executable" -e "shared object" | grep ELF \
-  | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
+find $PKG | xargs file | egrep -e "executable|shared object" \
+  | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : \
+  | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
 
 # Compress and link manpages, if any:
-if [ -d $PKG/usr/man ]; then
-  ( cd $PKG/usr/man
+if [ -d $PKG/${PREFIX}/man ]; then
+  ( cd $PKG/${PREFIX}/man
     for manpagedir in $(find . -type d -name "man*") ; do
       ( cd $manpagedir
         for eachpage in $( find . -type l -maxdepth 1) ; do
@@ -89,30 +93,32 @@ if [ -d $PKG/usr/man ]; then
 fi
 
 # Compress info files, if any:
-if [ -d $PKG/usr/info ]; then
-  ( cd $PKG/usr/info
+if [ -d $PKG/${PREFIX}/info ]; then
+  ( cd $PKG/${PREFIX}/info
     rm -f dir
     gzip -9 *
   )
 fi
 
 # Add a documentation directory:
-mkdir -p $PKG/usr/doc/${PKGNAM}-$VERSION
+mkdir -p $PKG/${PREFIX}/doc/${PKGNAM}-$VERSION
 cp -a \
   ABOUT-NLS AUTHORS COPYING* INSTALL NEWS README* THANKS TODO \
-  $PKG/usr/doc/${PKGNAM}-$VERSION
+  $PKG/${PREFIX}/doc/${PKGNAM}-$VERSION
 
 # If there's a ChangeLog, installing at least part of the recent history
 # is useful, but don't let it get totally out of control:
 if [ -r ChangeLog ]; then
-  DOCSDIR=$(echo $PKG/usr/doc/${PKGNAM}-$VERSION)
+  DOCSDIR=$(echo $PKG/${PREFIX}/doc/${PKGNAM}-$VERSION)
   cat ChangeLog | head -n 1000 > $DOCSDIR/ChangeLog
   touch -r ChangeLog $DOCSDIR/ChangeLog
 fi
 
-mkdir -p $PKG/install
-cat $CWD/slack-desc > $PKG/install/slack-desc
-
-cd $PKG
-/sbin/makepkg -l y -c n $TMP/${PKGNAM}-$VERSION-$ARCH-$BUILD.txz
-
+cat ${CWD}/$PKGNAM.yypkg.script | sed \
+  -e "s/%{PKG}/$PKGNAM/" \
+  -e "s/%{HST}/${HOST_TRIPLET}/" \
+  -e "s/%{TGT}//" \
+  -e "s/%{VER}/${VERSION}/" \
+  -e "s/%{BUILD}/${BUILD}/" \
+  -e "s/%{DESCR}/${DESCR:-"No description"}/" \
+  | makeypkg -o ${YYOUTPUT} -script - "${PKG}/${PREFIX}"

@@ -73,16 +73,18 @@ zcat $CWD/file.zisofs.magic.gz >> magic/Magdir/compress
 zcat $CWD/file.crdaregbin.magic.gz >> magic/Magdir/crdaregbin
 
 CFLAGS="$SLKCFLAGS" \
+LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 ./configure \
-  --prefix=/usr \
-  --libdir=/usr/lib${LIBDIRSUFFIX} \
-  --sysconfdir=/etc \
-  --datadir=/etc \
-  --mandir=/usr/man \
-  --infodir=/usr/info \
-  --docdir=/usr/doc/file-$VERSION \
+  --prefix=/${PREFIX} \
+  --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
+  --sysconfdir=/${PREFIX}/etc \
+  --datadir=/${PREFIX}/etc \
+  --mandir=/${PREFIX}/man \
+  --infodir=/${PREFIX}/info \
+  --docdir=/${PREFIX}/doc/file-$VERSION \
   --enable-fsect-man5 \
   --disable-static \
+  --host=${HOST_TRIPLET} \
   --build=$ARCH-slackware-linux
 
 # The generated $TMP/file-$VERSION/libtool is buggy.  I don't know if this is supposed
@@ -93,7 +95,7 @@ make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG || exit 1
 
 # Seems --disable-static has been ignored lately:
-rm -f $PKG/usr/lib${LIBDIRSUFFIX}/libmagic.a
+rm -f $PKG/${PREFIX}/lib${LIBDIRSUFFIX}/libmagic.a
 
 # Update:  We're going to use magic.mgc now as the flat files cause
 # libmagic crashes with versions newer than file-5.11.  Maybe that
@@ -127,20 +129,25 @@ rm -f $PKG/usr/lib${LIBDIRSUFFIX}/libmagic.a
 find $PKG | xargs file | grep -e "executable" -e "shared object" \
   | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
 
-( cd $PKG/usr/man || exit 1
+( cd $PKG/${PREFIX}/man || exit 1
   find . -type f -exec gzip -9 {} \;
   for i in $(find . -type l) ; do ln -s $(readlink $i).gz $i.gz ; rm $i ; done
 )
 
-mkdir -p $PKG/usr/doc/file-$VERSION
+mkdir -p $PKG/${PREFIX}/doc/file-$VERSION
 cp -a \
   AUTHORS COPYING INSTALL MAINT NEWS README TODO \
-    $PKG/usr/doc/file-$VERSION
+    $PKG/${PREFIX}/doc/file-$VERSION
 
 mkdir -p $PKG/install
 cat $CWD/slack-desc > $PKG/install/slack-desc
 
-# Build the package:
-cd $PKG
-/sbin/makepkg -l y -c n $TMP/file-$VERSION-$ARCH-$BUILD.txz
+cat ${CWD}/file.yypkg.script | sed \
+  -e "s/%{PKG}/file/" \
+  -e "s/%{HST}/${HOST_TRIPLET}/" \
+  -e "s/%{TGT}//" \
+  -e "s/%{VER}/${VERSION}/" \
+  -e "s/%{BUILD}/${BUILD}/" \
+  -e "s/%{DESCR}/${DESCR:-"No description"}/" \
+  | makeypkg -o ${YYOUTPUT} -script - "${PKG}/${PREFIX}"
 
