@@ -190,10 +190,18 @@ sed -i -e "s#lib\$#lib${LIBDIRSUFFIX}#" ${PREFIX}/lib${LIBDIRSUFFIX}/pkgconfig/*
 # Make runtime package:
 mkdir -p ${PREFIX}/doc/openssl-$VERSION
 ( cd $TMP/openssl-$VERSION
-<<<<<<< HEAD
   cp -a CHANGES CHANGES.SSLeay FAQ INSTALL INSTALL.MacOS INSTALL.VMS \
     INSTALL.W32 LICENSE NEWS README README.ENGINE \
     $PKG1/${PREFIX}/doc/openssl-$VERSION
+  # If there's a CHANGES file, installing at least part of the recent history
+  # is useful, but don't let it get totally out of control:
+  if [ -r CHANGES ]; then
+    DOCSDIR=$(echo $PKG1/usr/doc/*-$VERSION)
+    cat CHANGES | head -n 2000 > $DOCSDIR/CHANGES
+    touch -r CHANGES $DOCSDIR/CHANGES
+  fi
+  find $PKG1/usr/doc/openssl-$VERSION -type d -exec chmod 755 {} \;
+  find $PKG1/usr/doc/openssl-$VERSION -type f -exec chmod 644 {} \;
 )
 
 cat ${CWD}/openssl.yypkg.script | sed \
@@ -204,24 +212,3 @@ cat ${CWD}/openssl.yypkg.script | sed \
   -e "s/%{BUILD}/${BUILD}/" \
   -e "s/%{DESCR}/${DESCR:-"No description"}/" \
   | yypkg --makepkg --output ${YYOUTPUT} --script - --directory "${PKG1}/${PREFIX}"
-
-=======
-  cp -a CHANGES CHANGES.SSLeay FAQ INSTALL INSTALL.MacOS INSTALL.VMS INSTALL.W32 \
-  LICENSE NEWS README README.ENGINE $PKG2/usr/doc/openssl-$VERSION
-  # If there's a CHANGES file, installing at least part of the recent history
-  # is useful, but don't let it get totally out of control:
-  if [ -r CHANGES ]; then
-    DOCSDIR=$(echo $PKG2/usr/doc/*-$VERSION)
-    cat CHANGES | head -n 2000 > $DOCSDIR/CHANGES
-    touch -r CHANGES $DOCSDIR/CHANGES
-  fi
-)
-
-find $PKG2/usr/doc/openssl-$VERSION -type d -exec chmod 755 {} \;
-find $PKG2/usr/doc/openssl-$VERSION -type f -exec chmod 644 {} \;
-cd $PKG2
-mkdir -p install
-zcat $CWD/doinst.sh-openssl-solibs.gz > install/doinst.sh
-cat $CWD/slack-desc.openssl-solibs > install/slack-desc
-/sbin/makepkg -l y -c n $TMP/${NAME2}.txz
->>>>>>> volkerdi/master
