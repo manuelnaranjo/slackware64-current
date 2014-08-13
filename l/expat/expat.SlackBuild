@@ -54,7 +54,7 @@ LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
   --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
   --host=${HOST_TRIPLET} \
-  --disable-static \
+  ${DISABLE_STATIC} \
   --mandir=/usr/man \
   --build=$ARCH-slackware-linux
 make -j4 || exit 1

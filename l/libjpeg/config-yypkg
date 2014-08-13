@@ -1,0 +1,2 @@
+
+export DISABLE_STATIC="--enable-static --disable-shared"

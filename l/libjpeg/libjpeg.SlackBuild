@@ -61,13 +61,11 @@ LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
   --prefix=/${PREFIX} \
   --mandir=/${PREFIX}/man \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
-  --disable-static \
+  ${DISABLE_STATIC} \
   --host=${HOST_TRIPLET}
 
 make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG
-
-rm -f $PKG/$PREFIX/lib${LIBDIRSUFFIX}/libjpeg.a
 
 # Strip binaries:
 ( cd $PKG

@@ -1,0 +1,2 @@
+export WITHOUT_PNG=""
+export DISABLE_STATIC="--disable-static"

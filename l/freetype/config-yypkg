@@ -1,0 +1,2 @@
+export WITHOUT_PNG="--without-png"
+export DISABLE_STATIC="--disable-shared --enable-static"

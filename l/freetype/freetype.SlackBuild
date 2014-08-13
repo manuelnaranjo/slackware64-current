@@ -71,14 +71,11 @@ CFLAGS="-O2" \
 LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
   LIBPNG_CFLAGS="$(pkg-config --cflags libpng)" \
   LIBPNG_LDFLAGS="$(pkg-config --libs libpng)" \
-  make setup \
-  CFG="--prefix=/${PREFIX} --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} --build=$ARCH-slackware-linux --host=${HOST_TRIPLET}"
+  make \
+  CFG="--prefix=/${PREFIX} --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} --build=$ARCH-slackware-linux --host=${HOST_TRIPLET} ${WITHOUT_PNG} ${DISABLE_STATIC}"
 
 make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG
-
-# Can't imagine a lot of use for this:
-rm -f $PKG/${PREFIX}/lib${LIBDIRSUFFIX}/libfreetype.a
 
 find $PKG | xargs file | egrep "executable|shared object" \
   | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
