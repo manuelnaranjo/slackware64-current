@@ -1,0 +1,2 @@
+export SHARED="--shared"
+export TARGETS="libz-1.dll libz.dll.a example_d.exe minigzip_d.exe"

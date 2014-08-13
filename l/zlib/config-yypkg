@@ -1,0 +1,2 @@
+export SHARED="--static"
+export TARGETS="libz.a example.exe minigzip.exe"

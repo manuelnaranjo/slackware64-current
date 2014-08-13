@@ -29,11 +29,6 @@ STATICLIB = libz.a
 SHAREDLIB = libz-1.dll
 IMPLIB    = libz.dll.a
 
-#
-# Set to 1 if shared object needs to be installed
-#
-SHARED_MODE=1
-
 #LOC = -DASMV
 #LOC = -DDEBUG -g
 

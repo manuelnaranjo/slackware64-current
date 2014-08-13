@@ -61,7 +61,7 @@ CFLAGS="-O3" \
 ./configure \
   --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
-  --shared
+  ${SHARED}
 
 CC=${HOST_TRIPLET}-gcc \
   CFLAGS="-O3 -Wall" \
@@ -70,16 +70,19 @@ CC=${HOST_TRIPLET}-gcc \
   AR="${HOST_TRIPLET}-ar" \
   RC="${HOST_TRIPLET}-windres" \
   STRIP="${HOST_STRIP}" \
-  make -j8 -f $CWD/Makefile.yypkg || exit 1
+  make -j8 -f $CWD/Makefile.yypkg ${TARGETS} || exit 1
 
+FIND_1f="find . -maxdepth 1 -type f"
 mkdir -p $PKG/${PREFIX}/include
 cp -a zlib.h zconf.h $PKG/${PREFIX}/include
 chmod 644 $PKG/${PREFIX}/include/*
-mkdir -p $PKG/${PREFIX}/bin
-cp -a libz*.dll $PKG/${PREFIX}/bin
-mkdir -p $PKG/${PREFIX}/lib${LIBDIRSUFFIX}
-cp -a libz*.dll.a $PKG/${PREFIX}/lib${LIBDIRSUFFIX}
-chmod 755 $PKG/${PREFIX}/bin/*
+
+mkdir -p $PKG/${PREFIX}/bin $PKG/${PREFIX}/lib${LIBDIRSUFFIX}
+${FIND_1f} -name 'libz*.dll' | \
+  xargs -I '{}' install -m 755 '{}' $PKG/${PREFIX}/bin
+${FIND_1f} -a \( -name 'libz*.dll.a' -o -name 'libz.a' \) | \
+  xargs -I '{}' install -m 755 '{}' $PKG/${PREFIX}/lib${LIBDIRSUFFIX}
+
 mkdir -p $PKG/${PREFIX}/man/man3
 cat zlib.3 | gzip -9c > $PKG/${PREFIX}/man/man3/zlib.3.gz
 
