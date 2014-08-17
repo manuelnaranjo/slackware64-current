@@ -42,20 +42,6 @@ CWD=$(pwd)
 TMP=${TMP:-/tmp}
 PKG=$TMP/package-$PKGNAM
 
-if [ "$ARCH" = "i486" ]; then
-  SLKCFLAGS="-O2 -march=i486 -mtune=i686"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "s390" ]; then
-  SLKCFLAGS="-O2"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "x86_64" ]; then
-  SLKCFLAGS="-O2 -fPIC"
-  LIBDIRSUFFIX="64"
-else
-  SLKCFLAGS="-O2"
-  LIBDIRSUFFIX=""
-fi
-
 rm -rf $PKG 
 mkdir -p $TMP $PKG
 cd $TMP
@@ -69,26 +55,33 @@ find . \
   \( -perm 666 -o -perm 664 -o -perm 600 -o -perm 444 -o -perm 440 -o -perm 400 \) \
   -exec chmod 644 {} \;
 
-CFLAGS="$SLKCFLAGS" \
-CXXFLAGS="$SLKCFLAGS" \
+case "${HOST_TRIPLET}" in
+  x86_64-w64-mingw32) WITH_ASM="--disable-asm" ;;
+  *) WITH_ASM="" ;;
+esac
+
+CFLAGS="-O2" \
+CXXFLAGS="-O2" \
 ./configure \
-  --prefix=/usr \
-  --libdir=/usr/lib${LIBDIRSUFFIX} \
-  --infodir=/usr/info \
-  --docdir=/usr/doc/libgcrypt-$VERSION \
+  --prefix=/${PREFIX} \
+  --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
+  --infodir=/${PREFIX}/info \
+  --docdir=/${PREFIX}/doc/libgcrypt-$VERSION \
   --enable-shared=yes \
   --enable-static=no \
-  --program-prefix="" \
-  --program-suffix="" \
-  --build=$ARCH-slackware-linux \
-  --host=$ARCH-slackware-linux
+  --with-gpg-error-prefix=/${PREFIX} \
+  --enable-threads=windows \
+  ${WITH_ASM} \
+  --disable-padlock-support \
+  --build=${BUILD_TRIPLET} \
+  --host=${HOST_TRIPLET}
 
 make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG
 
 # Move the shared library to $PKG/lib${LIBDIRSUFFIX}:
 mkdir -p $PKG/lib${LIBDIRSUFFIX}
-( cd $PKG/usr/lib${LIBDIRSUFFIX}
+( cd $PKG/${PREFIX}/lib${LIBDIRSUFFIX}
   for file in lib*.so.??.* ; do
     mv $file ../../lib${LIBDIRSUFFIX}
     ln -sf ../../lib${LIBDIRSUFFIX}/$file .
@@ -96,29 +89,33 @@ mkdir -p $PKG/lib${LIBDIRSUFFIX}
   cp -a lib*.so.?? ../../lib${LIBDIRSUFFIX}
 )
 
-find $PKG | xargs file | grep -e "executable" -e "shared object" \
-  | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
+find $PKG | xargs file | egrep "executable|shared object" \
+  | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : \
+  | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
 
-rm -f $PKG/usr/info/dir
-gzip -9 $PKG/usr/info/*
+rm -f $PKG/${PREFIX}/info/dir
+gzip -9 $PKG/${PREFIX}/info/*
 
-mkdir -p $PKG/usr/doc/$PKGNAM-$VERSION
+mkdir -p $PKG/${PREFIX}/doc/$PKGNAM-$VERSION
 cp -a \
   AUTHORS BUGS COPYING* ChangeLog INSTALL NEWS \
   README* THANKS TODO VERSION \
-  $PKG/usr/doc/$PKGNAM-$VERSION
+  $PKG/${PREFIX}/doc/$PKGNAM-$VERSION
 
 # If there's a ChangeLog, installing at least part of the recent history
 # is useful, but don't let it get totally out of control:
 if [ -r ChangeLog ]; then
-  DOCSDIR=$(echo $PKG/usr/doc/${PKGNAM}-$VERSION)
+  DOCSDIR=$(echo $PKG/${PREFIX}/doc/${PKGNAM}-$VERSION)
   cat ChangeLog | head -n 1000 > $DOCSDIR/ChangeLog
   touch -r ChangeLog $DOCSDIR/ChangeLog
 fi
 
-mkdir -p $PKG/install
-cat $CWD/slack-desc > $PKG/install/slack-desc
-
-cd $PKG
-/sbin/makepkg -l y -c n $TMP/$PKGNAM-$VERSION-$ARCH-$BUILD.txz
+cat ${CWD}/${PKGNAM}.yypkg.script | sed \
+  -e "s/%{PKG}/${PKGNAM}/" \
+  -e "s/%{HST}/${HOST_TRIPLET}/" \
+  -e "s/%{TGT}//" \
+  -e "s/%{VER}/${VERSION}/" \
+  -e "s/%{BUILD}/${BUILD}/" \
+  -e "s/%{DESCR}/${DESCR:-"No description"}/" \
+  | yypkg --makepkg --output ${YYOUTPUT} --script - --directory "${PKG}/${PREFIX}"
 
