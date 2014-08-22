@@ -62,12 +62,14 @@ LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 r --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
   --mandir=/${PREFIX}/man \
-  --host=${HOST_TRIPLET} \
   --without-python \
+  --host=${HOST_TRIPLET} \
   --build=$ARCH-slackware-linux 
 
 make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG || exit 1
+
+rm -f $PKG/${PREFIX}/lib${LIBDIRSUFFIX}/libxml2.a
 
 find $PKG | xargs file | egrep "executable|shared object" \
   | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : \
