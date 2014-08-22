@@ -382,6 +382,7 @@ fi
      --enable-languages=${GCC_LANGUAGES} \
      --enable-checking=release \
      ${WITH_OBJC_GC} \
+     --enable-libgomp \
      --with-system-zlib \
      --with-python-dir=/lib$LIBDIRSUFFIX_HST/python2.7/site-packages \
      --disable-libunwind-exceptions \
