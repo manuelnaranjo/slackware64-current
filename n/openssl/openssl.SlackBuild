@@ -67,6 +67,12 @@ case "${HOST_TRIPLET}" in
     ;;
 esac
 
+# !PATCH
+# This should prevent building the "heartbeat" test. Before 1.0.1i no test was
+# built; starting with it, the "heartbeat" test gets built and... fails
+# building. Since no test will be run, disable it too. Sad but needed.
+sed -i '/\$(BUILD_CMD_STATIC)$/ s/BUILD_CMD_STATIC/BUILD_CMD/' test/Makefile
+
 # OpenSSL has a (nasty?) habit of bumping the internal version number with
 # every release.  This wouldn't be so bad, but some applications are so
 # paranoid that they won't run against a different OpenSSL version than
