@@ -85,7 +85,7 @@ LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
   --enable-static=no \
   --disable-rpath \
   --enable-threads=win32 \
-  --build=$ARCH-slackware-linux \
+  --build=${BUILD_TRIPLET} \
   --host=${HOST_TRIPLET}
 
 make $NUMJOBS || make || exit 1
@@ -136,5 +136,4 @@ cat ${CWD}/${PKGNAM}.yypkg.script | sed \
   -e "s/%{BUILD}/${BUILD}/" \
   -e "s/%{DESCR}/${DESCR:-"No description"}/" \
   | yypkg --makepkg --output ${YYOUTPUT} --script - --directory "${PKG}/${PREFIX}"
-
 
