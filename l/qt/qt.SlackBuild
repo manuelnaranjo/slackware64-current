@@ -40,7 +40,7 @@
 # qt 4.7.3, 4.7.4, 4.8.0, 4.8.1, 4.8.2, 4.8.4 are built from original nokia sources.
 
 PKGNAM=qt
-VERSION=$(ls qt-*.tar.?z* | rev | cut -f 3- -d . | cut -f 1 -d - | rev)
+VERSION=${VERSION:-$(ls qt-*.tar.?z* | rev | cut -f 3- -d . | cut -f 1 -d - | rev)}
 BUILD=${BUILD:-1}
 
 NUMJOBS=${NUMJOBS:--j7}
@@ -88,9 +88,6 @@ case "${HOST_TRIPLET}" in
     cat $CWD/0002-Use-widl-instead-of-midl.-Also-set-QMAKE_DLLTOOL-to-.patch \
       | patch -p1 --verbose || exit 1
 
-    cat $CWD/0001-windployqt-Fix-cross-compilation.patch \
-      | patch -p1 --verbose || exit 1
-
     cat $CWD/qt5-dont-add-resource-files-to-qmake-libs.patch \
       | ( cd qtbase && patch -p1 --verbose ) || exit 1
     cat $CWD/qt5-qmake-implib-dll-a.patch \
@@ -120,6 +117,7 @@ zcat $CWD/qt.fix.broken.gif.crash.diff.gz | patch -p1 --verbose || exit 1
   -no-compile-examples \
   -nomake examples \
   -nomake tests \
+  -no-kms \
   -no-cups \
   -no-gtkstyle \
   -no-glib \
