@@ -25,31 +25,7 @@ PKGNAM=libidn
 VERSION=${VERSION:-$(echo $PKGNAM-*.tar.?z* | rev | cut -f 3- -d . | cut -f 1 -d - | rev)}
 BUILD=${BUILD:-2}
 
-# Automatically determine the architecture we're building on:
-if [ -z "$ARCH" ]; then
-  case "$( uname -m )" in
-    i?86) export ARCH=i486 ;;
-    arm*) export ARCH=arm ;;
-    # Unless $ARCH is already set, use uname -m for all other archs:
-       *) export ARCH=$( uname -m ) ;;
-  esac
-fi
-
 NUMJOBS=${NUMJOBS:-" -j7 "}
-
-if [ "$ARCH" = "i486" ]; then
-  SLKCFLAGS="-O2 -march=i486 -mtune=i686"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "s390" ]; then
-  SLKCFLAGS="-O2"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "x86_64" ]; then
-  SLKCFLAGS="-O2 -fPIC"
-  LIBDIRSUFFIX="64"
-else
-  SLKCFLAGS="-O2"
-  LIBDIRSUFFIX=""
-fi
 
 CWD=$(pwd)
 TMP=${TMP:-/tmp}
@@ -64,27 +40,32 @@ cd libidn-$VERSION
 chown -R root:root .
 find . \
   \( -perm 777 -o -perm 775 -o -perm 711 -o -perm 555 -o -perm 511 \) \
-  -exec chmod 755 {} \; -o \
+  -exec chmod 755 {} + -o \
   \( -perm 666 -o -perm 664 -o -perm 600 -o -perm 444 -o -perm 440 -o -perm 400 \) \
-  -exec chmod 644 {} \;
+  -exec chmod 644 {} +
 
-CFLAGS="$SLKCFLAGS" \
+# C# support can be enabled through pnet or mono
+CFLAGS="-O2" \
 ./configure \
-  --prefix=/usr \
-  --libdir=/usr/lib${LIBDIRSUFFIX} \
-  --mandir=/usr/man \
-  --infodir=/usr/info \
-  --build=$ARCH-slackware-linux
+  --prefix=/${PREFIX} \
+  --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
+  --mandir=/${PREFIX}/man \
+  --infodir=/${PREFIX}/info \
+  --disable-csharp \
+  --enable-gcc-warnings \
+  --host=${HOST_TRIPLET} \
+  --build=${BUILD_TRIPLET}
 
 make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG || exit 1
 
-find $PKG | xargs file | grep -e "executable" -e "shared object" | grep ELF \
-  | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
+find $PKG | xargs file | egrep "executable|shared object" \
+  | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : \
+  | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
 
 # Compress and if needed symlink the man pages:
-if [ -d $PKG/usr/man ]; then
-  ( cd $PKG/usr/man
+if [ -d $PKG/${PREFIX}/man ]; then
+  ( cd $PKG/${PREFIX}/man
     for manpagedir in $(find . -type d -name "man*") ; do
       ( cd $manpagedir
         for eachpage in $( find . -type l -maxdepth 1) ; do
@@ -98,31 +79,34 @@ if [ -d $PKG/usr/man ]; then
 fi
 
 # Compress info pages and purge "dir" file from the package:
-if [ -d $PKG/usr/info ]; then
-  ( cd $PKG/usr/info
+if [ -d $PKG/${PREFIX}/info ]; then
+  ( cd $PKG/${PREFIX}/info
     rm -f dir
     gzip -9 *
   )
 fi
 
-mkdir -p $PKG/usr/doc/libidn-$VERSION
+mkdir -p $PKG/${PREFIX}/doc/libidn-$VERSION
 cp -a \
   ABOUT-NLS AUTHORS COPYING* FAQ INSTALL NEWS README* THANKS TODO \
   contrib \
   libidn/libidn.html \
-  $PKG/usr/doc/libidn-$VERSION
+  $PKG/${PREFIX}/doc/libidn-$VERSION
 
 # If there's a ChangeLog, installing at least part of the recent history
 # is useful, but don't let it get totally out of control:
 if [ -r ChangeLog ]; then
-  DOCSDIR=$(echo $PKG/usr/doc/${PKGNAM}-$VERSION)
+  DOCSDIR=$(echo $PKG/${PREFIX}/doc/${PKGNAM}-$VERSION)
   cat ChangeLog | head -n 1000 > $DOCSDIR/ChangeLog
   touch -r ChangeLog $DOCSDIR/ChangeLog
 fi
 
-mkdir -p $PKG/install
-cat $CWD/slack-desc > $PKG/install/slack-desc
-
-cd $PKG
-/sbin/makepkg -l y -c n $TMP/libidn-$VERSION-$ARCH-$BUILD.txz
+cat ${CWD}/$PKGNAM.yypkg.script | sed \
+  -e "s/%{PKG}/$PKGNAM/" \
+  -e "s/%{HST}/${HOST_TRIPLET}/" \
+  -e "s/%{TGT}//" \
+  -e "s/%{VER}/${VERSION}/" \
+  -e "s/%{BUILD}/${BUILD}/" \
+  -e "s/%{DESCR}/${DESCR:-"No description"}/" \
+  | yypkg --makepkg --output ${YYOUTPUT} --script - --directory "${PKG}/${PREFIX}"
 
