@@ -38,14 +38,14 @@ NUMJOBS=${NUMJOBS:-" -j7 "}
 
 CWD=$(pwd)
 TMP=${TMP:-/tmp}
-PKG=$TMP/package-libxslt
+PKG=$TMP/package-$PKGNAM
 rm -rf $PKG
 mkdir -p $TMP $PKG
 
 cd $TMP
-rm -rf libxslt-$VERSION
-tar xvf $CWD/libxslt-$VERSION.tar.?z* || exit 1
-cd libxslt-$VERSION
+rm -rf $PKGNAM-$VERSION
+tar xvf $CWD/$PKGNAM-$VERSION.tar.?z* || exit 1
+cd $PKGNAM-$VERSION
 chown -R root:root .
 find . \
   \( -perm 777 -o -perm 775 -o -perm 711 -o -perm 555 -o -perm 511 \) \
@@ -70,11 +70,11 @@ make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG || exit 1
 
 mv $PKG/${PREFIX}/share/doc $PKG/${PREFIX}
-mv $PKG/${PREFIX}/doc/libxslt-python-$VERSION $PKG/${PREFIX}/doc/libxslt-$VERSION
+mv $PKG/${PREFIX}/doc/$PKGNAM-python-$VERSION $PKG/${PREFIX}/doc/$PKGNAM-$VERSION
 cp -a \
-  AUTHORS COPYING* Copyright FEATURES INSTALL IPR NEWS README TODO libxslt.spec \
-  $PKG/${PREFIX}/doc/libxslt-$VERSION
-find $PKG/${PREFIX}/doc/libxslt-$VERSION -type f | xargs chmod 644
+  AUTHORS COPYING* Copyright FEATURES INSTALL IPR NEWS README TODO $PKGNAM.spec \
+  $PKG/${PREFIX}/doc/$PKGNAM-$VERSION
+find $PKG/${PREFIX}/doc/$PKGNAM-$VERSION -type f | xargs chmod 644
 
 find $PKG | xargs file | egrep "executable|shared object" \
   | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : \
@@ -82,8 +82,8 @@ find $PKG | xargs file | egrep "executable|shared object" \
 
 gzip -9 $PKG/${PREFIX}/man/man?/*.?
 
-cat ${CWD}/libxslt.yypkg.script | sed \
-  -e "s/%{PKG}/libxslt/" \
+cat ${CWD}/$PKGNAM.yypkg.script | sed \
+  -e "s/%{PKG}/$PKGNAM/" \
   -e "s/%{HST}/${HOST_TRIPLET}/" \
   -e "s/%{TGT}//" \
   -e "s/%{VER}/${VERSION}/" \
