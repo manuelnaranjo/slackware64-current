@@ -61,10 +61,10 @@ LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
   --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
   --mandir=/${PREFIX}/man \
-  --host=${HOST_TRIPLET} \
-  --without-crypto \
+  --disable-static \
   --without-python \
-  --build=$ARCH-slackware-linux 
+  --host=${HOST_TRIPLET} \
+  --build=${BUILD_TRIPLET}
 
 make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG || exit 1
