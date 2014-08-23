@@ -27,14 +27,6 @@ BUILD=${BUILD:-1}
 
 NUMJOBS=${NUMJOBS:-" -j7 "}
 
-if [ -z "$ARCH" ]; then
-  case "$( uname -m )" in
-    i?86) ARCH=i486 ;;
-    arm*) ARCH=arm ;;
-       *) ARCH=$( uname -m ) ;;
-  esac
-fi
-
 CWD=$(pwd)
 TMP=${TMP:-/tmp}
 PKG=$TMP/package-${PKGNAM}
@@ -54,6 +46,11 @@ find . \
   \( -perm 666 -o -perm 664 -o -perm 600 -o -perm 444 -o -perm 440 -o -perm 400 \) \
   -exec chmod 644 {} \;
 
+sed -i \
+  -e '/# include <ddk\/ntddcdrm.h>/ s;ddk/;;' \
+  -e '/# include <ddk\/ntddscsi.h>/ s;ddk/;;' \
+  lib/driver/MSWindows/win32_ioctl.c
+
 # Configure:
 CFLAGS="-O2" \
 LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
@@ -64,7 +61,7 @@ LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
   --infodir=/${PREFIX}/info \
   --disable-static \
   --host=${HOST_TRIPLET} \
-  --build=$ARCH-slackware-linux
+  --build=${BUILD_TRIPLET}
 
 # Build and install:
 make $NUMJOBS || make || exit 1
@@ -119,4 +116,4 @@ cat ${CWD}/$PKGNAM.yypkg.script | sed \
   -e "s/%{VER}/${VERSION}/" \
   -e "s/%{BUILD}/${BUILD}/" \
   -e "s/%{DESCR}/${DESCR:-"No description"}/" \
-  | makeypkg -o ${YYOUTPUT} -script - "${PKG}/${PREFIX}"
+  | yypkg --makepkg --output ${YYOUTPUT} --script - --directory "${PKG}/${PREFIX}"
