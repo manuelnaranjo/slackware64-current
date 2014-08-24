@@ -25,16 +25,6 @@ PKGNAM=flac
 VERSION=${VERSION:-$(echo $PKGNAM-*.tar.?z* | rev | cut -f 3- -d . | cut -f 1 -d - | rev)}
 BUILD=${BUILD:-3}
 
-# Automatically determine the architecture we're building on:
-if [ -z "$ARCH" ]; then
-  case "$( uname -m )" in
-    i?86) export ARCH=i486 ;;
-    arm*) export ARCH=arm ;;
-    # Unless $ARCH is already set, use uname -m for all other archs:
-       *) export ARCH=$( uname -m ) ;;
-  esac
-fi
-
 NUMJOBS=${NUMJOBS:-" -j7 "}
 
 CWD=$(pwd)
@@ -70,10 +60,10 @@ LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
   --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
   --mandir=/${PREFIX}/man \
-  --host=${HOST_TRIPLET} \
   --disable-static \
   --disable-xmms-plugin \
-  --build=$ARCH-slackware-linux
+  --host=${HOST_TRIPLET} \
+  --build=${BUILD_TRIPLET}
 
 make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG || exit 1
@@ -102,8 +92,8 @@ find $PKG | xargs file | egrep -e "executable|shared object" \
 
 gzip -9 $PKG/${PREFIX}/man/man?/*.?
 
-cat ${CWD}/flac.yypkg.script | sed \
-  -e "s/%{PKG}/flac/" \
+cat ${CWD}/$PKGNAM.yypkg.script | sed \
+  -e "s/%{PKG}/$PKGNAM/" \
   -e "s/%{HST}/${HOST_TRIPLET}/" \
   -e "s/%{TGT}//" \
   -e "s/%{VER}/${VERSION}/" \
