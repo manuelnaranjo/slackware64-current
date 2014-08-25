@@ -288,6 +288,8 @@ for COMPILER in ${ALL_COMPILERS}; do
   fi
 done
 
+set -e
+
 cd $TMP
 tar xvf $CWD/gcc-$VERSION.tar.?z*
 # (cd gcc-$VERSION
@@ -302,7 +304,7 @@ tar xvf $CWD/gcc-$VERSION.tar.?z*
 
 # Copy ecj.jar into the TLD of the source. Needed for java compiler.
 # This can be retrieved from ftp://sourceware.org/pub/java
-cp $CWD/ecj-4.5.jar gcc-$VERSION/ecj.jar
+# cp $CWD/ecj-4.5.jar gcc-$VERSION/ecj.jar
 
 # Use an antlr runtime to compile javadoc.
 # The runtime can be obtained from:
@@ -365,9 +367,8 @@ if [ -n "${LIBDIRSUFFIX_TGT}" ]; then
 fi
 
 # build gcc
-{( mkdir gcc.build.lnx;
+  mkdir gcc.build.lnx;
   cd gcc.build.lnx;
-
 
   CFLAGS="$SLKCFLAGS" \
   CXXFLAGS="$SLKCFLAGS" \
@@ -534,17 +535,6 @@ fi
       ln -sf gcc.1.gz cc.1.gz
     fi
   )
-
-  ## build the txz package
-  #(
-  #  cd $PKG_GCC;
-  #  makepkg -l y -c n $TMP/gcc-$VERSION-$ARCH-$BUILD.txz
-  #)
-  # keep a log
-) 2>&1 && RES="true" || RES="false"; } | tee $TMP/gcc.build.log
-if ! ${RES}; then
-  exit 1
-fi
 
 # OK, time to split the big package where needed:
 
