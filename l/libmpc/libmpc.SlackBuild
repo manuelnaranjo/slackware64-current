@@ -54,8 +54,14 @@ tar xvf $CWD/$SRCNAM-$VERSION.tar.?z* || exit 1
 cd $SRCNAM-$VERSION
 chown -R root:root .
 
+#! PATCH: Fix passing of -no-undefined to libtool
+# 1- remove it from LDFLAGS since it's for libtool, not ld:
 sed -i -e '/LDFLAGS="\$LDFLAGS -no-undefined"/ d' acinclude.m4
+# 2- add it to libmpc_la_LDFLAGS which is what is passed to libtool:
 sed -i -e 's/libmpc_la_LDFLAGS = -version-info 2:0:0/\0 -no-undefined/' src/Makefile.am
+# 3- add AM_PROG_AR in configure.ac otherwise automake warns and warn-errors
+#     that it is missing:
+sed -i -e 's/AC_LANG(C)/AM_PROG_AR\n\0/' configure.ac
 
 autoreconf -fiv
 
