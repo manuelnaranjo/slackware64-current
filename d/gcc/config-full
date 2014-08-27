@@ -1,2 +1,2 @@
 export GCC_CORE="no"
-export GCC_LANGUAGES="c,c++,fortran"
+export GCC_LANGUAGES="c,c++"
