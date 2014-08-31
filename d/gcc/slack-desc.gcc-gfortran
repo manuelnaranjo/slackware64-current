@@ -6,7 +6,7 @@
 # leave one space after the ':'.
 
             |-----handy-ruler------------------------------------------------------|
-gcc-gfortran: gcc-gfortran (Fortran support for GCC)
+gcc-gfortran: gcc-gfortran (Fortran for GCC)
 gcc-gfortran:
 gcc-gfortran: The GNU Fortran compiler is fully compliant with the Fortran 95
 gcc-gfortran: Standard and includes legacy F77 support.  In addition, a significant
