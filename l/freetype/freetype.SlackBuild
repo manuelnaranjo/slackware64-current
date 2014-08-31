@@ -80,6 +80,9 @@ make install DESTDIR=$PKG
 find $PKG | xargs file | egrep "executable|shared object" \
   | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
 
+mv $PKG/${PREFIX}/share/man $PKG/${PREFIX}/man
+find $PKG/${PREFIX}/man -type f -exec gzip -9 {} \;
+
 mkdir -p $PKG/${PREFIX}/doc/freetype-$VERSION
 cp -a \
   docs \
