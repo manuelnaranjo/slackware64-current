@@ -469,7 +469,9 @@ fi
     sed -i 's#;.\(:../lib !m64 m32;\)$#;32\1#' ${PKG_GCC}/${SPECS}
   fi
 
-  chmod 755 $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX_HST}/libgcc_s.so.1
+  if [ -e $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX_HST}/libgcc_s.so.1 ]; then
+    chmod 755 $PKG_GCC/${PREFIX}/lib${LIBDIRSUFFIX_HST}/libgcc_s.so.1
+  fi
 
   # The (huge) static GNU java libraries are not packaged.  In nearly all
   # cases one or more dependencies will not be available as static anyway.
