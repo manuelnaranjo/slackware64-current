@@ -494,7 +494,9 @@ fi
   )
 
   ( cd $PKG_GCC/${PREFIX}/bin
-    mv ${TARGET_TRIPLET}-gfortran ${TARGET_TRIPLET}-gfortran-gcc
+    if [ -n "${PKG_GCC_GFORTRAN}" ]; then
+      mv ${TARGET_TRIPLET}-gfortran ${TARGET_TRIPLET}-gfortran-gcc
+    fi
     for bin in gcc g++ gfortran-gcc gcc-{ar,nm,ranlib} gcj gcjh; do
       if [ -e ${bin}${EXE} ]; then
         mv ${bin}${EXE} ${TARGET_TRIPLET}-${bin}-${VERSION}${EXE}
