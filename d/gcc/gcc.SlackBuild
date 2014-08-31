@@ -267,7 +267,7 @@ description_of_compiler() {
     | sed -e 's;/;\\/;g' \
     | sed -n "/^${PKG}:/ s#^${PKG}: ##p" \
     | sed -e 's;";\\\\";g' \
-    | tr -d '()#' \
+    | tr -d '#' \
     | tr '\n' ' '
 }
 
