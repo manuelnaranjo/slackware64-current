@@ -455,7 +455,7 @@ fi
 
   # Add, e.g., /opt/windows_32/{include,lib} to default search paths
   if [ x"${HOST_TRIPLET}" != x"${TARGET_TRIPLET}" ]; then
-    prefix_dir="/${YYPREFIX_TARGET}"
+    prefix_dir="${YYPREFIX_TARGET}"
 
     sed -i \
       -e "/^\*lib:$/ { N; s;$; -L${prefix_dir}/lib${LIBDIRSUFFIX_TGT}; }" \
