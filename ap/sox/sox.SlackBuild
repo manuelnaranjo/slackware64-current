@@ -59,6 +59,7 @@ make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG || exit 1
 
 # play, rec and soxi symlinks point to "sox" instead of "sox.exe"; replace them:
+find $PKG/${PREFIX}/bin -type l -lname sox -exec mv {} {}.exe \;
 find $PKG/${PREFIX}/bin -type l -lname sox -exec ln -sf sox.exe {} \;
 
 find $PKG | xargs file | egrep -e "executable|shared object" \
