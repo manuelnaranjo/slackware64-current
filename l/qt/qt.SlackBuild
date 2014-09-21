@@ -175,7 +175,7 @@ EOF
 #   done
 # )
 
-find $PKG | xargs file | egrep -e "executable|shared object" \
+find $PKG -size +4k -type f | xargs file | egrep -e "executable|shared object" \
   | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : \
   | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
 
