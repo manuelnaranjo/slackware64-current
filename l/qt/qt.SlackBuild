@@ -213,15 +213,14 @@ find $PKG -size +4k -type f | xargs file | egrep -e "executable|shared object" \
 
 # Add menu entries for all those hidden but great Qt applications:
 # Qt logo:
-convert $PKG/${PREFIX}/lib$LIBDIRSUFFIX/qt/doc/src/images/qt-logo.png  -resize 48x48 $PKG/${PREFIX}/share/icons/hicolor/48x48/apps/qt-logo.png
-convert $PKG/${PREFIX}/lib$LIBDIRSUFFIX/qt/doc/src/images/qt-logo.png  -resize 48x48 $PKG/${PREFIX}/share/icons/hicolor/48x48/apps/qt-logo.png
+convert $CWD/qtdoc/doc/src/images/qt-logo.png -resize 48x48 $PKG/${PREFIX}/share/icons/hicolor/48x48/apps/qt-logo.png
 # Assistant icons
-install -p -m644 -D tools/assistant/tools/assistant/images/assistant.png $PKG/${PREFIX}/share/icons/hicolor/32x32/apps/assistant.png
-install -p -m644 -D tools/assistant/tools/assistant/images/assistant-128.png $PKG/${PREFIX}/share/icons/hicolor/128x128/apps/assistant.png
+install -p -m644 -D qttools/src/assistant/assistant/images/assistant.png $PKG/${PREFIX}/share/icons/hicolor/32x32/apps/assistant.png
+install -p -m644 -D qttools/src/assistant/assistant/images/assistant-128.png $PKG/${PREFIX}/share/icons/hicolor/128x128/apps/assistant.png
 # Designer icon
-install -p -m644 -D tools/designer/src/designer/images/designer.png $PKG/${PREFIX}/share/icons/hicolor/128x128/apps/designer.png
+install -p -m644 -D qttools/src/designer/src/designer/images/designer.png $PKG/${PREFIX}/share/icons/hicolor/128x128/apps/designer.png
 # Linguist icons
-for icon in tools/linguist/linguist/images/icons/linguist-*-32.png ; do
+for icon in qttools/src/linguist/linguist/images/icons/linguist-*-32.png ; do
   size=$(echo $(basename ${icon}) | cut -d- -f2)
   install -p -m644 -D ${icon} $PKG/${PREFIX}/share/icons/hicolor/${size}x${size}/apps/linguist.png
 done
