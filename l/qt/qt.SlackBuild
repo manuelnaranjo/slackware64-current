@@ -133,10 +133,6 @@ zcat $CWD/qt.fix.broken.gif.crash.diff.gz | patch -p1 --verbose || exit 1
 make $NUMJOBS || make || exit 1
 make install INSTALL_ROOT=$PKG || exit 1
 
-# .dll files are install in both $(libdir) and $(bindir); remove the ones in
-# $(libdir).
-rm $PKG/${PREFIX}/lib${LIBDIRSUFFIX}/*.dll
-
 # The infamous qt -> qt-${VERSION} link that keeps the full path out of .la files:
 ( cd $PKG/${PREFIX}/lib${LIBDIRSUFFIX} ; ln -sf qt qt-${VERSION} )
 
