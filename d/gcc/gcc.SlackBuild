@@ -662,13 +662,15 @@ strip_f() {
 
 strip_f "executable|shared object" "${HOST_EXE_FORMAT}" "${HOST_STRIP} --strip-unneeded"
 
-if echo "$TARGET_TRIPLET" | grep -q mingw; then
-  strip_f "DLL" "${TARGET_EXE_FORMAT}" "${TARGET_STRIP} --strip-unneeded"
-else
-  strip_f "shared object" "${TARGET_EXE_FORMAT}" "${TARGET_STRIP} --strip-unneeded"
-fi
+if [ x"${GCC_CORE}" != x"yes" ]; then
+  if echo "$TARGET_TRIPLET" | grep -q mingw; then
+    strip_f "DLL" "${TARGET_EXE_FORMAT}" "${TARGET_STRIP} --strip-unneeded"
+  else
+    strip_f "shared object" "${TARGET_EXE_FORMAT}" "${TARGET_STRIP} --strip-unneeded"
+  fi
 
-strip_f "current ar archive" "" "${TARGET_STRIP} -g"
+  strip_f "current ar archive" "" "${TARGET_STRIP} -g"
+fi
 
 # for COMPILER in ${ALL_COMPILERS}; do
 #   ( cd "$(pkg_of_element "${COMPILER}")"
