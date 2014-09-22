@@ -548,12 +548,14 @@ if [ -n "${PKG_GCC_GPP}" ]; then ( cd $PKG_GCC_GPP
   move_from_pkg_gcc "${PREFIX}/bin/*++*"
   move_from_pkg_gcc "${PREFIX}/libexec/gcc/$TARGET_TRIPLET/$VERSION/cc1plus*"
   move_from_pkg_gcc "${PREFIX}/man/man1/*++*"
-  if [ x"${HOST_TRIPLET}" = x"${TARGET_TRIPLET}" ]; then
-    move_from_pkg_gcc "${PREFIX}/include/c++"
-    move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/*++*"
-  else
-    move_from_pkg_gcc "${PREFIX}/${TARGET_TRIPLET}/include/c++"
-    move_from_pkg_gcc "${PREFIX}/${TARGET_TRIPLET}/lib${LIBDIRSUFFIX_TGT}/*++*"
+  if [ x"${GCC_CORE}" != x"yes" ]; then
+    if [ x"${HOST_TRIPLET}" = x"${TARGET_TRIPLET}" ]; then
+      move_from_pkg_gcc "${PREFIX}/include/c++"
+      move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/*++*"
+    else
+      move_from_pkg_gcc "${PREFIX}/${TARGET_TRIPLET}/include/c++"
+      move_from_pkg_gcc "${PREFIX}/${TARGET_TRIPLET}/lib${LIBDIRSUFFIX_TGT}/*++*"
+    fi
   fi
 ); fi
 
