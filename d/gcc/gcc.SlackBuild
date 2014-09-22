@@ -491,7 +491,7 @@ fi
     # build an installer for Windows anyway and you can move the files in it,
     # i.e. they ignore this need because you're going to be able to work-around
     # the issue in the installer.
-    mv ${PREFIX}/lib/lib*.dll ${PREFIX}/bin/
+    mv ${PREFIX}/lib/lib*.dll ${PREFIX}/bin/ || true
   )
 
   ( cd $PKG_GCC/${PREFIX}/bin
