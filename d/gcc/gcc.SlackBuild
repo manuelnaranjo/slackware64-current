@@ -554,7 +554,7 @@ if [ -n "${PKG_GCC_GPP}" ]; then ( cd $PKG_GCC_GPP
       move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/*++*"
     else
       move_from_pkg_gcc "${PREFIX}/${TARGET_TRIPLET}/include/c++"
-      move_from_pkg_gcc "${PREFIX}/${TARGET_TRIPLET}/lib${LIBDIRSUFFIX_TGT}/*++*"
+      move_from_pkg_gcc "${PREFIX}/${TARGET_TRIPLET}/lib/*++*"
     fi
   fi
 ); fi
