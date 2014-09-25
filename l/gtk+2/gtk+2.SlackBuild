@@ -65,6 +65,12 @@ sed -i 's/\$(GTK_DEP_LIBS)/$(GMODULE_LIBS) \0/' \
 libtoolize --force
 autoreconf -fiv
 
+#! PATCH
+# Thanks fedora:
+#   The pre-generated gtk.def file can't be used for MinGW-W64
+#   Force a regeneration of this file by removing the bundled copy
+rm -f gtk/gtk.def
+
 CFLAGS="-O2" \
 LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 ./configure \
@@ -74,7 +80,7 @@ LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
   --mandir=/${PREFIX}/man \
   --host=${HOST_TRIPLET} \
   --disable-cups \
-  --build=$ARCH-slackware-linux
+  --build=${BUILD_TRIPLET}
 
 make $NUMJOBS || make || exit 1
 
