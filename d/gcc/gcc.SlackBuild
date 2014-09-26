@@ -484,7 +484,7 @@ fi
   ( cd $PKG_GCC
     # *not* ${LIBDIRSUFFIX_HST}
     mkdir -p ${PREFIX}/lib
-    ln -sf ../bin/cpp ${PREFIX}/lib/cpp
+    ln -sf ../bin/cpp ${PREFIX}/lib/cpp${EXE}
     # GCC puts its files in $(toolexeclibdir) which is $(libdir)/../lib in the
     # case of cross-compilation. There is no way to change it. A particular
     # thought to Cygwin people who said it didn't matter since you're going to
