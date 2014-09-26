@@ -551,7 +551,8 @@ if [ -n "${PKG_GCC_GPP}" ]; then ( cd $PKG_GCC_GPP
   if [ x"${GCC_CORE}" != x"yes" ]; then
     if [ x"${HOST_TRIPLET}" = x"${TARGET_TRIPLET}" ]; then
       move_from_pkg_gcc "${PREFIX}/include/c++"
-      move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/*++*"
+      # XXX: should be lib${LIBDIRSUFFIX} below but GCC disagrees currently...
+      move_from_pkg_gcc "${PREFIX}/lib/*++*"
     else
       move_from_pkg_gcc "${PREFIX}/${TARGET_TRIPLET}/include/c++"
       move_from_pkg_gcc "${PREFIX}/${TARGET_TRIPLET}/lib/*++*"
