@@ -56,9 +56,12 @@ find . \
   \( -perm 666 -o -perm 664 -o -perm 600 -o -perm 444 -o -perm 440 -o -perm 400 \) \
   -exec chmod 644 {} \;
 
-# PATCH
-sed -i '/libid3tag_la_LDFLAGS/ s/$/ -no-undefined/' Makefile.am
-autoreconf -fiv
+#! PATCH
+# I wanted to do the following at first but debian's autotools are broken and
+# make it impossible to run autoreconf:
+# sed -i '/libid3tag_la_LDFLAGS/ s/$/ -no-undefined/' Makefile.am
+sed -i '/libid3tag_la_LDFLAGS/ s/$/ -no-undefined/' Makefile.in
+# autoreconf -fiv
 
 # Configure:
 CFLAGS="-O2" \
