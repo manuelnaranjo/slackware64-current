@@ -61,12 +61,14 @@ CWD=$(pwd)
 TMP=${TMP:-/tmp}
 PKG=$TMP/package-${PKGNAM}
 
+set -e
+
 rm -rf $PKG
 mkdir -p $TMP $PKG
 cd $TMP
 rm -rf qt-everywhere-opensource-src-$VERSION
-tar xvf $CWD/qt-everywhere-opensource-src-$VERSION.tar.gz     # For qt releases
-cd qt-everywhere-opensource-src-$VERSION || exit 1
+tar xvf $CWD/qt-everywhere-opensource-src-$VERSION.tar.xz     # For qt releases
+cd qt-everywhere-opensource-src-$VERSION
 # We have to use rpath here as the library which the
 chown -R root:root .
 find . \
@@ -81,37 +83,42 @@ find . \
 # Stupid idea - remove it:
 # zcat $CWD/qt.webkit-no_Werror.patch.gz | patch -p1 --verbose || exit 1
 
+#! PATCH
+sed -i 's/Shlwapi.h/shlwapi.h/' qttools/src/windeployqt/utils.cpp
+
 case "${HOST_TRIPLET}" in
   *-*-mingw*)
     cat $CWD/0001-configure-use-pkg-config-for-libpng.patch \
-      | patch -p1 --verbose || exit 1
+      | patch -p1 --verbose
     cat $CWD/0002-Use-widl-instead-of-midl.-Also-set-QMAKE_DLLTOOL-to-.patch \
-      | patch -p1 --verbose || exit 1
+      | patch -p1 --verbose
 
     cat $CWD/qt5-dont-add-resource-files-to-qmake-libs.patch \
-      | ( cd qtbase && patch -p1 --verbose ) || exit 1
+      | ( cd qtbase && patch -p1 --verbose )
     cat $CWD/qt5-qmake-implib-dll-a.patch \
-      | ( cd qtbase && patch -p1 --verbose ) || exit 1
+      | ( cd qtbase && patch -p1 --verbose )
 
     sed -i '/option.host_build./ d' qtactiveqt/src/tools/idc/idc.pro
 
+    EXEEXT=".exe"
+    ;;
+  *)
+    EXEEXT=""
     ;;
 esac
+
+# Fix crash on malformed GIF images (CVE-2014-0190):
+zcat $CWD/qt.fix.broken.gif.crash.diff.gz | patch -p1 --verbose
 
 export CFLAGS="-O2"
 export CXXFLAGS="-O2"
 export OPENSOURCE_CXXFLAGS="-O2"
 export LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}"
 
-# Fix crash on malformed GIF images (CVE-2014-0190):
-zcat $CWD/qt.fix.broken.gif.crash.diff.gz | patch -p1 --verbose || exit 1
-
-./configure \
+MAKEFLAGS="${NUMJOBS}" ./configure \
   -confirm-license \
   -opensource \
-  -prefix /${PREFIX}/lib${LIBDIRSUFFIX}/qt5 \
-  -hostprefix /${PREFIX}/lib${LIBDIRSUFFIX}/qt5 \
-  -hostbindir /${PREFIX}/bin/qt5 \
+  -prefix /${PREFIX} \
   -headerdir /${PREFIX}/include/qt5 \
   -libdir /${PREFIX}/lib${LIBDIRSUFFIX} \
   -no-compile-examples \
@@ -124,32 +131,116 @@ zcat $CWD/qt.fix.broken.gif.crash.diff.gz | patch -p1 --verbose || exit 1
   -no-fontconfig \
   ${CONFIGURE_OPTIONS} \
   -release \
+  -optimized-qmake \
   -no-separate-debug-info \
   -no-pch
   # No-precompiled-headers is ccache-friendly.
 
 # Sometimes a failure happens when parallelizing make.  Try again if make fails,
 # but make a failure the second time around (single threaded) a fatal error:
-make $NUMJOBS || make || exit 1
-make install INSTALL_ROOT=$PKG || exit 1
+make $NUMJOBS || make
+make install INSTALL_ROOT=$PKG
+
+case "${HOST_TRIPLET}" in
+  *-*-mingw*)
+    if [ x"${HOST_TRIPLET}" != x"${BUILD_TRIPLET}" ]; then
+      (cd qtbase/qmake
+        make clean
+        make \
+          CC=${HOST_TRIPLET}-gcc \
+          CXX=${HOST_TRIPLET}-g++ \
+          QMAKESPEC=${PWD}/../mkspecs/win32-g++ \
+          EXTRA_CPPFLAGS=-DUNICODE \
+          QMAKE_LFLAGS="-lole32 -luuid -ladvapi32 -lkernel32" \
+          EXEEXT="${EXEEXT}" \
+          QTOBJS='qfilesystemengine_win.o qfilesystemiterator_win.o qfsfileengine_win.o qlocale_win.o registry.o qsettings_win.o qsystemlibrary.o' \
+          $NUMJOBS
+        install -m 755 ../bin/qmake${EXEEXT} $PKG/${PREFIX}/bin
+      )
+
+      tool() {
+        local TOOL_PATH="${1}"
+        local TOOL="${2:-""}"
+        if [ -n "${TOOL}" ]; then
+          local TARGET="${TOOL}${EXEEXT}"
+          local WITH_TARGET="TARGET=${TARGET}"
+        else
+          local TARGET=""
+          local WITH_TARGET=""
+        fi
+
+        make -C ${TOOL_PATH}/${TOOL} clean
+
+        sed -i '/INCPATH \+=/ s/linux-g++/win32-g++/g' ${TOOL_PATH}/${TOOL}/Makefile
+
+        make -C ${TOOL_PATH}/${TOOL} \
+          CC="${HOST_TRIPLET}-gcc" \
+          CXX="${HOST_TRIPLET}-g++" \
+          LINK='$(CXX)' \
+          AR="${HOST_TRIPLET}-ar cqs" \
+          ${WITH_TARGET} \
+          LIBS="-L${PWD}/qtbase/lib ${EXTRA_LIBS} -lQt5Core" \
+          LFLAGS="-Wl,-O1" \
+          CFLAGS="-O2 -fno-exceptions -Wall -W -D_REENTRANT "'$(DEFINES)'" -DUNICODE ${EXTRA_CPPFLAGS}" \
+          CXXFLAGS="-O2 -std=c++0x -fno-exceptions -Wall -W -D_REENTRANT "'$(DEFINES)'" -DUNICODE ${EXTRA_CPPFLAGS}" \
+          $NUMJOBS
+
+        if [ -n "${TARGET}" ]; then
+          install -m 755 "${TOOL_PATH}/${TOOL}/${TARGET}" "$PKG/${PREFIX}/bin"
+        fi
+      }
+
+      tool "qtbase/src/tools" moc
+      tool "qtbase/src/tools" rcc
+      tool "qtbase/src/tools" qlalr
+      EXTRA_LIBS="-lQt5Xml" \
+        tool "qtbase/src/tools" qdoc
+      tool "qtbase/src/tools" uic
+      EXTRA_LIBS="-lQt5DBus" \
+        tool "qtbase/src/tools" qdbusxml2cpp
+      EXTRA_LIBS="-lQt5DBus" EXTRA_CPPFLAGS="$(pkg-config --cflags dbus-1)" \
+        tool "qtbase/src/tools" qdbuscpp2xml
+
+      EXTRA_LIBS="-lshlwapi" \
+        tool "qttools/src" windeployqt
+      EXTRA_LIBS="-lQt5Xml" \
+        tool "qttools/src/linguist" lconvert
+      EXTRA_LIBS="-lQt5Xml" \
+        tool "qttools/src/linguist" lrelease
+      EXTRA_LIBS="-L../../../../qtdeclarative/lib -lQt5Qml -lQt5Xml" \
+        tool "qttools/src/linguist" lupdate
+
+      EXTRA_LIBS="-L../../lib -lQt5Qml" \
+        tool "qtdeclarative/tools" qmlimportscanner
+      EXTRA_LIBS="-L../../lib -lQt5Qml" \
+        tool "qtdeclarative/src/qmldevtools" ""
+      EXTRA_LIBS="-L../../lib -lQt5QmlDevTools -lQt5Qml" \
+        tool "qtdeclarative/tools" qmlmin
+
+      (cd $PKG/${PREFIX}/bin
+        rm -f lconvert lrelease lupdate moc qdbuscpp2xml qdbusxml2cpp qdoc qlalr
+        rm -f qmake qmlimportscanner qmlmin rcc uic windeployqt
+      )
+    fi
+  ;;
+esac
 
 # The infamous qt -> qt-${VERSION} link that keeps the full path out of .la files:
 ( cd $PKG/${PREFIX}/lib${LIBDIRSUFFIX} ; ln -sf qt qt-${VERSION} )
 
 # Add a missing Qt.pc which is needed by KDE applications:
-mkdir -p $PKG/${PREFIX}/lib${LIBDIRSUFFIX}/qt/lib/pkgconfig
-cat <<EOF > $PKG/${PREFIX}/lib${LIBDIRSUFFIX}/qt/lib/pkgconfig/Qt.pc
-prefix=/${PREFIX}/lib${LIBDIRSUFFIX}/qt
+mkdir -p $PKG/${PREFIX}/lib${LIBDIRSUFFIX}/pkgconfig
+cat <<EOF > $PKG/${PREFIX}/lib${LIBDIRSUFFIX}/pkgconfig/Qt.pc
+prefix=/${PREFIX}
 bindir=\${prefix}/bin
 datadir=\${prefix}
 docdir=\${prefix}/doc
 headerdir=\${prefix}/include
 importdir=\${prefix}/imports
-libdir=\${prefix}/lib
-moc=\${bindir}/moc
+libdir=\${prefix}/lib${LIBDIRSUFFIX}
+moc=\${bindir}/moc${EXEEXT}
 plugindir=\${prefix}/plugins
-qmake=\${bindir}/qmake
-sysconfdir=\${prefix}/etc/settings
+qmake=\${bindir}/qmake${EXEEXT}
 translationdir=\${prefix}/translations
 
 Name: Qt
@@ -206,14 +297,14 @@ find $PKG -size +4k -type f | xargs file | egrep -e "executable|shared object" \
 # Install Qt's private headers - at least Gentoo and Fedora are adding these
 # and some software has (inevitably) started depending on them:
 # We're using `rsync -R` as easy way to preserve relative path names:
-# rsync -aR \
-#   include/Qt{Core,Declarative,Gui,Script}/private \
-#   src/{corelib,declarative,gui,script}/*/*_p.h \
-#   ${PKG}/${PREFIX}/lib${LIBDIRSUFFIX}/qt/
+
+ln -s 5.3.1/QtCore/private qtbase/include/QtCore/private
+ln -s 5.3.1/QtGui/private qtbase/include/QtGui/private
 
 # Add menu entries for all those hidden but great Qt applications:
 # Qt logo:
-convert $CWD/qtdoc/doc/src/images/qt-logo.png -resize 48x48 $PKG/${PREFIX}/share/icons/hicolor/48x48/apps/qt-logo.png
+mkdir -p $PKG/${PREFIX}/share/icons/hicolor/48x48/apps/
+convert qtdoc/doc/src/images/qt-logo.png -resize 48x48 $PKG/${PREFIX}/share/icons/hicolor/48x48/apps/qt-logo.png
 # Assistant icons
 install -p -m644 -D qttools/src/assistant/assistant/images/assistant.png $PKG/${PREFIX}/share/icons/hicolor/32x32/apps/assistant.png
 install -p -m644 -D qttools/src/assistant/assistant/images/assistant-128.png $PKG/${PREFIX}/share/icons/hicolor/128x128/apps/assistant.png
@@ -277,7 +368,7 @@ EOF
 
 # Add a documentation directory:
 mkdir -p $PKG/${PREFIX}/doc/$PKGNAM-$VERSION
-cp -a *GPL_EXCEPTION* FAQ* INSTALL KNOWN* LICENSE* README* changes-* \
+cp -a *GPL_EXCEPTION* LICENSE* README* \
   $PKG/${PREFIX}/doc/$PKGNAM-$VERSION
 if [ -d $PKG/${PREFIX}/lib${LIBDIRSUFFIX}/qt/doc/html ]; then
   ( cd $PKG/${PREFIX}/doc/$PKGNAM-$VERSION
