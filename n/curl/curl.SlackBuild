@@ -44,6 +44,8 @@ PKG=$TMP/package-curl
 # Uncomment to build a no-SSL version:
 #SSLOPT=--without-ssl
 
+set -e
+
 rm -rf $PKG
 mkdir -p $PKG
 cd $TMP
