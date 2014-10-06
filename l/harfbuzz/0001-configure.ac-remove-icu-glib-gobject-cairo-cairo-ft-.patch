@@ -1,0 +1,109 @@
+From 5f431b42582150da7c45c437442cd5fafd91b426 Mon Sep 17 00:00:00 2001
+From: Adrien Nader <adrien@notk.org>
+Date: Mon, 6 Oct 2014 08:05:28 +0200
+Subject: [PATCH] configure.ac: remove icu, glib/gobject, cairo/cairo-ft deps.
+
+---
+ configure.ac | 70 ++++++------------------------------------------------------
+ 1 file changed, 6 insertions(+), 64 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index 588744e..b8bb9b4 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -136,86 +136,28 @@ AM_CONDITIONAL(HAVE_UCDN, $have_ucdn)
+ 
+ dnl ===========================================================================
+ 
+-PKG_CHECK_MODULES(GLIB, glib-2.0 >= 2.16, have_glib=true, have_glib=false)
+-if $have_glib; then
+-	AC_DEFINE(HAVE_GLIB, 1, [Have glib2 library])
+-fi
++have_glib=false
+ AM_CONDITIONAL(HAVE_GLIB, $have_glib)
+ 
+-PKG_CHECK_MODULES(GOBJECT, gobject-2.0 glib-2.0 >= 2.16, have_gobject=true, have_gobject=false)
+-if $have_gobject; then
+-	AC_DEFINE(HAVE_GOBJECT, 1, [Have gobject2 library])
+-	GLIB_MKENUMS=`$PKG_CONFIG --variable=glib_mkenums glib-2.0`
+-	AC_SUBST(GLIB_MKENUMS)
+-fi
++have_gobject=false
+ AM_CONDITIONAL(HAVE_GOBJECT, $have_gobject)
+ 
+ dnl ==========================================================================
+ 
+-PKG_CHECK_MODULES(CAIRO, cairo >= 1.8.0, have_cairo=true, have_cairo=false)
+-if $have_cairo; then
+-	AC_DEFINE(HAVE_CAIRO, 1, [Have cairo graphics library])
+-fi
++have_cairo=false
+ AM_CONDITIONAL(HAVE_CAIRO, $have_cairo)
+ 
+-PKG_CHECK_MODULES(CAIRO_FT, cairo-ft, have_cairo_ft=true, have_cairo_ft=false)
+-if $have_cairo_ft; then
+-	AC_DEFINE(HAVE_CAIRO_FT, 1, [Have cairo-ft support in cairo graphics library])
+-fi
++have_cairo_ft=false
+ AM_CONDITIONAL(HAVE_CAIRO_FT, $have_cairo_ft)
+ 
+ dnl ==========================================================================
+ 
+-PKG_CHECK_MODULES(ICU, icu-uc, have_icu=true, have_icu=false)
+-dnl Fallback to icu-config if ICU pkg-config files could not be found
+-if test "$have_icu" != "true"; then
+-	AC_CHECK_TOOL(ICU_CONFIG, icu-config, no)
+-	AC_MSG_CHECKING([for ICU by using icu-config fallback])
+-	if test "$ICU_CONFIG" != "no" && "$ICU_CONFIG" --version >/dev/null; then
+-		have_icu=true
+-		# We don't use --cflags as this gives us a lot of things that we don't
+-		# necessarily want, like debugging and optimization flags
+-		# See man (1) icu-config for more info.
+-		ICU_CFLAGS=`$ICU_CONFIG --cppflags`
+-		ICU_LIBS=`$ICU_CONFIG --ldflags-libsonly`
+-		AC_SUBST(ICU_CFLAGS)
+-		AC_SUBST(ICU_LIBS)
+-		AC_MSG_RESULT([yes])
+-	else
+-		AC_MSG_RESULT([no])
+-	fi
+-fi
+-
+-if $have_icu; then
+-	CXXFLAGS="$CXXFLAGS `$PKG_CONFIG --variable=CXXFLAGS icu-uc`"
+-	AC_DEFINE(HAVE_ICU, 1, [Have ICU library])
+-fi
++have_icu=false
+ AM_CONDITIONAL(HAVE_ICU, $have_icu)
+ 
+ dnl ==========================================================================
+ 
+-PKG_CHECK_MODULES(ICU_LE, icu-le icu-uc, have_icu_le=true, have_icu_le=false)
+-dnl Fallback to icu-config if ICU pkg-config files could not be found
+-if test "$have_icu_le" != "true"; then
+-	AC_CHECK_TOOL(ICU_CONFIG, icu-config, no)
+-	AC_MSG_CHECKING([for ICU_LE by using icu-config fallback])
+-	if test "$ICU_CONFIG" != "no" && "$ICU_CONFIG" --version >/dev/null; then
+-		have_icu_le=true
+-		# We don't use --cflags as this gives us a lot of things that we don't
+-		# necessarily want, like debugging and optimization flags
+-		# See man (1) icu-config for more info.
+-		ICU_LE_CFLAGS=`$ICU_CONFIG --cppflags`
+-		ICU_LE_LIBS=`$ICU_CONFIG --ldflags-libsonly --ldflags-layout`
+-		AC_SUBST(ICU_LE_CFLAGS)
+-		AC_SUBST(ICU_LE_LIBS)
+-		AC_MSG_RESULT([yes])
+-	else
+-		AC_MSG_RESULT([no])
+-	fi
+-fi
+-if $have_icu_le; then
+-	AC_DEFINE(HAVE_ICU_LE, 1, [Have ICU Layout Engine library])
+-fi
++have_icu_le=false
+ AM_CONDITIONAL(HAVE_ICU_LE, $have_icu_le)
+ 
+ dnl ==========================================================================
+-- 
+1.8.4
+

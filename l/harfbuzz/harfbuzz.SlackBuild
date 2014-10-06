@@ -56,6 +56,11 @@ find . \
  \( -perm 666 -o -perm 664 -o -perm 600 -o -perm 444 -o -perm 440 -o -perm 400 \) \
  -exec chmod 644 {} \;
 
+if [ x"${NO_ICU_GLIB_DEP}" = x"yes" ]; then
+  patch -p1 < $CWD/0001-configure.ac-remove-icu-glib-gobject-cairo-cairo-ft-.patch
+  autoreconf -fiv
+fi
+
 CFLAGS="-O2" \
 CXXFLAGS="-O2" \
 LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
