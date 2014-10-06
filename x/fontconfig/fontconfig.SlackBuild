@@ -78,6 +78,7 @@ LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
   --with-baseconfigdir=/${PREFIX}/etc/fonts \
   --with-configdir=/${PREFIX}/etc/fonts/conf.d \
   --with-xmldir=/${PREFIX}/etc/fonts \
+  ${WITH_DEFAULT_FONTS} \
   --with-add-fonts="APPSHAREFONTDIR" \
   --enable-static=no \
   --disable-docs \

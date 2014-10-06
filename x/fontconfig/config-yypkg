@@ -1,0 +1,1 @@
+export WITH_DEFAULT_FONTS="--with-default-fonts='APPSHAREFONTDIR'"
