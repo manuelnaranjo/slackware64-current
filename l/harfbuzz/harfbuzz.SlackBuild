@@ -41,6 +41,8 @@ CWD=$(pwd)
 TMP=${TMP:-/tmp}
 PKG=$TMP/package-$PKGNAM
 
+set -e
+
 rm -rf $PKG
 mkdir -p $TMP $PKG
 cd $TMP
