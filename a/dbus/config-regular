@@ -1,1 +1,1 @@
-export DISABLE_STATIC="--disable-static"
+export WITH_DBUS_SESSION_BUS_DEFAULT_ADDRESS="--with-dbus-session-bus-default-address=autolaunch:"

@@ -67,8 +67,8 @@ LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
   --infodir=/${PREFIX}/info \
   --docdir=/${PREFIX}/doc/$PKGNAM-$VERSION \
   --disable-doxygen-docs \
-  ${DISABLE_STATIC} \
-  --with-dbus-session-bus-default-address=autolaunch: \
+  --disable-static \
+  ${WITH_DBUS_SESSION_BUS_DEFAULT_ADDRESS} \
   --host=${HOST_TRIPLET} \
   --build=$ARCH-slackware-linux
 

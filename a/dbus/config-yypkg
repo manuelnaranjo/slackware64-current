@@ -1,1 +1,1 @@
-export DISABLE_STATIC="--disable-shared --enable-static"
+export WITH_DBUS_SESSION_BUS_DEFAULT_ADDRESS=""
