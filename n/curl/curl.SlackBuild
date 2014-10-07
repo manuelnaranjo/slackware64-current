@@ -99,7 +99,7 @@ find $PKG | xargs file | egrep -e "executable|shared object" \
 
 mkdir -p $PKG/${PREFIX}/doc/curl-$VERSION
 cp -a \
-  COPYING* README* UPGRADE \
+  COPYING* README* \
   $PKG/${PREFIX}/doc/curl-$VERSION
 ( cd docs
   rm -rf Makefile* curl-config.1 curl-config.html curl.1 curl.html libcurl
