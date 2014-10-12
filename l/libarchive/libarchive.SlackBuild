@@ -56,7 +56,11 @@ find . \
  \( -perm 666 -o -perm 664 -o -perm 600 -o -perm 444 -o -perm 440 -o -perm 400 \) \
  -exec chmod 644 {} \;
 
-CFLAGS="-O2" \
+#! PATCH
+STAT_IS_64="-D__MINGW_USE_VC2005_COMPAT=1 -D_FILE_OFFSET_BITS=64"
+
+#! PATCH
+CFLAGS="-O2 ${STAT_IS_64}" \
 CXXFLAGS="-O2" \
 LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 ./configure \
@@ -67,10 +71,14 @@ LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
   --mandir=/${PREFIX}/man \
   ${CONFIGURE_OPTIONS} \
   --host=${HOST_TRIPLET} \
-  --build=$ARCH-slackware-linux
+  --build=${BUILD_TRIPLET}
 
 make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG || exit 1
+
+#! PATCH
+sed -i '/^Cflags: / s/$/ '"${STAT_IS_64}"'/' \
+  $PKG/${PREFIX}/lib${LIBDIRSUFFIX}/pkgconfig/libarchive.pc
 
 find $PKG | xargs file | egrep -e "executable|shared object" \
   | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : \
