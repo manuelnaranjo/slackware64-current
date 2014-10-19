@@ -70,6 +70,14 @@ find $PKG | xargs file | egrep -e "executable|shared object" \
   | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : \
   | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
 
+#! PATCH
+#  Having 'make.exe' on MSYS is rarely what people want since it won't use 'sh'
+#  but 'cmd.exe' and won't understand posix paths. Rename it to the common
+#  'mingw32-make'.
+if [ -e $PKG/bin/make.exe ]; then
+  mv $PKG/bin/make.exe $PKG/bin/mingw32-make.exe
+fi
+
 gzip -9 $PKG/${PREFIX}/man/man1/*
 rm $PKG/${PREFIX}/info/dir
 gzip -9 $PKG/${PREFIX}/info/*
