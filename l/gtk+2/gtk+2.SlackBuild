@@ -71,6 +71,11 @@ autoreconf -fiv
 #   Force a regeneration of this file by removing the bundled copy
 rm -f gtk/gtk.def
 
+#! PATCH
+sed -i \
+  '/gtk_libdir = g_build_filename (root, "lib", NULL);/ s/"lib"/"lib'"${LIBDIRSUFFIX}"'"/' \
+  gtk/gtkmain.c
+
 CFLAGS="-O2" \
 LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 ./configure \
