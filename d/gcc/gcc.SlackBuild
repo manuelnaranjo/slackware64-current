@@ -454,9 +454,16 @@ fi
     cat gcc/specs > $PKG_GCC/${SPECS}
   fi
 
-  # Add, e.g., /opt/windows_32/{include,lib} to default search paths
-  if [ x"${HOST_TRIPLET}" != x"${TARGET_TRIPLET}" ]; then
-    prefix_dir="${YYPREFIX_TARGET}"
+  # Add, e.g., /opt/windows_32/{include,lib} to default search paths when not
+  # making a native compiler.
+  if [ x"${BUILD_TRIPLET}" != x"${TARGET_TRIPLET}" ]; then
+    # If it's a cross-compiler
+    if [ x"${HOST_TRIPLET}" != x"${TARGET_TRIPLET}" ]; then
+      # it should look inside /opt/windows_??/...
+      prefix_dir="${YYPREFIX_TARGET}"
+    else # If it's a cross-compiled compiler
+      prefix_dir='!{YYPREFIX}'
+    fi
 
     sed -i \
       -e "/^\*lib:$/ { N; s;$; -L${prefix_dir}/lib${LIBDIRSUFFIX_TGT}; }" \
@@ -686,6 +693,7 @@ for COMPILER in ${ALL_COMPILERS}; do
     -e "s/%{VER}/${VERSION}/" \
     -e "s/%{BUILD}/${BUILD}/" \
     -e "s/%{DESCR}/$(description_of_compiler "${COMPILER}")/" \
+    -e "s;%{SPECS_FILE};lib${LIBDIRSUFFIX_HST}/gcc/${TARGET_TRIPLET}/${VERSION}/specs;" \
     | yypkg --makepkg --output ${YYOUTPUT} --script - --directory "$(pkg_of_element "${COMPILER}")/${PREFIX}"
 done
 
