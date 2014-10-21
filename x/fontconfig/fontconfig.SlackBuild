@@ -97,6 +97,10 @@ make install DESTDIR=$PKG || exit 1
 mkdir -p $PKG/${PREFIX}/share/fontconfig
 ( cd $PKG/${PREFIX}/share/fontconfig ; ln -sf /${PREFIX}/etc/fonts/conf.avail . )
 
+sed -i \
+  '/<string>sans-serif<\/string>/ s/sans-serif/DejaVu Sans/' \
+  $PKG/${PREFIX}/etc/fonts/fonts.conf
+
 mkdir -p $PKG/${PREFIX}/doc/fontconfig-$VERSION
 cp -a \
   AUTHORS COPYING* INSTALL NEWS README \
