@@ -74,8 +74,8 @@ find $PKG | xargs file | egrep -e "executable|shared object" \
 #  Having 'make.exe' on MSYS is rarely what people want since it won't use 'sh'
 #  but 'cmd.exe' and won't understand posix paths. Rename it to the common
 #  'mingw32-make'.
-if [ -e $PKG/bin/make.exe ]; then
-  mv $PKG/bin/make.exe $PKG/bin/mingw32-make.exe
+if [ -e $PKG/${PREFIX}/bin/make.exe ]; then
+  mv $PKG/${PREFIX}/bin/make.exe $PKG/${PREFIX}/bin/mingw32-make.exe
 fi
 
 gzip -9 $PKG/${PREFIX}/man/man1/*
@@ -84,9 +84,9 @@ gzip -9 $PKG/${PREFIX}/info/*
 # This has been here so long that it should probably stay.
 # Trying to get rid of ginstall didn't go well, so...  :-)
 ( cd $PKG/${PREFIX}/bin
-  rm -f gmake
-  ln -sf make mingw32-make
-  ln -sf make gmake )
+  # ln -sf mingw32-make.exe make.exe
+  ln -sf mingw32-make.exe gmake.exe
+)
 mkdir -p $PKG/${PREFIX}/doc/make-$VERSION
 cp -a \
   ABOUT-NLS AUTHORS COPYING* NEWS README* \
