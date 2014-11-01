@@ -1,0 +1,90 @@
+From 520c62fbfca6173d9481e9e26a21946a0d519284 Mon Sep 17 00:00:00 2001
+From: Adrien Nader <adrien@notk.org>
+Date: Fri, 31 Oct 2014 09:17:26 +0100
+Subject: [PATCH] windows: don't #undef stat since it my be defined to
+ "stat64".
+
+---
+ libarchive/archive_match.c                     |  2 +-
+ libarchive/archive_platform.h                  |  2 ++
+ libarchive/archive_read_disk_entry_from_file.c |  2 +-
+ libarchive/archive_util.c                      |  2 +-
+ libarchive/archive_windows.h                   | 10 ++++++----
+ 5 files changed, 11 insertions(+), 7 deletions(-)
+
+diff --git a/libarchive/archive_match.c b/libarchive/archive_match.c
+index 6b6be9c..0dcb5e3 100644
+--- a/libarchive/archive_match.c
++++ b/libarchive/archive_match.c
+@@ -1227,7 +1227,7 @@ set_timefilter_pathname_mbs(struct archive_match *a, int timetype,
+ 		archive_set_error(&(a->archive), EINVAL, "pathname is empty");
+ 		return (ARCHIVE_FAILED);
+ 	}
+-	if (stat(path, &st) != 0) {
++	if (my_stat(path, &st) != 0) {
+ 		archive_set_error(&(a->archive), errno, "Failed to stat()");
+ 		return (ARCHIVE_FAILED);
+ 	}
+diff --git a/libarchive/archive_platform.h b/libarchive/archive_platform.h
+index ce2f482..e9ec5a4 100644
+--- a/libarchive/archive_platform.h
++++ b/libarchive/archive_platform.h
+@@ -58,6 +58,8 @@
+  * either Windows or Posix APIs. */
+ #if (defined(__WIN32__) || defined(_WIN32) || defined(__WIN32)) && !defined(__CYGWIN__)
+ #include "archive_windows.h"
++#else
++#define my_stat(fd, st) stat(fd, st)
+ #endif
+ 
+ /*
+diff --git a/libarchive/archive_read_disk_entry_from_file.c b/libarchive/archive_read_disk_entry_from_file.c
+index e984aaa..ba78321 100644
+--- a/libarchive/archive_read_disk_entry_from_file.c
++++ b/libarchive/archive_read_disk_entry_from_file.c
+@@ -163,7 +163,7 @@ archive_read_disk_entry_from_file(struct archive *_a,
+ 				}
+ 			} else
+ #endif
+-			if (stat(path, &s) != 0) {
++			if (my_stat(path, &s) != 0) {
+ 				archive_set_error(&a->archive, errno,
+ 				    "Can't stat %s", path);
+ 				return (ARCHIVE_FAILED);
+diff --git a/libarchive/archive_util.c b/libarchive/archive_util.c
+index 34d8081..43acd51 100644
+--- a/libarchive/archive_util.c
++++ b/libarchive/archive_util.c
+@@ -433,7 +433,7 @@ __archive_mktemp(const char *tmpdir)
+ 		temp_name.s[temp_name.length-1] = '\0';
+ 		temp_name.length --;
+ 	}
+-	if (stat(temp_name.s, &st) < 0)
++	if (my_stat(temp_name.s, &st) < 0)
+ 		goto exit_tmpfile;
+ 	if (!S_ISDIR(st.st_mode)) {
+ 		errno = ENOTDIR;
+diff --git a/libarchive/archive_windows.h b/libarchive/archive_windows.h
+index c6f5bc5..a178f49 100644
+--- a/libarchive/archive_windows.h
++++ b/libarchive/archive_windows.h
+@@ -112,10 +112,12 @@
+ #if !defined(__BORLANDC__)
+ #define setmode		_setmode
+ #endif
+-#ifdef stat
+-#undef stat
+-#endif
+-#define	stat(path,stref)		__la_stat(path,stref)
++int __la_stat(const char *pathname, struct stat *buf);
++static inline int
++my_stat(const char *pathname, struct stat *st)
++{
++  return __la_stat(pathname, st);
++}
+ #if !defined(__BORLANDC__)
+ #define	strdup		_strdup
+ #endif
+-- 
+1.8.4
+

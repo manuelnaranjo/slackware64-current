@@ -57,9 +57,12 @@ find . \
  -exec chmod 644 {} \;
 
 #! PATCH
-STAT_IS_64="-D__MINGW_USE_VC2005_COMPAT=1 -D_FILE_OFFSET_BITS=64"
+patch -p1 --verbose < ${CWD}/0001-windows-don-t-undef-stat-since-it-my-be-defined-to-s.patch || exit 1
+patch -p0 --verbose < ${CWD}/use-static-asserts-to-guarantee-abi-compatibility.patch || exit 1
 
 #! PATCH
+STAT_IS_64="-D__MINGW_USE_VC2005_COMPAT"
+
 CFLAGS="-O2 ${STAT_IS_64}" \
 CXXFLAGS="-O2" \
 LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
