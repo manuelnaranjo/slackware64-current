@@ -53,10 +53,15 @@ find . \
   \( -perm 666 -o -perm 664 -o -perm 600 -o -perm 444 -o -perm 440 -o -perm 400 \) \
   -exec chmod 644 {} +
 
+#! PATCH
 sed -i -e 's/mkdir(directory, 0755);/mkdir(directory);/' libxslt/security.c
+
+#! PATCH
+sed -i '/^\tXML_CONFIG=xml2-config$/ s/xml2-config/${XML_CONFIG:-&}/' configure
 
 CFLAGS="-O2" \
 LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
+XML_CONFIG="/${PREFIX}/bin/xml2-config" \
 ./configure \
   --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \

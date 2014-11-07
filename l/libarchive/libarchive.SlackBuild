@@ -66,6 +66,7 @@ STAT_IS_64="-D__MINGW_USE_VC2005_COMPAT"
 CFLAGS="-O2 ${STAT_IS_64}" \
 CXXFLAGS="-O2" \
 LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
+XML2_CONFIG="/${PREFIX}/bin/xml2-config" \
 ./configure \
   --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
