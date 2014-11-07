@@ -42,6 +42,8 @@ PKG=$TMP/package-$PKGNAM
 rm -rf $PKG
 mkdir -p $TMP $PKG
 
+set -e
+
 cd $TMP
 rm -rf $PKGNAM-$VERSION
 tar xvf $CWD/$PKGNAM-$VERSION.tar.?z* || exit 1
@@ -75,9 +77,8 @@ make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG || exit 1
 
 mv $PKG/${PREFIX}/share/doc $PKG/${PREFIX}
-mv $PKG/${PREFIX}/doc/$PKGNAM-python-$VERSION $PKG/${PREFIX}/doc/$PKGNAM-$VERSION
 cp -a \
-  AUTHORS COPYING* Copyright FEATURES INSTALL IPR NEWS README TODO $PKGNAM.spec \
+  AUTHORS COPYING* Copyright FEATURES INSTALL NEWS README TODO $PKGNAM.spec \
   $PKG/${PREFIX}/doc/$PKGNAM-$VERSION
 find $PKG/${PREFIX}/doc/$PKGNAM-$VERSION -type f | xargs chmod 644
 
