@@ -352,16 +352,6 @@ if [ x"$GCC_CORE" != x"yes" ]; then ( cd gcc-$VERSION
 )
 fi
 
-# Mingw requires a kludge known as "winsup". It seems it's only needed when
-# cross-compiling a native compiler that targets i686-*-mingw32 (and runs on
-# that same triplet).
-case "${HOST_TRIPLET},${TARGET_TRIPLET}" in
-  "i686-w64-mingw32","i686-w64-mingw32")
-    mkdir -p winsup/mingw
-    ln -s ${YYPREFIX_CROSS_TOOLCHAIN}/${TARGET_TRIPLET}/include winsup/mingw/include
-    ;;
-esac
-
 #! KLUDGE
 if [ -n "${LIBDIRSUFFIX_TGT}" ]; then
   ln -sf /${PREFIX}/${TARGET_TRIPLET}/lib{,${LIBDIRSUFFIX_TGT}}
