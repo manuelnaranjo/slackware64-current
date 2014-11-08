@@ -352,11 +352,6 @@ if [ x"$GCC_CORE" != x"yes" ]; then ( cd gcc-$VERSION
 )
 fi
 
-#! KLUDGE
-if [ -n "${LIBDIRSUFFIX_TGT}" ]; then
-  ln -sf /${PREFIX}/${TARGET_TRIPLET}/lib{,${LIBDIRSUFFIX_TGT}}
-fi
-
 # build gcc
   mkdir gcc.build.lnx;
   cd gcc.build.lnx;
