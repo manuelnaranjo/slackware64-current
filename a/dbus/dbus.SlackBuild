@@ -95,7 +95,7 @@ if [ -d $PKG/${PREFIX}/man ]; then
 fi
 
 # Install a custom init script for dbus - the included one is not good for us
-rm $PKG/${PREFIX}/etc/rc.d/*
+rm -rf $PKG/${PREFIX}/etc/rc.d
 
 # Add documentation
 mkdir -p $PKG/${PREFIX}/doc/$PKGNAM-$VERSION
