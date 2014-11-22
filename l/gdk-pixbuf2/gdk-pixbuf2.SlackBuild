@@ -58,6 +58,9 @@ find . \
 # and this patch is the workaround.  ;-)
 zcat $CWD/gdk-pixbuf.pnglz.diff.gz | patch -p1 || exit 1
 
+# Upstream patch only available in an unstable version so far.
+patch -p0 --verbose < ${CWD}/lib-Prefer-our-own-loaders-to-the-GDI+-one.patch
+
 #! PATCH
 sed -i \
   '/libdir = g_build_filename (\(_gdk_pixbuf_win32_\)\?get_toplevel (), "lib", NULL);/ s/"lib"/"lib'"${LIBDIRSUFFIX}"'"/' \

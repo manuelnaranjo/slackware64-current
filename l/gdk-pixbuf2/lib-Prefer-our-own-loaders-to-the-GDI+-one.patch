@@ -1,0 +1,56 @@
+From d846e8e5f532ad823b30b2965f0c8558196d4d40 Mon Sep 17 00:00:00 2001
+From: Ignacio Casal Quinteiro <icq@gnome.org>
+Date: Wed, 3 Sep 2014 09:48:50 +0200
+Subject: lib: Prefer our own loaders to the GDI+ one
+
+Give priority to the modules using the open source libraries
+instead of gdip as GDI+ is known to be buggy, and not so well integrated
+into gdk-pixbuf.
+
+https://bugzilla.gnome.org/show_bug.cgi?id=739077
+
+diff --git a/gdk-pixbuf/gdk-pixbuf-io.c b/gdk-pixbuf/gdk-pixbuf-io.c
+index 63a0299..dfc2c29 100644
+--- a/gdk-pixbuf/gdk-pixbuf-io.c
++++ b/gdk-pixbuf/gdk-pixbuf-io.c
+@@ -706,6 +706,18 @@ gdk_pixbuf_load_module_unlocked (GdkPixbufModule *image_module,
+ 
+         try_module (pixdata,pixdata);
+ 
++#ifdef INCLUDE_gdiplus
++        try_module (ico,gdip_ico);
++        try_module (wmf,gdip_wmf);
++        try_module (emf,gdip_emf);
++        try_module (bmp,gdip_bmp);
++        try_module (gif,gdip_gif);
++        try_module (jpeg,gdip_jpeg);
++        try_module (tiff,gdip_tiff);
++#endif
++#ifdef INCLUDE_gdip_png
++        try_module (png,gdip_png);
++#endif
+ #ifdef INCLUDE_png      
+         try_module (png,png);
+ #endif
+@@ -757,18 +769,6 @@ gdk_pixbuf_load_module_unlocked (GdkPixbufModule *image_module,
+ #ifdef INCLUDE_qtif
+         try_module (qtif,qtif);
+ #endif
+-#ifdef INCLUDE_gdiplus
+-        try_module (ico,gdip_ico);
+-        try_module (wmf,gdip_wmf);
+-        try_module (emf,gdip_emf);
+-        try_module (bmp,gdip_bmp);
+-        try_module (gif,gdip_gif);
+-        try_module (jpeg,gdip_jpeg);
+-        try_module (tiff,gdip_tiff);
+-#endif
+-#ifdef INCLUDE_gdip_png
+-        try_module (png,gdip_png);
+-#endif
+ 
+ #undef try_module
+         
+-- 
+cgit v0.10.1
+
