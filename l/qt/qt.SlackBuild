@@ -224,6 +224,18 @@ case "${HOST_TRIPLET}" in
   ;;
 esac
 
+# Qt isn't redeployable by default: it is full of hardcoded paths and values.
+# We need to create a file named "qt.conf" for it not to look into
+# "/opt/windows_??" when running on Windows.
+# Credits to Cristian Adams at
+# http://cristianadam.blogspot.fr/2012/06/portable-qmake.html with the change
+# that qmake will look for "qt.conf" and not "qmake.conf" (probably a
+# difference in Qt5; spotted through ProcessMonitor).
+cat > $PKG/${PREFIX}/bin/qt.conf << EOF
+[Paths]
+  HostPrefix=..
+EOF
+
 # The infamous qt -> qt-${VERSION} link that keeps the full path out of .la files:
 ( cd $PKG/${PREFIX}/lib${LIBDIRSUFFIX} ; ln -sf qt qt-${VERSION} )
 
