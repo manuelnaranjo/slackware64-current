@@ -58,13 +58,6 @@ zcat $CWD/fix_build_issues_on_tutorial_and_faq.diff.gz | patch -p1 --verbose || 
 zcat $CWD/gtk+-2.24.x.icon-compat.diff.gz | patch -p1 --verbose || exit 1
 zcat $CWD/gtk+-2.24.x.icon-compat.am.diff.gz | patch -p1 --verbose || exit 1
 
-sed -i 's/\$(GTK_DEP_LIBS)/$(GMODULE_LIBS) \0/' \
-  modules/engines/ms-windows/Makefile.am \
-  modules/other/gail/Makefile.am
-
-libtoolize --force
-autoreconf -fiv
-
 #! PATCH
 # Thanks fedora:
 #   The pre-generated gtk.def file can't be used for MinGW-W64
