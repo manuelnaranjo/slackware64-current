@@ -50,10 +50,14 @@ cd glib-$VERSION
 chown -R root:root .
 chmod -R u+w,go+r-w,a-s .
 
+sed -i \
+  '/AC_DEFINE(._WIN32_WINNT., .0x0501., .Target the Windows XP API.)/ s/501/600/' \
+  configure.ac
+
 # Silly upstream, using the bleeding edge.  Reconf:
 autoreconf --force --install 
 
-CFLAGS="-O2" \
+CFLAGS="-O2 -DHAVE_IF_NAMETOINDEX=1" \
 LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 ./configure \
   --prefix=/${PREFIX} \
