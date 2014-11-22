@@ -40,6 +40,8 @@ CWD=$(pwd)
 TMP=${TMP:-/tmp}
 PKG=$TMP/package-gtk2
 
+set -e
+
 rm -rf $PKG
 mkdir -p $TMP $PKG/${PREFIX}
 cd $TMP
@@ -51,12 +53,12 @@ chown -R root:root .
 chmod -R u+w,go+r-w,a-s .
 
 # Fix build errors
-zcat $CWD/fix_build_issues_on_tutorial_and_faq.diff.gz | patch -p1 --verbose || exit 1
+zcat $CWD/fix_build_issues_on_tutorial_and_faq.diff.gz | patch -p1 --verbose
 
 # Patch to restore commonly used icon names, otherwise everything breaks.
 # I fail to see the point of this "cleanup"
-zcat $CWD/gtk+-2.24.x.icon-compat.diff.gz | patch -p1 --verbose || exit 1
-zcat $CWD/gtk+-2.24.x.icon-compat.am.diff.gz | patch -p1 --verbose || exit 1
+zcat $CWD/gtk+-2.24.x.icon-compat.diff.gz | patch -p1 --verbose
+zcat $CWD/gtk+-2.24.x.icon-compat.am.diff.gz | patch -p1 --verbose
 
 #! PATCH
 # Thanks fedora:
@@ -126,7 +128,7 @@ fi
 
 mkdir -p $PKG/${PREFIX}/doc/gtk+-$VERSION
 cp -a \
-  AUTHORS COPYING* NEWS README* TODO \
+  AUTHORS COPYING* NEWS README* \
   $PKG/${PREFIX}/doc/gtk+-$VERSION
 ( cd $PKG/${PREFIX}/doc/gtk+-$VERSION
   ln -s ../../share/gtk-doc/html/gail-libgail-util .

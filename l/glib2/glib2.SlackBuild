@@ -40,6 +40,8 @@ CWD=$(pwd)
 TMP=${TMP:-/tmp}
 PKG=$TMP/package-glib2
 
+set -e
+
 rm -rf $PKG
 mkdir -p $TMP $PKG/${PREFIX}
 cd $TMP
