@@ -69,6 +69,17 @@ sed -i \
   '/gtk_libdir = g_build_filename (root, "lib", NULL);/ s/"lib"/"lib'"${LIBDIRSUFFIX}"'"/' \
   gtk/gtkmain.c
 
+#! PATCH
+# Behaviour change in 2.24.24 and cross-compiling >= 2.24.24 requires a host
+# with >= 2.24.24 otherwise the added switch (which is there to continue using
+# the previous behaviour wrt image data in the icon cache) makes
+# gtk-update-icon-cache fail (ir probably handles it as a regular argument and
+# not a switch since it doesn't complain about it being unknown).
+# Remove the switch if the host's gtk-update-icon-cache doesn't know about it.
+if ! gtk-update-icon-cache --help | grep -q -- --include-image-data; then
+  sed -i '/--include-image-data/ d' gtk/Makefile.in
+fi
+
 CFLAGS="-O2" \
 LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 ./configure \
