@@ -102,7 +102,7 @@ make install \
 mv $PKG/${PREFIX}/etc/gtk-2.0/im-multipress.conf $PKG/${PREFIX}/etc/gtk-2.0/im-multipress.conf.new || exit 1
 
 # Install a "starter" gtkrc
-echo 'gtk-theme-name="GTK+"' > $PKG/${PREFIX}/${PREFIX}/etc/gtk-2.0/gtkrc
+echo 'gtk-theme-name="GTK+"' > $PKG/${PREFIX}/etc/gtk-2.0/gtkrc
 
 # Strip binaries:
 ( cd $PKG
