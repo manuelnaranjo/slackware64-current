@@ -58,6 +58,12 @@ find . \
 # and this patch is the workaround.  ;-)
 zcat $CWD/gdk-pixbuf.pnglz.diff.gz | patch -p1 || exit 1
 
+#! PATCH
+sed -i \
+  '/libdir = g_build_filename (\(_gdk_pixbuf_win32_\)\?get_toplevel (), "lib", NULL);/ s/"lib"/"lib'"${LIBDIRSUFFIX}"'"/' \
+  gdk-pixbuf/queryloaders.c \
+  gdk-pixbuf/gdk-pixbuf-io.c
+
 CFLAGS="-O2" \
 CXXFLAGS="-O2" \
 LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
