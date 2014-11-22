@@ -474,14 +474,6 @@ fi
   # Fix stuff up:
   compress_info_files ${PKG_GCC}
   ( cd $PKG_GCC
-    # As per the Linux FHS, symlink cpp to /lib/cpp (not /lib64)
-    # http://refspecs.linuxfoundation.org/FHS_2.3/fhs-2.3.html#REQUIREMENTS5
-    # A symlink in lib64 is possible but not required and probably completely
-    # useless since things looking at /lib/cpp have it completely hardcode;
-    # long live the 90s (or is it the 80s?).
-    mkdir -p ${PREFIX}/lib
-    ln -sf ../bin/cpp${EXE} ${PREFIX}/lib/cpp${EXE}
-
     # GCC puts its files in $(toolexeclibdir) which is $(libdir)/../lib in the
     # case of cross-compilation. There is no way to change it. A particular
     # thought to Cygwin people who said it didn't matter since you're going to
@@ -489,6 +481,17 @@ fi
     # i.e. they ignore this need because you're going to be able to work-around
     # the issue in the installer.
     mv ${PREFIX}/lib/lib*.dll ${PREFIX}/bin/ || true
+    if [ -n "${LIBDIRSUFFIX_TGT}" ]; then
+      mv ${PREFIX}/lib/* ${PREFIX}/lib${LIBDIRSUFFIX_TGT} || true
+    fi
+
+    # As per the Linux FHS, symlink cpp to /lib/cpp (not /lib64)
+    # http://refspecs.linuxfoundation.org/FHS_2.3/fhs-2.3.html#REQUIREMENTS5
+    # A symlink in lib64 is possible but not required and probably completely
+    # useless since things looking at /lib/cpp have it completely hardcode;
+    # long live the 90s (or is it the 80s?).
+    mkdir -p ${PREFIX}/lib
+    ln -sf ../bin/cpp${EXE} ${PREFIX}/lib/cpp${EXE}
   )
 
   ( cd $PKG_GCC/${PREFIX}/bin
@@ -549,7 +552,7 @@ if [ -n "${PKG_GCC_GPP}" ]; then ( cd $PKG_GCC_GPP
     if [ x"${HOST_TRIPLET}" = x"${TARGET_TRIPLET}" ]; then
       move_from_pkg_gcc "${PREFIX}/include/c++"
       # XXX: should be lib${LIBDIRSUFFIX} below but GCC disagrees currently...
-      move_from_pkg_gcc "${PREFIX}/lib/*++*"
+      move_from_pkg_gcc "${PREFIX}/lib${LIBDIRSUFFIX_HST}/*++*"
     else
       move_from_pkg_gcc "${PREFIX}/${TARGET_TRIPLET}/include/c++"
       move_from_pkg_gcc "${PREFIX}/${TARGET_TRIPLET}/lib/*++*"
