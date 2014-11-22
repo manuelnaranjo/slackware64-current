@@ -113,7 +113,6 @@ zcat $CWD/qt.fix.broken.gif.crash.diff.gz | patch -p1 --verbose
 export CFLAGS="-O2"
 export CXXFLAGS="-O2"
 export OPENSOURCE_CXXFLAGS="-O2"
-export LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}"
 
 MAKEFLAGS="${NUMJOBS}" ./configure \
   -confirm-license \
