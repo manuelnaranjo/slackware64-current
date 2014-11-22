@@ -86,7 +86,7 @@ make || exit 1 # This isn't fully compatible with threaded make
 make install DESTDIR=$PKG || exit 1
 
 for i in $PKG/${PREFIX}/bin/*; do
-  if file $i | grep "PE32 executable"; then
+  if file $i | grep -q "PE32+\? executable"; then
     mv $i $i.exe
   fi
 done
