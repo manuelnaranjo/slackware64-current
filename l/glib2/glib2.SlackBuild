@@ -64,6 +64,8 @@ LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
   --sysconfdir=/${PREFIX}/etc \
   --mandir=/${PREFIX}/man \
+  --enable-shared \
+  --disable-static \
   --host=${HOST_TRIPLET} \
   --build=${BUILD_TRIPLET}
 
