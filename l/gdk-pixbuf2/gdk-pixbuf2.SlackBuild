@@ -79,7 +79,7 @@ LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
   --docdir=/${PREFIX}/doc/$PKGNAM-$VERSION \
   --disable-introspection \
   --host=${HOST_TRIPLET} \
-  --build=$ARCH-slackware-linux
+  --build=${BUILD_TRIPLET}
 
 make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG || exit 1
