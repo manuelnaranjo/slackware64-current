@@ -79,16 +79,6 @@ CXXFLAGS="-O2" \
 make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG
 
-# Move the shared library to $PKG/lib${LIBDIRSUFFIX}:
-mkdir -p $PKG/lib${LIBDIRSUFFIX}
-( cd $PKG/${PREFIX}/lib${LIBDIRSUFFIX}
-  for file in lib*.so.??.* ; do
-    mv $file ../../lib${LIBDIRSUFFIX}
-    ln -sf ../../lib${LIBDIRSUFFIX}/$file .
-  done
-  cp -a lib*.so.?? ../../lib${LIBDIRSUFFIX}
-)
-
 find $PKG | xargs file | egrep "executable|shared object" \
   | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : \
   | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
