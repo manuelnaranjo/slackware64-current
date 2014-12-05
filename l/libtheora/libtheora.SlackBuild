@@ -51,7 +51,11 @@ cd ${PKGNAM}-$VERSION
 chown -R root:root .
 chmod -R u+w,go+r-w,a-s .
 
+#! PATCH
 find . -iname '*.def' -exec sed -i 's/\r//' {} +
+
+#! PATCH
+sed -i 's/-version-info/-no-undefined \0/' lib/Makefile.in
 
 # Configure:
 CFLAGS="-O2" \
