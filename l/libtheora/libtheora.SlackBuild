@@ -55,11 +55,10 @@ chmod -R u+w,go+r-w,a-s .
 find . -iname '*.def' -exec sed -i 's/\r//' {} +
 
 #! PATCH
-sed -i 's/-version-info/-no-undefined \0/' lib/Makefile.in
+autoreconf -fiv
 
 # Configure:
 CFLAGS="-O2" \
-LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 ./configure \
   --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
