@@ -49,6 +49,7 @@ LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 ./configure \
   --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
+  --docdir=/${PREFIX}/doc/libogg-${VERSION} \
   --disable-static \
   --host=${HOST_TRIPLET} \
   --build=${BUILD_TRIPLET}
@@ -60,7 +61,6 @@ find $PKG | xargs file | egrep -e "executable|shared object" \
   | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : \
   | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
 
-mv $PKG/${PREFIX}/share/doc $PKG/${PREFIX}
 cp -a AUTHORS CHANGES COPYING README $PKG/${PREFIX}/doc/libogg-$VERSION
 
 cat ${CWD}/libogg.yypkg.script | sed \
