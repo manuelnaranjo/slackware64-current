@@ -75,7 +75,7 @@ LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG || exit 1
 
-mv $PKG/etc/wgetrc $PKG/etc/wgetrc.new
+mv $PKG/${PREFIX}/etc/wgetrc $PKG/${PREFIX}/etc/wgetrc.new
 
 find $PKG | xargs file | egrep -e "executable|shared object" \
   | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : \
