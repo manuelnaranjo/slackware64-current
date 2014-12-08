@@ -21,7 +21,7 @@
 #  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-VERSION=1.4.12
+VERSION=${VERSION:-1.4.14}
 BUILD=${BUILD:-1}
 
 # Automatically determine the architecture we're building on:
@@ -54,6 +54,7 @@ find . \
   -exec chmod 644 {} \;
 
 # Look like using ./configure is the only way that works now...
+HAVE_SOLARIS_LD_TRUE='#' HAVE_SOLARIS_LD_FALSE='' \
 CFLAGS="-O2" \
 LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 ./configure \
