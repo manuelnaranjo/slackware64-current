@@ -26,6 +26,7 @@ BUILD=${BUILD:-1}
 
 NUMJOBS=${NUMJOBS:-" -j7 "}
 
+set -e
 
 CWD=$(pwd)
 TMP=${TMP:-/tmp}
@@ -59,7 +60,7 @@ find $PKG | xargs file | egrep -e "executable|shared object" \
 
 mv $PKG/${PREFIX}/share/doc $PKG/${PREFIX}
 cp -a \
-  AUTHORS COPYING HACKING README \
+  AUTHORS COPYING README \
   $PKG/${PREFIX}/doc/libvorbis-$VERSION
 
 # If there's a ChangeLog, installing at least part of the recent history

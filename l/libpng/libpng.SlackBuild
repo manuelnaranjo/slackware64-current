@@ -34,6 +34,8 @@ if [ -z "$ARCH" ]; then
   esac
 fi
 
+set -e
+
 CWD=$(pwd)
 TMP=${TMP:-/tmp}
 PKG=$TMP/package-libpng

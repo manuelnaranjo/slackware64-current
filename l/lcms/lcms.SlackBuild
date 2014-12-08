@@ -24,6 +24,7 @@
 VERSION=${VERSION:-$(echo lcms-*.tar.?z* | rev | cut -f 3- -d . | cut -f 1 -d - | rev)}
 BUILD=${BUILD:-2}
 
+set -e
 
 NUMJOBS=${NUMJOBS:-" -j7 "}
 

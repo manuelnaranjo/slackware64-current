@@ -26,6 +26,7 @@ BUILD=${BUILD:-1}
 
 NUMJOBS=${NUMJOBS:-" -j7 "}
 
+set -e
 
 CWD=$(pwd)
 TMP=${TMP:-/tmp}
@@ -77,7 +78,7 @@ gzip -9 $PKG/${PREFIX}/info/* $PKG/${PREFIX}/man/man?/*
 
 mkdir -p $PKG/${PREFIX}/doc/wget-$VERSION
 cp -a \
-  AUTHORS COPYING* MAILING-LIST NEWS PATCHES README* TODO \
+  AUTHORS COPYING* MAILING-LIST NEWS README* \
   $PKG/${PREFIX}/doc/wget-$VERSION
 
 # If there's a ChangeLog, installing at least part of the recent history

@@ -33,6 +33,8 @@ PKG=$TMP/package-libxml2
 rm -rf $PKG
 mkdir -p $TMP $PKG
 
+set -e
+
 cd $TMP
 rm -rf libxml2-$VERSION
 tar xvf $CWD/libxml2-$VERSION.tar.?z* || exit 1

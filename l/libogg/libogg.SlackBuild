@@ -27,6 +27,8 @@ BUILD=${BUILD:-1}
 # Automatically determine the architecture we're building on:
 NUMJOBS=${NUMJOBS:-" -j7 "}
 
+set -e
+
 CWD=$(pwd)
 TMP=${TMP:-/tmp}
 PKG=$TMP/package-libogg

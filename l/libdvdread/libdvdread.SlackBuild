@@ -31,6 +31,8 @@ CWD=$(pwd)
 TMP=${TMP:-/tmp}
 PKG=$TMP/package-$PKGNAM
 
+set -e
+
 rm -rf $PKG
 mkdir -p $TMP $PKG
 cd $TMP
@@ -61,7 +63,7 @@ make install DESTDIR=$PKG || exit 1
 
 mkdir -p $PKG/${PREFIX}/doc/$PKGNAM-$VERSION
 cp -a \
-  AUTHORS COPYING* DEVELOPMENT-POLICY.txt INSTALL NEWS README* TODO \
+  AUTHORS COPYING* NEWS README* TODO \
   $PKG/${PREFIX}/doc/$PKGNAM-$VERSION
 
 # If there's a ChangeLog, installing at least part of the recent history

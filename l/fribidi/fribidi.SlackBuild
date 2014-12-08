@@ -27,6 +27,8 @@ BUILD=${BUILD:-3}
 
 NUMJOBS=${NUMJOBS:-" -j7 "}
 
+set -e
+
 CWD=$(pwd)
 TMP=${TMP:-/tmp}
 PKG=${TMP}/package-fribidi
