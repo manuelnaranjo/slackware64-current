@@ -49,7 +49,14 @@ cd $PKGNAM-$VERSION || exit 1
 chown -R root:root .
 chmod -R u+w,go+r-w,a-s .
 
+#! PATCH
 sed -i 's/#include "soup-requester.h"/\0\n#include <string.h>/' libsoup/soup-request-file.c
+
+#! PATCH
+# Apply upstream patch to fix build without NTML. It's the only change from
+# 2.42.3 to 2.42.3.1 but there are no released tarballs for 2.42.3.1 (only git
+# archives without configure) so simply apply it by hand.
+patch -p1 --verbose < "${CWD}/libsoup-2.42.3.1-fix-build-without-ntml.patch"
 
 CFLAGS="-O2" \
 LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \

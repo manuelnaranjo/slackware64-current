@@ -1,0 +1,32 @@
+From f4bb23f1672f3274657912778eee93d70b3152c9 Mon Sep 17 00:00:00 2001
+From: Dan Winship <danw@gnome.org>
+Date: Thu, 17 Oct 2013 18:03:05 -0400
+Subject: soup-auth-ntlm: fix build with --without-ntlm-auth
+
+https://bugzilla.gnome.org/show_bug.cgi?id=710267
+
+diff --git a/libsoup/soup-auth-ntlm.c b/libsoup/soup-auth-ntlm.c
+index f76285e..2bebf42 100644
+--- a/libsoup/soup-auth-ntlm.c
++++ b/libsoup/soup-auth-ntlm.c
+@@ -309,13 +309,17 @@ soup_auth_ntlm_update_connection (SoupConnectionAuth *auth, SoupMessage *msg,
+ 			return TRUE;
+ 		}
+ 
++#ifdef USE_NTLM_AUTH
+ 		if (priv->sso_available) {
+ 			conn->state = SOUP_NTLM_SSO_FAILED;
+ 			priv->password_state = SOUP_NTLM_PASSWORD_NONE;
+ 		} else {
++#endif
+ 			conn->state = SOUP_NTLM_FAILED;
+ 			priv->password_state = SOUP_NTLM_PASSWORD_REJECTED;
++#ifdef USE_NTLM_AUTH
+ 		}
++#endif
+ 		return TRUE;
+ 	}
+ 
+-- 
+cgit v0.10.1
+
