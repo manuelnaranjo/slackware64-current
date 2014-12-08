@@ -22,7 +22,7 @@
 
 
 PKGNAM=curl
-VERSION=${VERSION:-$(echo curl-*.tar.bz2 | rev | cut -f 3- -d . | cut -f 1 -d - | rev)}
+VERSION=${VERSION:-$(echo curl-*.tar.lzma | rev | cut -f 3- -d . | cut -f 1 -d - | rev)}
 BUILD=${BUILD:-1}
 
 # Automatically determine the architecture we're building on:
@@ -50,7 +50,7 @@ rm -rf $PKG
 mkdir -p $PKG
 cd $TMP
 rm -rf curl-$VERSION
-tar xvf $CWD/curl-$VERSION.tar.bz2 || exit 1
+tar xvf $CWD/curl-$VERSION.tar.lzma || exit 1
 cd curl-$VERSION
 
 chown -R root:root .
