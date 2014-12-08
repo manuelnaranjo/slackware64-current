@@ -45,7 +45,11 @@ find . \
  \( -perm 666 -o -perm 664 -o -perm 600 -o -perm 444 -o -perm 440 -o -perm 400 \) \
  -exec chmod 644 {} \;
 
-sed -i 's/IN6_ARE_ADDR_EQUAL (\(&cur->data.d6\), \(&ip->data.d6\))/(memcmp(\1, \2, sizeof (struct in6_addr)) == 0)/' src/host.c
+#! PATCH
+# IN6_ARE_ADDR_EQUAL is #define'd as a macro equal to IN6_ADDR_EQUAL in
+# ws2ipdef.h but this file is seemingly not #include'd by wget (or rather its
+# include chain) and linking fails with an unresolved reference.
+sed -i 's/IN6_ARE_ADDR_EQUAL/IN6_ADDR_EQUAL/' src/host.c
 
 #! PATCH
 # Fix an issue in gnulib; upstream patch at
