@@ -25,15 +25,6 @@ VERSION=${VERSION:-$(echo libogg-*.tar.?z* | rev | cut -f 3- -d . | cut -f 1 -d 
 BUILD=${BUILD:-1}
 
 # Automatically determine the architecture we're building on:
-if [ -z "$ARCH" ]; then
-  case "$( uname -m )" in
-    i?86) export ARCH=i486 ;;
-    arm*) export ARCH=arm ;;
-    # Unless $ARCH is already set, use uname -m for all other archs:
-       *) export ARCH=$( uname -m ) ;;
-  esac
-fi
-
 NUMJOBS=${NUMJOBS:-" -j7 "}
 
 CWD=$(pwd)
@@ -58,7 +49,7 @@ LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
   --disable-static \
   --host=${HOST_TRIPLET} \
-  --build=$ARCH-slackware-linux
+  --build=${BUILD_TRIPLET}
 
 make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG
