@@ -89,6 +89,10 @@ zcat $CWD/binutils.export.demangle.h.diff.gz | patch -p1 --verbose || exit 1
 # Don't check to see if "config.h" was included in the installed headers:
 zcat $CWD/binutils.no-config-h-check.diff.gz | patch -p1 --verbose || exit 1
 
+#! PATCH
+# CVE-2014-8501
+patch -p1 --verbose < ${CWD}/binutils-fix-seg-fault-in-strings-on-corrupt-pe.patch
+
 chown -R root:root .
 chmod -R u+w,go+r-w,a-s .
 
