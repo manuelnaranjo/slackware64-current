@@ -46,7 +46,20 @@ find . \
   \( -perm 666 -o -perm 664 -o -perm 600 -o -perm 444 -o -perm 440 -o -perm 400 \) \
   -exec chmod 644 {} \;
 
-[ ! -x configure ] && autoreconf -fiv
+#! PATCH
+# The 5.0.0 tarball is weird: it has an 'msvc' directory inside an otherwise
+# empty 'msvc' directory. This doesn't match the git repository and makes the
+# build fail.
+mv msvc/msvc msvc.new
+rm -r msvc
+mv msvc.new msvc
+
+#! PATCH
+# Add missing -no-undefined when making shared library.
+sed -i '/libdvdread_la_LDFLAGS = -version-info $(DVDREAD_LTVERSION) \\$/ a -no-undefined \\' Makefile.in
+
+# --enable-dlfcn is needed for configure to not discover anything that matches
+# -ldl on the system (i.e. evil or dlfcn-win32).
 CFLAGS="-O2" \
 CXXFLAGS="-O2" \
 ./configure \
@@ -55,6 +68,7 @@ CXXFLAGS="-O2" \
   --sysconfdir=/${PREFIX}/etc \
   --localstatedir=/${PREFIX}/var \
   --disable-static \
+  --enable-dlfcn \
   --build=${BUILD_TRIPLET} \
   --host=${HOST_TRIPLET}
 
