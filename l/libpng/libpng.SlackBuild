@@ -75,10 +75,6 @@ rm -f $PKG/$PREFIX/lib${LIBDIRSUFFIX}/libpng{14,}.a
 ln -s libpng14.dll.a $PKG/$PREFIX/lib${LIBDIRSUFFIX}/libpng.dll.a
 ln -s libpng14-14.dll $PKG/$PREFIX/bin/libpng.dll
 
-# I hate these crappy NIH syndrome *-config binaries
-rm -f $PKG/$PREFIX/bin/libpng-config
-rm -f $PKG/$PREFIX/bin/libpng14-config
-
 ln -s libpng14.pc $PKG/$PREFIX/lib${LIBDIRSUFFIX}/pkgconfig/libpng.pc
 
 find $PKG | xargs file | egrep "executable|shared object" \
