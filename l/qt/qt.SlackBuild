@@ -232,7 +232,7 @@ esac
 # difference in Qt5; spotted through ProcessMonitor).
 cat > $PKG/${PREFIX}/bin/qt.conf << EOF
 [Paths]
-  HostPrefix=..
+  Prefix=..
 EOF
 
 # qmake is a pile of assumptions written in stone during its compilation.  For
