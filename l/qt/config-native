@@ -48,4 +48,6 @@ export CONFIGURE_OPTIONS=" \
   -skip qtxmlpatterns \
 "
 
+export YYLOWCOMPRESS="1"
+
 export HACKY_DISABLES="widgets gui printsupport platformsupport plugins network testlib sql concurrent"
