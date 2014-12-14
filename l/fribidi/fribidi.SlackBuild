@@ -52,6 +52,7 @@ LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
   --mandir=/${PREFIX}/man \
   --disable-static \
   --enable-malloc \
+  --without-glib \
   --host=${HOST_TRIPLET} \
   --with-pic
 make $NUMJOBS || exit 1
