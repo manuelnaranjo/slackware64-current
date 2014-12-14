@@ -235,6 +235,23 @@ cat > $PKG/${PREFIX}/bin/qt.conf << EOF
   HostPrefix=..
 EOF
 
+# qmake is a pile of assumptions written in stone during its compilation.  For
+# cross-compile, we will have to put a "qt.conf" file next to it, telling it
+# not to look in the current installation prefix (and provide env vars for the
+# specs file lookup but that doesn't matter here).
+# Since the configuration we want is for cross-toolchain, we can only add it
+# during the cross_toolchain series. The issue is that qt.conf is searched for
+# at basically "$(dirname argv[1])/qt.conf", i.e. it will be
+# ${YYPREFIX_NATIVE}/bin/qt.conf. Fortunately for us it doesn't do anything
+# about symlink so we add a symlink from ${YYPREFIX_CROSS}/bin/qmake to the
+# binary in the native prefix. This however requires the cross prefix to always
+# be before the native one in ${PATH} and this is simply too risky so in
+# addition to that, we rename the qmake binary in order to "poison" it. This is
+# fine since it is only to be used for win-builds.
+if [ x"${TARGET_TRIPLET}" != x"${HOST_TRIPLET}" ]; then
+  mv ${PKG}/${PREFIX}/bin/qmake ${PKG}/${PREFIX}/bin/qmake-poisoned
+fi
+
 # The infamous qt -> qt-${VERSION} link that keeps the full path out of .la files:
 ( cd $PKG/${PREFIX}/lib${LIBDIRSUFFIX} ; ln -sf qt qt-${VERSION} )
 
