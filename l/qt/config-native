@@ -12,10 +12,40 @@ export CONFIGURE_OPTIONS=" \
   -no-openssl \
   -no-xinput2 \
   -no-xcb-xlib \
-  -no-widgets \
   -no-iconv \
   -no-evdev \
   -no-icu \
   -no-xcb \
   -no-opengl \
+  -no-accessibility \
+  -no-pulseaudio \
+  -no-alsa \
+  -no-dbus \
+  -no-egl \
+  -no-linuxfb \
+  -no-qpa-platform-guard \
+  -no-sm \
+  -no-libudev \
+  -skip qtactiveqt \
+  -skip qtconnectivity \
+  -skip qtdeclarative \
+  -skip qtdoc \
+  -skip qtenginio \
+  -skip qtgraphicaleffects \
+  -skip qtimageformats \
+  -skip qtlocation \
+  -skip qtmultimedia \
+  -skip qtquick1 \
+  -skip qtquickcontrols \
+  -skip qtscript \
+  -skip qtsensors \
+  -skip qtserialport \
+  -skip qtsvg \
+  -skip qttranslations \
+  -skip qtwebkit \
+  -skip qtwebkit-examples \
+  -skip qtwebsockets \
+  -skip qtxmlpatterns \
 "
+
+export HACKY_DISABLES="widgets gui printsupport platformsupport plugins network testlib sql concurrent"
