@@ -124,6 +124,16 @@ MAKEFLAGS="${NUMJOBS}" ./configure \
   -no-pch
   # No-precompiled-headers is ccache-friendly.
 
+# Kill building of some sub-modules that cannot be disabled through configure.
+# In particular this makes it possible to not build GUI and widgets code while
+# still having 'uic' built.
+# 70% reduction in build time for tools-only builds in addition to the gains
+# through the various -skip configure parameters (which cut the build times in
+# half).
+for p in ${HACKY_DISABLES}; do
+  printf 'all:\n\ttrue\n\ninstall:\n\ttrue\n' > "qtbase/src/${p}/Makefile"
+done
+
 # Sometimes a failure happens when parallelizing make.  Try again if make fails,
 # but make a failure the second time around (single threaded) a fatal error:
 make $NUMJOBS || make
