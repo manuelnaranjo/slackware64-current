@@ -46,6 +46,12 @@ find . \
   \( -perm 666 -o -perm 664 -o -perm 600 -o -perm 444 -o -perm 440 -o -perm 400 \) \
   -exec chmod 644 {} +
 
+# If --with-zlib isn't provided, ${Z_DIR} is empty and the following line
+# introduces an -L/lib during the build. On some recent systems which have
+# merged /usr and /, this will find libraries and will make the build fail.
+sed -i '/LDFLAGS="-L\${Z_DIR}\/lib"/ d' configure.ac
+autoreconf -fiv
+
 CFLAGS="-O2" \
 LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 ./configure \
