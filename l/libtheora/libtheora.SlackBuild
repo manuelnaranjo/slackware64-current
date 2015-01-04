@@ -25,17 +25,9 @@ PKGNAM=libtheora
 VERSION=${VERSION:-$(echo $PKGNAM-*.tar.?z* | rev | cut -f 3- -d . | cut -f 1 -d - | rev)}
 BUILD=${BUILD:-1}
 
-# Automatically determine the architecture we're building on:
-if [ -z "$ARCH" ]; then
-  case "$( uname -m )" in
-    i?86) export ARCH=i486 ;;
-    arm*) export ARCH=arm ;;
-    # Unless $ARCH is already set, use uname -m for all other archs:
-       *) export ARCH=$( uname -m ) ;;
-  esac
-fi
-
 NUMJOBS=${NUMJOBS:-" -j7 "}
+
+set -e
 
 CWD=$(pwd)
 TMP=${TMP:-/tmp}
@@ -55,7 +47,20 @@ chmod -R u+w,go+r-w,a-s .
 find . -iname '*.def' -exec sed -i 's/\r//' {} +
 
 #! PATCH
-autoreconf -fiv
+cp ${CWD}/ax_prog_cc_for_build.m4 m4
+sed -i '/^AC_PROG_CC$/ a AC_PROG_CC_FOR_BUILD' configure.ac
+sed -i \
+  -e '/^noinst_PROGRAMS = vp3huff$/ d' \
+  -e '/^vp3huff_SOURCES = vp3huff.c$/ d' \
+  -e '/^\t.\/vp3huff > $@$/ a vp3huff$(EXEEXT_FOR_BUILD):\n\t$(CC_FOR_BUILD) -o vp3huff$(EXEEXT_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) vp3huff.c' \
+  doc/spec/Makefile.am
+# Also need to add EXEEXT_FOR_BUILD in './vp3huff > $@' but no use for now and
+# we have no need for it, better make a patch to upstream
+
+#! PATCH
+# The configure file has syntax errors which disappear after re-generation.
+# Moreover it's needed for the patch above.
+autoreconf -fiv -I m4
 
 # Configure:
 CFLAGS="-O2" \
@@ -65,7 +70,7 @@ CFLAGS="-O2" \
   --disable-static \
   --disable-examples \
   --host=${HOST_TRIPLET} \
-  --build=$ARCH-slackware-linux
+  --build=${BUILD_TRIPLET}
 
 # Build and install:
 make $NUMJOBS || make || exit 1
