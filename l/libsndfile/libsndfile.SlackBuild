@@ -50,6 +50,13 @@ cd $PKGNAM-$VERSION || exit 1
 chown -R root:root .
 chmod -R a-s,u+w,go+r-w .
 
+#! PATCH
+#! libsndfile isn't using '-lvorbis -logg' but merely '-lvorbisenc'
+sed -i \
+  '/EXTERNAL_LIBS="\$FLAC_LIBS \$VORBISENC_LIBS \$SPEEX_LIBS"/ s/\$VORBISENC_LIBS/& $VORBIS_LIBS $OGG_LIBS/' \
+  configure
+# autoreconf -fiv
+
 CFLAGS="-O2" \
 CXXFLAGS="-O2" \
 LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
