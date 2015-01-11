@@ -233,6 +233,7 @@ esac
 cat > $PKG/${PREFIX}/bin/qt.conf << EOF
 [Paths]
   Prefix=..
+  Headers=include/qt5
 EOF
 
 # qmake is a pile of assumptions written in stone during its compilation.  For
