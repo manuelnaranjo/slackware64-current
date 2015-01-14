@@ -75,6 +75,7 @@ find . \
 #! PATCH
 sed -i 's/Shlwapi.h/shlwapi.h/' qttools/src/windeployqt/utils.cpp
 
+#! PATCH
 case "${HOST_TRIPLET}" in
   *-*-mingw*)
     cat $CWD/0001-configure-use-pkg-config-for-libpng.patch \
@@ -88,6 +89,9 @@ case "${HOST_TRIPLET}" in
       | ( cd qtbase && patch -p1 --verbose )
 
     sed -i '/option.host_build./ d' qtactiveqt/src/tools/idc/idc.pro
+
+    cat $CWD/0001-QCoreApplication-ibraryPaths-discovers-plugpath-rela.patch \
+      | patch -p1 --verbose
 
     EXEEXT=".exe"
     ;;

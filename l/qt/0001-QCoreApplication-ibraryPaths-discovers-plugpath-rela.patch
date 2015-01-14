@@ -1,0 +1,38 @@
+From 62403408303a6055a9563b34c973d4fd20994d37 Mon Sep 17 00:00:00 2001
+From: Adrien Nader <adrien@notk.org>
+Date: Wed, 14 Jan 2015 23:16:55 +0100
+Subject: [PATCH] QCoreApplication: ibraryPaths() discovers plugpath relative
+ to Qt5Core.dll.
+
+---
+ qtbase/src/corelib/kernel/qcoreapplication.cpp | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/qtbase/src/corelib/kernel/qcoreapplication.cpp b/qtbase/src/corelib/kernel/qcoreapplication.cpp
+index 6868eb6..952c6ab 100644
+--- a/qtbase/src/corelib/kernel/qcoreapplication.cpp
++++ b/qtbase/src/corelib/kernel/qcoreapplication.cpp
+@@ -2408,6 +2408,20 @@ QStringList QCoreApplication::libraryPaths()
+             if (!app_libpaths->contains(installPathPlugins))
+                 app_libpaths->append(installPathPlugins);
+         }
++#ifdef _WIN32
++        HMODULE phModule;
++        QString installPathQtCoreDll;
++        if (GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, (LPCTSTR) QCoreApplication::libraryPaths, &phModule)) {
++            char qt_core_path[512];
++            DWORD ret = GetModuleFileNameA(phModule, qt_core_path, sizeof(qt_core_path));
++            if (ret > 0 && ret < sizeof(qt_core_path)) {
++                QString p = QString(qt_core_path);
++                QString pp = QFileInfo(p).dir().filePath(QString("../plugins"));
++                QString ppp = QDir(pp).canonicalPath();
++                app_libpaths->append(ppp);
++            }
++        }
++#endif
+ 
+         // If QCoreApplication is not yet instantiated,
+         // make sure we add the application path when we construct the QCoreApplication
+-- 
+1.8.4
+
