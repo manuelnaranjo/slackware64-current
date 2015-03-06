@@ -47,7 +47,7 @@
 PKGNAM="gcc"
 VERSION=${VERSION:-$(echo $PKGNAM-*.tar.xz | rev | cut -f 3- -d . | cut -f 1 -d - | rev)}
 PREFIX=${PREFIX:-usr}
-BUILD=${BUILD:-2}
+BUILD=${BUILD:-1}
 
 # How many jobs to run in parallel:
 NUMJOBS=" -j 7 "
@@ -298,10 +298,9 @@ tar xvf $CWD/gcc-$VERSION.tar.?z*
 # cp boehm-gc.orig/gc_ext_config.h.in gc-7.2
 # mv gc-7.2 boehm-gc)
 
-# Apply patches:
-( cd gcc-$VERSION
-   zcat $CWD/gcc.pr61801.diff.gz | patch -p1 --verbose || exit 1
-) || exit 1
+#( cd gcc-$VERSION
+#  If we had any patches, we would apply them here, but we're .diff free now.
+#) || exit 1
 
 # Copy ecj.jar into the TLD of the source. Needed for java compiler.
 # This can be retrieved from ftp://sourceware.org/pub/java
