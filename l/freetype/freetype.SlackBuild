@@ -22,7 +22,7 @@
 
 
 PKGNAM=freetype
-VERSION=${VERSION:-$(echo $PKGNAM-*.tar.xz | cut -d - -f 2 | rev | cut -f 3- -d . | rev)}
+VERSION=${VERSION:-$(echo $PKGNAM-*.tar.bz2 | cut -d - -f 2 | rev | cut -f 3- -d . | rev)}
 BUILD=${BUILD:-1}
 
 NUMJOBS=${NUMJOBS:-" -j7 "}
@@ -45,7 +45,7 @@ rm -rf $PKG
 mkdir -p $TMP $PKG
 cd $TMP
 rm -rf freetype-$VERSION
-tar xvf $CWD/freetype-$VERSION.tar.xz || exit 1
+tar xvf $CWD/freetype-$VERSION.tar.bz2 || exit 1
 cd freetype-$VERSION
 
 chown -R root:root .
