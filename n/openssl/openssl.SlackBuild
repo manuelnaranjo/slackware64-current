@@ -61,12 +61,6 @@ find . -name "*.pod" -exec sed -i "s/^\=item \([0-9]\)\(\ \|$\)/\=item C<\1>/g" 
 # Use .so.1, not .so.1.0.0:
 zcat $CWD/openssl.soname.diff.gz | patch -p1 --backup --verbose --suffix=.orig || exit 1
 
-case "${HOST_TRIPLET}" in
-  i686-w64-mingw32)
-    zcat $CWD/openssl.optsx86.diff.gz | patch -p1 --backup --verbose --suffix=.orig || exit 1
-    ;;
-esac
-
 # !PATCH
 # This should prevent building the "heartbeat" test. Before 1.0.1i no test was
 # built; starting with it, the "heartbeat" test gets built and... fails
