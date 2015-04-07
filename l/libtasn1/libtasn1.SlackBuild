@@ -43,7 +43,7 @@ rm -rf $PKG
 mkdir -p $TMP $PKG
 cd $TMP
 rm -rf $PKGNAM-$VERSION
-tar xvf $CWD/$PKGNAM-$VERSION.tar.xz || exit 1
+tar xvf $CWD/$PKGNAM-$VERSION.tar.gz || exit 1
 cd $PKGNAM-$VERSION || exit 1
 chown -R root:root .
 find . \
@@ -51,11 +51,6 @@ find . \
  -exec chmod 755 {} \; -o \
  \( -perm 666 -o -perm 664 -o -perm 600 -o -perm 444 -o -perm 440 -o -perm 400 \) \
  -exec chmod 644 {} \;
-
-# Fix an issue in gnulib; upstream patch at
-# http://git.savannah.gnu.org/gitweb/?p=gnulib.git;a=commit;h=86725346a1b116f3c2da26c124288f5f4495bf69
-# but libtasn1 (like wget) is still using an old copy of gnulib.
-find . -name 'msvc-inval.c' -exec sed -i 's/\<cdecl\>/__cdecl/' {} +
 
 CFLAGS="-O2" \
 CXXFLAGS="-O2" \
