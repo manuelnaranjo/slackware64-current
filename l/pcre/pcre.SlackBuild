@@ -41,6 +41,8 @@ CWD=$(pwd)
 TMP=${TMP:-/tmp}
 PKG=$TMP/package-pcre
 
+set -e
+
 rm -rf $PKG
 mkdir -p $TMP $PKG
 
@@ -56,6 +58,8 @@ find . \
   -exec chmod 755 {} \; -o \
   \( -perm 666 -o -perm 664 -o -perm 600 -o -perm 444 -o -perm 440 -o -perm 400 \) \
   -exec chmod 644 {} \;
+
+patch -p0 --verbose < $CWD/CVE-2014-8964-fix-zero-repeated-assertion-as-condition-bug.patch
 
 CFLAGS="-O2" \
 LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
