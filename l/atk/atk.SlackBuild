@@ -27,19 +27,11 @@ BUILD=${BUILD:-1}
 
 NUMJOBS=${NUMJOBS:-" -j7 "}
 
-# Automatically determine the architecture we're building on:
-if [ -z "$ARCH" ]; then
-  case "$( uname -m )" in
-    i?86) export ARCH=i486 ;;
-    arm*) export ARCH=arm ;;
-    # Unless $ARCH is already set, use uname -m for all other archs:
-       *) export ARCH=$( uname -m ) ;;
-  esac
-fi
-
 CWD=$(pwd)
 TMP=${TMP:-/tmp}
 PKG=$TMP/package-atk
+
+set -e
 
 rm -rf $PKG
 mkdir -p $TMP $PKG/${PREFIX}
@@ -55,14 +47,13 @@ find . \
   -exec chmod 644 {} \;
 
 CFLAGS="-O2" \
-LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 ./configure \
   --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
   --sysconfdir=/${PREFIX}/etc \
   --mandir=/${PREFIX}/man \
   --host=${HOST_TRIPLET} \
-  --build=$ARCH-slackware-linux
+  --build=${BUILD_TRIPLET}
 
 make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG
