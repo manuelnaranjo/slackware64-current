@@ -70,7 +70,7 @@ LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
   --disable-static \
   ${WITH_DBUS_SESSION_BUS_DEFAULT_ADDRESS} \
   --host=${HOST_TRIPLET} \
-  --build=$ARCH-slackware-linux
+  --build=${BUILD_TRIPLET}
 
 make $NUMJOBS || make || exit 1
 make install DESTDIR=$PKG
