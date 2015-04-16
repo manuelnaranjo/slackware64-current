@@ -68,6 +68,7 @@ LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
   --mandir=/${PREFIX}/man \
   --enable-shared \
   --disable-static \
+  --with-pcre=system \
   --host=${HOST_TRIPLET} \
   --build=${BUILD_TRIPLET}
 
