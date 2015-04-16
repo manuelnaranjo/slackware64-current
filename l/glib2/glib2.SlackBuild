@@ -55,14 +55,8 @@ chmod -R u+w,go+r-w,a-s .
 sed -i \
   's/if \(defined(_MSC_VER) && _MSC_VER >= 1400\)/if (\1) || defined(MINGW_HAS_SECURE_API)/' \
   glib/grand.c
-  '/AC_DEFINE(._WIN32_WINNT., .0x0501., .Target the Windows XP API.)/ s/501/600/' \
-  configure.ac
-
-# Silly upstream, using the bleeding edge.  Reconf:
-autoreconf --force --install 
 
 CFLAGS="-O2 -DHAVE_IF_NAMETOINDEX=1" \
-LDFLAGS="-L/${PREFIX}/lib${LIBDIRSUFFIX}" \
 ./configure \
   --prefix=/${PREFIX} \
   --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
