@@ -21,7 +21,7 @@
 #  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-VERSION=5.2
+VERSION=${VERSION:-5.2}
 BUILD=${BUILD:-4}
 
 # Automatically determine the architecture we're building on:
@@ -38,19 +38,7 @@ CWD=$(pwd)
 TMP=${TMP:-/tmp}
 PKG=$TMP/package-readline
 
-if [ "$ARCH" = "i486" ]; then
-  SLKCFLAGS="-O2 -march=i486 -mtune=i686"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "s390" ]; then
-  SLKCFLAGS="-O2"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "x86_64" ]; then
-  SLKCFLAGS="-O2 -fPIC"
-  LIBDIRSUFFIX="64"
-else
-  SLKCFLAGS="-O2"
-  LIBDIRSUFFIX=""
-fi
+set -e
 
 rm -rf $PKG
 mkdir -p $TMP $PKG
@@ -65,40 +53,53 @@ find . \
   -exec chmod 755 {} \; -o \
   \( -perm 666 -o -perm 664 -o -perm 600 -o -perm 444 -o -perm 440 -o -perm 400 \) \
   -exec chmod 644 {} \;
-for file in $CWD/readline-*-patches/readline*-??? ; do
+for file in $CWD/readline-${VERSION}-patches/readline*-??? ; do
   cat $file | patch -p0 --verbose || exit 1
 done
 
-CFLAGS="$SLKCFLAGS" \
+CFLAGS="-O2" \
+LDFLAGS="-lncurses" \
+bash_cv_wcwidth_broken="yes" \
 ./configure \
-  --prefix=/usr \
-  --libdir=/usr/lib${LIBDIRSUFFIX} \
-  --infodir=/usr/info \
-  --with-curses \
+  --prefix=/${PREFIX} \
+  --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
+  --infodir=/${PREFIX}/info \
   --enable-multibyte \
-  --build=$ARCH-slackware-linux-gnu
+  --enable-shared \
+  --disable-static \
+  --build=${BUILD_TRIPLET} \
+  --host=${HOST_TRIPLET} \
 
-make -j4 static shared || exit 1
+make -j4 || make
 make install DESTDIR=$PKG
 
-find $PKG | xargs file | grep -e "executable" -e "shared object" \
-  | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
+(cd $PKG/${PREFIX}
+  mkdir -p bin
+  for l in "readline" "history"; do
+    mv lib${LIBDIRSUFFIX}/lib${l}.so.5 bin/lib${l}.dll
+    ln -s ../bin/lib${l}.dll lib${LIBDIRSUFFIX}/lib${l}.dll
+  done
+)
 
-rm $PKG/usr/info/dir
-gzip -9 $PKG/usr/man/man3/*
-gzip -9 $PKG/usr/info/*
+( cd $PKG
+  find . | xargs file | egrep "executable|shared object" | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
+)
 
-chmod 755 $PKG/usr/lib${LIBDIRSUFFIX}/lib*.so.*
+rm $PKG/${PREFIX}/info/dir
+gzip -9 $PKG/${PREFIX}/man/man3/*
+gzip -9 $PKG/${PREFIX}/info/*
 
-mkdir -p $PKG/usr/doc/readline-$VERSION
+mkdir -p $PKG/${PREFIX}/doc/readline-$VERSION
 cp -a \
   CHANGELOG CHANGES COPYING* INSTALL MANIFEST README* USAGE \
-  $PKG/usr/doc/readline-$VERSION
+  $PKG/${PREFIX}/doc/readline-$VERSION
 
-mkdir -p $PKG/install
-cat $CWD/slack-desc > $PKG/install/slack-desc
-
-# Build the package:
-cd $PKG
-/sbin/makepkg -l y -c n $TMP/readline-$VERSION-$ARCH-$BUILD.txz
+cat ${CWD}/readline.yypkg.script | sed \
+  -e "s/%{PKG}/readline/" \
+  -e "s/%{HST}/${HOST_TRIPLET}/" \
+  -e "s/%{TGT}//" \
+  -e "s/%{VER}/${VERSION}/" \
+  -e "s/%{BUILD}/${BUILD}/" \
+  -e "s/%{DESCR}/${DESCR:-"No description"}/" \
+  | yypkg --makepkg --output ${YYOUTPUT} --script - --directory "${PKG}/${PREFIX}"
 
