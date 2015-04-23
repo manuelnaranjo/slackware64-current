@@ -1,0 +1,14 @@
+using gcc : :
+      ${HOST_TRIPLET}-g++ :
+      ${OTAG}rc${CTAG}${HOST_TRIPLET}-windres
+      ${OTAG}archiver${CTAG}${HOST_TRIPLET}-ar
+      ${OTAG}linkflags${CTAG}-L${YYPREFIX}/bin
+${COMMA_TAG}
+
+using python
+     : ${PYTHON_VERSION}              # version
+     : ${YYPREFIX}/bin/python.exe     # cmd-or-prefix
+     : ${YYPREFIX}/include/python${PYTHON_VERSION}  # include
+     : -lpython${PYTHON_VERSION}                  # libraries
+     : ${OTAG}target-os${CTAG}windows             # condition
+${COMMA_TAG}

@@ -1,0 +1,11 @@
+--- boost_1_55_0/tools/build/v2/tools/python.jam	2013-05-21 01:14:18.000000000 -0300
++++ boost_1_55_0.mine/python.jam	2015-04-23 11:52:46.480887012 -0300
+@@ -661,7 +661,7 @@
+     if <target-os>windows in $(requirements)
+     {
+         local major-minor = [ split-version $(version) ] ;
+-        lib-version = $(major-minor:J="") ;
++        lib-version = $(major-minor:J=".") ;
+         if <python-debugging>on in $(requirements)
+         {
+             lib-version = $(lib-version)_d ;

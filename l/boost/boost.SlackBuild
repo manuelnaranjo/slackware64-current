@@ -34,45 +34,35 @@ BUILD=${BUILD:-1}
 PKG_VERSION=$(echo $VERSION | tr _ .)	# Leave this alone
 NUMJOBS=${NUMJOBS:-" -j7 "}
 
-# Automatically determine the architecture we're building on:
-MARCH=$( uname -m )
-if [ -z "$ARCH" ]; then
-  case "$MARCH" in
-    i?86)    export ARCH=i486 ;;
-    armv7hl) export ARCH=$MARCH ;;
-    arm*)    export ARCH=arm ;;
-    # Unless $ARCH is already set, use uname -m for all other archs:
-    *)       export ARCH=$MARCH ;;
-  esac
+export LANG="en"
+
+
+
+# detect this based on what target we have
+if [[ "$YYPREFIX" == *32* ]]; then
+    LIBDIRSUFFIX=""
+    ADDRESS_MODEL="32"
+else
+    LIBDIRSUFFIX="64"
+    ADDRESS_MODEL="64"
 fi
 
-if [ "$ARCH" = "i486" ]; then
-  SLKCFLAGS="-O2 -march=i486 -mtune=i686"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "s390" ]; then
-  SLKCFLAGS="-O2"
-  LIBDIRSUFFIX=""
-elif [ "$ARCH" = "x86_64" ]; then
-  SLKCFLAGS="-O2 -fPIC"
-  LIBDIRSUFFIX="64"
-elif [ "$ARCH" = "armv7hl" ]; then
-  SLKCFLAGS="-O2 -march=armv7-a -mfpu=vfpv3-d16"
-  LIBDIRSUFFIX=""
-else
-  SLKCFLAGS="-O2"
-  LIBDIRSUFFIX=""
-fi
+SLKCFLAGS="-O2"
+
+set -eu
 
 CWD=$(pwd)
 TMP=${TMP:-/tmp}
 PKG=$TMP/package-boost
 
+IVERSION=${VERSION//./_}
+
 rm -rf $PKG
 mkdir -p $TMP $PKG
 cd $TMP
-rm -rf boost_$VERSION
-tar xvf $CWD/boost_$VERSION.tar.?z* || exit 1
-cd boost_$VERSION || exit 1
+rm -rf boost_$IVERSION
+tar xvf $CWD/boost_$IVERSION.tar.?z* || exit 1
+cd boost_$IVERSION || exit 1
 
 chown -R root:root .
 find . \
@@ -86,79 +76,131 @@ sed -e '1 i#ifndef Q_MOC_RUN' \
   -e '$ a#endif' \
   -i boost/type_traits/detail/has_binary_operator.hpp
 
+HOST_PYTHON="host-python2"
 # This is the python we build against:
-PYTHON_VERSION=$(python -c 'import sys; print sys.version[:3]')
-PYTHON_FLAGS="-sPYTHON_ROOT=/usr -sPYTHON_VERSION=$PYTHON_VERSION"
+PYTHON_VERSION=$(${HOST_PYTHON} -c 'import sys; print sys.version[:3]')
+PYTHON_FLAGS="-sPYTHON_ROOT=${PREFIX} -sPYTHON_VERSION=$PYTHON_VERSION"
 
-# First build bjam, the boost build system:
-cd tools/build/src/engine
-  CFLAGS="$SLKCFLAGS -fno-strict-aliasing" CC=gcc ./build.sh cc
-cd -
+case "${HOST_TRIPLET}" in
+    *-*-mingw*)
+        for i in $CWD/fedora-patches/*.patch; do
+            patch -p1 -i ${i}
+        done
 
-BJAM=$(find tools/build/src/engine/ -name b2 -a -type f)
+        for i in $CWD/patches/*.patch; do
+            patch -p1 -i ${i}
+        done
 
-# Create build subdirectory
-mkdir obj
+        BJAM="bjam"
+        # build for target
+        cd tools/build/v2/engine
+          CC=${HOST_TRIPLET}-gcc \
+              ${BJAM} -f build.jam \
+              --toolset=cc -d0
 
-# Next, we build boost using bjam
-$BJAM \
-  release \
-  $NUMJOBS \
-  "-sNO_COMPRESSION=0" \
-  "-sZLIB_INCLUDE=/usr/include" \
-  "-sZLIB_LIBPATH=/usr/lib${LIBDIRSUFFIX}" \
-  "-sBZIP2_INCLUDE=/usr/include" \
-  "-sBZIP2_LIBPATH=/usr/lib${LIBDIRSUFFIX}" \
-  "-sEXPAT_INCLUDE=/usr/include" \
-  "-sEXPAT_LIBPATH=/usr/lib${LIBDIRSUFFIX}" \
-  --layout=system \
-  --builddir=obj \
-  --prefix=/usr \
-  --libdir=/usr/lib${LIBDIRSUFFIX} \
-  --build-type=minimal \
-  toolset=gcc \
-  variant=release \
-  link=shared \
-  threading=multi \
-  runtime-link=shared \
-  cflags="$SLKCFLAGS" \
-  cxxflags="$SLKCFLAGS $EXTRA_CXXFLAGS" \
-  $PYTHON_FLAGS \
-  stage
+           mkdir -p ${PKG}/${PREFIX}/bin
+           cp $(find -name b2.exe -a -type f) ${PKG}/${PREFIX}/bin
+           cp $(find -name bjam.exe -a -type f) ${PKG}/${PREFIX}/bin
+        cd -
 
-# And then install boost..
-mkdir -p $PKG/usr/{lib$LIBDIRSUFFIX,include}
+        # Create build subdirectory
+        mkdir obj
 
-$BJAM \
-  release \
-  "-sEXPAT_INCLUDE=/usr/include" \
-  "-sEXPAT_LIBPATH=/usr/lib${LIBDIRSUFFIX}" \
-  --layout=system \
-  --builddir=obj \
-  --prefix=$PKG/usr \
-  --libdir=$PKG/usr/lib${LIBDIRSUFFIX} \
-  --build-type=minimal \
-  toolset=gcc \
-  variant=release \
-  link=shared \
-  threading=multi \
-  runtime-link=shared \
-  cflags="$SLKCFLAGS" \
-  cxxflags="$SLKCFLAGS $EXTRA_CXXFLAGS" \
-  $PYTHON_FLAGS \
-  install
+        export OTAG="<"
+        export CTAG=">"
+        export COMMA_TAG=";"
+
+        while read line; do
+            eval echo "$line";
+        done < "${CWD}/user-config.jam.template" > user-config.jam
+
+        # Next, we build boost using bjam
+        $BJAM \
+            release \
+            $NUMJOBS \
+            "-sNO_COMPRESSION=0" \
+            "-sZLIB_INCLUDE=${YYPREFIX}/include" \
+            "-sZLIB_LIBPATH=${YYPREFIX}/lib${LIBDIRSUFFIX}" \
+            "-sBZIP2_INCLUDE=${YYPREFIX}/include" \
+            "-sBZIP2_LIBPATH=${YYPREFIX}/lib${LIBDIRSUFFIX}" \
+            "-sEXPAT_INCLUDE=${YYPREFIX}/include" \
+            "-sEXPAT_LIBPATH=${YYPREFIX}/lib${LIBDIRSUFFIX}" \
+            --layout=system \
+            --builddir=obj \
+            --prefix=/${PREFIX} \
+            --libdir=/${PREFIX}/lib${LIBDIRSUFFIX} \
+            --build-type=minimal \
+            --ignore-site-config \
+            --user-config=user-config.jam \
+            toolset=gcc \
+            target-os=windows/python=2.7 \
+            variant=release \
+            link=shared \
+            address-model=${ADDRESS_MODEL} \
+            binary-format=pe \
+            threading=multi \
+            threadapi=win32 \
+            runtime-link=shared \
+            cflags="$SLKCFLAGS" \
+            cxxflags="$SLKCFLAGS" \
+            $PYTHON_FLAGS \
+            stage
+
+        # And then install boost..
+        mkdir -p $PKG/usr/{lib$LIBDIRSUFFIX,include}
+
+        $BJAM \
+            release \
+            "-sEXPAT_INCLUDE=/${PREFIX}/include" \
+            "-sEXPAT_LIBPATH=/${PREFIX}/lib${LIBDIRSUFFIX}" \
+            --layout=system \
+            --builddir=obj \
+            --prefix=$PKG/${PREFIX}/ \
+            --libdir=$PKG/${PREFIX}/lib${LIBDIRSUFFIX} \
+            --build-type=minimal \
+            --ignore-site-config \
+            --user-config=user-config.jam \
+            toolset=gcc \
+            target-os=windows \
+            address-model=${ADDRESS_MODEL} \
+            binary-format=pe \
+            variant=release \
+            link=shared \
+            threading=multi \
+            threadapi=win32 \
+            runtime-link=shared \
+            cflags="$SLKCFLAGS" \
+            cxxflags="$SLKCFLAGS" \
+            $PYTHON_FLAGS \
+            install
+
+        mv ${PKG}/${PREFIX}/lib/*.dll ${PKG}/${PREFIX}/bin
+        ;;
+    *)
+
+        # build for host, we need bjam for our host
+        cd tools/build/src/engine
+          CFLAGS="$SLKCFLAGS -fno-strict-aliasing" ./build.sh cc
+          mkdir -p ${PKG}/${PREFIX}/bin
+          cp $(find -name b2 -a -type f) ${PKG}/${PREFIX}/bin
+          cp $(find -name bjam -a -type f) ${PKG}/${PREFIX}/bin
+        cd -
+        ;;
+esac
 
 find $PKG | xargs file | grep -e "executable" -e "shared object" \
-  | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
+  | grep ${HOST_EXE_FORMAT} | cut -f 1 -d : | xargs ${HOST_STRIP} --strip-unneeded 2> /dev/null
 
 mkdir -p $PKG/usr/doc/boost-$PKG_VERSION
 # Do not copy 44MB of developer 'doc/html' into our package...
 cp -a LICENSE* index.html $PKG/usr/doc/boost-$PKG_VERSION
 find $PKG/usr/doc -type f -exec chmod 0644 {} \;
 
-mkdir -p $PKG/install
-cat $CWD/slack-desc > $PKG/install/slack-desc
-
-cd $PKG
-/sbin/makepkg -l y -c n /tmp/boost-$PKG_VERSION-$ARCH-$BUILD.txz
-
+cat ${CWD}/${PKGNAM}.yypkg.script | sed \
+  -e "s/%{PKG}/${PKGNAM}/" \
+  -e "s/%{HST}/${HOST_TRIPLET}/" \
+  -e "s/%{TGT}//" \
+  -e "s/%{VER}/${VERSION}/" \
+  -e "s/%{BUILD}/${BUILD}/" \
+  -e "s/%{DESCR}/${DESCR:-"No description"}/" \
+  | yypkg --makepkg --output ${YYOUTPUT} --script - --directory "${PKG}/${PREFIX}"

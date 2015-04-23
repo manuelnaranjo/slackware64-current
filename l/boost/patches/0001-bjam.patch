@@ -1,0 +1,46 @@
+--- boost_1_55_0/tools/build/v2/engine/build.jam	2013-10-29 13:53:08.000000000 -0300
++++ boost_1_55_0.mine/tools/build/v2/engine/build.jam	2015-04-23 12:07:36.065298223 -0300
+@@ -491,14 +491,14 @@
+     modules.c strings.c filesys.c builtins.c class.c cwd.c native.c md5.c
+     [ .path modules set.c ] [ .path modules path.c ] [ .path modules regex.c ]
+     [ .path modules property-set.c ] [ .path modules sequence.c ] [ .path modules order.c ] ;
+-if $(OS) = NT
++#if $(OS) = NT
+ {
+     jam.source += execnt.c filent.c pathnt.c ;
+ }
+-else
+-{
+-    jam.source += execunix.c fileunix.c pathunix.c ;
+-}
++#else
++#{
++#    jam.source += execunix.c fileunix.c pathunix.c ;
++#}
+ 
+ # Debug assertions, or not.
+ if ! $(debug) || --noassert in $(ARGV)
+@@ -535,10 +535,10 @@
+     --defs += OPT_DUMA ;
+ }
+ 
+-if ( $(OS) = NT ) && ! NT in $(--defs)
+-{
++#if ( $(OS) = NT ) && ! NT in $(--defs)
++#{
+     --defs += NT ;
+-}
++#}
+ --defs += YYSTACKSIZE=5000 ;
+ 
+ if $(with-python)
+@@ -590,7 +590,8 @@
+ rule .exe
+ {
+     local exe = $(<) ;
+-    if $(OS) = NT || ( $(UNIX) = true && $(OS) = CYGWIN ) { exe = $(exe:S=.exe) ; }
++#    if $(OS) = NT || ( $(UNIX) = true && $(OS) = CYGWIN ) { exe = $(exe:S=.exe) ; }
++    exe = $(exe:S=.exe) ;
+     LOCATE on $(exe) = $(locate-target) ;
+     DEPENDS all : $(exe) ;
+     .mkdir $(locate-target) ;
