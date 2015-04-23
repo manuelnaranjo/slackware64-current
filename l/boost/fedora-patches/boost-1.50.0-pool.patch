@@ -1,7 +1,7 @@
-Index: boost/pool/pool.hpp
+Index: a/boost/pool/pool.hpp
 ===================================================================
---- boost/pool/pool.hpp	(revision 78317)
-+++ boost/pool/pool.hpp	(revision 78326)
+--- a/boost/pool/pool.hpp	(revision 78317)
++++ a/boost/pool/pool.hpp	(revision 78326)
 @@ -27,4 +27,6 @@
  #include <boost/pool/poolfwd.hpp>
  
@@ -88,10 +88,10 @@ Index: boost/pool/pool.hpp
 +    set_next_size(min BOOST_PREVENT_MACRO_SUBSTITUTION(next_size << 1, max_size * requested_size / partition_size));
  
    //  insert it into the list,
-Index: libs/pool/test/test_bug_6701.cpp
+Index: a/libs/pool/test/test_bug_6701.cpp
 ===================================================================
---- libs/pool/test/test_bug_6701.cpp	(revision 78326)
-+++ libs/pool/test/test_bug_6701.cpp	(revision 78326)
+--- a/libs/pool/test/test_bug_6701.cpp	(revision 78326)
++++ a/libs/pool/test/test_bug_6701.cpp	(revision 78326)
 @@ -0,0 +1,27 @@
 +/* Copyright (C) 2012 Étienne Dupuis
 +* 

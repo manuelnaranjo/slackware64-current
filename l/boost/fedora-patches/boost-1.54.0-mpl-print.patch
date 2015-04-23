@@ -1,7 +1,7 @@
-Index: boost/mpl/print.hpp
+Index: a/boost/mpl/print.hpp
 ===================================================================
---- boost/mpl/print.hpp	(revision 83411)
-+++ boost/mpl/print.hpp	(working copy)
+--- a/boost/mpl/print.hpp	(revision 83411)
++++ a/boost/mpl/print.hpp	(working copy)
 @@ -45,22 +45,21 @@
      : mpl::identity<T>
  #if defined(__MWERKS__)

@@ -1,7 +1,7 @@
-Index: boost/date_time/date_parsing.hpp
+Index: a/boost/date_time/date_parsing.hpp
 ===================================================================
---- boost/date_time/date_parsing.hpp	(revision 85073)
-+++ boost/date_time/date_parsing.hpp	(working copy)
+--- a/boost/date_time/date_parsing.hpp	(revision 85073)
++++ a/boost/date_time/date_parsing.hpp	(working copy)
 @@ -113,7 +113,6 @@
          spec_str = "mdy";
        }
@@ -18,10 +18,10 @@ Index: boost/date_time/date_parsing.hpp
        //typename date_type::ymd_type ymd((year_type::min)(),1,1);
        unsigned short y = 0, m = 0, d = 0;
  
-Index: boost/date_time/local_time/local_time_io.hpp
+Index: a/boost/date_time/local_time/local_time_io.hpp
 ===================================================================
---- boost/date_time/local_time/local_time_io.hpp	(revision 85073)
-+++ boost/date_time/local_time/local_time_io.hpp	(working copy)
+--- a/boost/date_time/local_time/local_time_io.hpp	(revision 85073)
++++ a/boost/date_time/local_time/local_time_io.hpp	(working copy)
 @@ -36,7 +36,6 @@
      boost::io::ios_flags_saver iflags(os);
      typedef local_date_time time_type;//::utc_time_type typename 
@@ -38,10 +38,10 @@ Index: boost/date_time/local_time/local_time_io.hpp
      std::ostreambuf_iterator<CharT> oitr(os);
      if (std::has_facet<custom_facet>(os.getloc())) {
        std::use_facet<custom_facet>(os.getloc()).put(oitr, os, os.fill(), p);
-Index: boost/date_time/posix_time/posix_time_io.hpp
+Index: a/boost/date_time/posix_time/posix_time_io.hpp
 ===================================================================
---- boost/date_time/posix_time/posix_time_io.hpp	(revision 85073)
-+++ boost/date_time/posix_time/posix_time_io.hpp	(working copy)
+--- a/boost/date_time/posix_time/posix_time_io.hpp	(revision 85073)
++++ a/boost/date_time/posix_time/posix_time_io.hpp	(working copy)
 @@ -47,7 +47,6 @@
               const ptime& p) {
      boost::io::ios_flags_saver iflags(os);
@@ -66,10 +66,10 @@ Index: boost/date_time/posix_time/posix_time_io.hpp
      std::ostreambuf_iterator<CharT> oitr(os);
      if (std::has_facet<custom_ptime_facet>(os.getloc()))
        std::use_facet<custom_ptime_facet>(os.getloc()).put(oitr, os, os.fill(), td);
-Index: boost/date_time/string_convert.hpp
+Index: a/boost/date_time/string_convert.hpp
 ===================================================================
---- boost/date_time/string_convert.hpp	(revision 85073)
-+++ boost/date_time/string_convert.hpp	(working copy)
+--- a/boost/date_time/string_convert.hpp	(revision 85073)
++++ a/boost/date_time/string_convert.hpp	(working copy)
 @@ -21,7 +21,6 @@
    inline
    std::basic_string<OutputT> convert_string_type(const std::basic_string<InputT>& inp_str)
@@ -78,10 +78,10 @@ Index: boost/date_time/string_convert.hpp
      typedef std::basic_string<OutputT> output_type;
      output_type result;
      result.insert(result.begin(), inp_str.begin(), inp_str.end());
-Index: boost/date_time/strings_from_facet.hpp
+Index: a/boost/date_time/strings_from_facet.hpp
 ===================================================================
---- boost/date_time/strings_from_facet.hpp	(revision 85073)
-+++ boost/date_time/strings_from_facet.hpp	(working copy)
+--- a/boost/date_time/strings_from_facet.hpp	(revision 85073)
++++ a/boost/date_time/strings_from_facet.hpp	(working copy)
 @@ -35,7 +35,6 @@
  {
    typedef std::basic_string<charT> string_type;

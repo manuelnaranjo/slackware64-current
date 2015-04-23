@@ -1,7 +1,7 @@
-Index: boost/tuple/detail/tuple_basic.hpp
+Index: a/boost/tuple/detail/tuple_basic.hpp
 ===================================================================
---- boost/tuple/detail/tuple_basic.hpp	(revision 85075)
-+++ boost/tuple/detail/tuple_basic.hpp	(working copy)
+--- a/boost/tuple/detail/tuple_basic.hpp	(revision 85075)
++++ a/boost/tuple/detail/tuple_basic.hpp	(working copy)
 @@ -225,7 +225,6 @@
  get(const cons<HT, TT>& c BOOST_APPEND_EXPLICIT_TEMPLATE_NON_TYPE(int, N)) {
    typedef BOOST_DEDUCED_TYPENAME detail::drop_front<N>::BOOST_NESTED_TEMPLATE

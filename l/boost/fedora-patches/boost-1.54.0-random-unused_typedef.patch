@@ -1,7 +1,7 @@
-Index: boost/random/generate_canonical.hpp
+Index: a/boost/random/generate_canonical.hpp
 ===================================================================
---- boost/random/generate_canonical.hpp	(revision 85073)
-+++ boost/random/generate_canonical.hpp	(working copy)
+--- a/boost/random/generate_canonical.hpp	(revision 85073)
++++ a/boost/random/generate_canonical.hpp	(working copy)
 @@ -54,7 +54,6 @@
      using std::floor;
      BOOST_ASSERT((g.min)() == 0);
@@ -10,10 +10,10 @@ Index: boost/random/generate_canonical.hpp
      std::size_t digits = std::numeric_limits<RealType>::digits;
      std::size_t engine_bits = detail::generator_bits<URNG>::value();
      std::size_t b = (std::min)(bits, digits);
-Index: boost/random/uniform_real_distribution.hpp
+Index: a/boost/random/uniform_real_distribution.hpp
 ===================================================================
---- boost/random/uniform_real_distribution.hpp	(revision 85073)
-+++ boost/random/uniform_real_distribution.hpp	(working copy)
+--- a/boost/random/uniform_real_distribution.hpp	(revision 85073)
++++ a/boost/random/uniform_real_distribution.hpp	(working copy)
 @@ -36,7 +36,6 @@
  {
      for(;;) {

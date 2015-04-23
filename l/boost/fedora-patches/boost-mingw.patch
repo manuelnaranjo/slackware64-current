@@ -1,5 +1,5 @@
---- libs/thread/build/Jamfile.v2.mingw	2012-12-04 15:05:00.027057650 +0100
-+++ libs/thread/build/Jamfile.v2	2012-12-04 15:05:22.488292220 +0100
+--- a/libs/thread/build/Jamfile.v2.mingw	2012-12-04 15:05:00.027057650 +0100
++++ a/libs/thread/build/Jamfile.v2	2012-12-04 15:05:22.488292220 +0100
 @@ -101,7 +101,8 @@
  local rule default_threadapi ( )
  {
@@ -10,8 +10,8 @@
      return $(api) ;
  }
  
---- libs/context/build/Jamfile.v2.orig	2013-03-03 13:39:59.684868916 +0100
-+++ libs/context/build/Jamfile.v2	2013-03-03 15:09:09.893232829 +0100
+--- a/libs/context/build/Jamfile.v2.orig	2013-03-03 13:39:59.684868916 +0100
++++ a/libs/context/build/Jamfile.v2	2013-03-03 15:09:09.893232829 +0100
 @@ -26,8 +26,9 @@
  local rule default_binary_format ( )
  {
@@ -74,8 +74,8 @@
     : asm/make_x86_64_ms_pe_masm.asm
       asm/jump_x86_64_ms_pe_masm.asm
       dummy.cpp
---- libs/context/src/asm/make_i386_ms_pe_gas.S.orig	2013-03-03 13:41:28.645502113 +0100
-+++ libs/context/src/asm/make_i386_ms_pe_gas.S	2013-03-03 14:39:27.590477410 +0100
+--- a/libs/context/src/asm/make_i386_ms_pe_gas.S.orig	2013-03-03 13:41:28.645502113 +0100
++++ a/libs/context/src/asm/make_i386_ms_pe_gas.S	2013-03-03 14:39:27.590477410 +0100
 @@ -0,0 +1,115 @@
 +/*
 +            Copyright Oliver Kowalke 2009.
@@ -192,8 +192,8 @@
 +    hlt
 +
 +.def	__exit;	.scl	2;	.type	32;	.endef  /* standard C library function */
---- libs/context/src/asm/jump_i386_ms_pe_gas.S.orig	2013-03-03 13:41:34.332670479 +0100
-+++ libs/context/src/asm/jump_i386_ms_pe_gas.S	2013-03-03 14:35:35.634611625 +0100
+--- a/libs/context/src/asm/jump_i386_ms_pe_gas.S.orig	2013-03-03 13:41:34.332670479 +0100
++++ a/libs/context/src/asm/jump_i386_ms_pe_gas.S	2013-03-03 14:35:35.634611625 +0100
 @@ -0,0 +1,108 @@
 +/*
 +            Copyright Oliver Kowalke 2009.
@@ -303,8 +303,8 @@
 +    movl    0x14(%ecx), %ecx        /* fetch the address to return to */
 +
 +    jmp     *%ecx                   /* indirect jump to context */
---- libs/context/src/asm/make_x86_64_ms_pe_gas.S.orig	2013-03-03 13:43:03.137299031 +0100
-+++ libs/context/src/asm/make_x86_64_ms_pe_gas.S	2013-03-03 14:54:16.036775106 +0100
+--- a/libs/context/src/asm/make_x86_64_ms_pe_gas.S.orig	2013-03-03 13:43:03.137299031 +0100
++++ a/libs/context/src/asm/make_x86_64_ms_pe_gas.S	2013-03-03 14:54:16.036775106 +0100
 @@ -0,0 +1,132 @@
 +/*
 +            Copyright Oliver Kowalke 2009.
@@ -438,8 +438,8 @@
 +.seh_endproc
 +
 +.def	_exit;	.scl	2;	.type	32;	.endef  /* standard C library function */
---- libs/context/src/asm/jump_x86_64_ms_pe_gas.S.orig	2013-03-03 13:42:57.753139784 +0100
-+++ libs/context/src/asm/jump_x86_64_ms_pe_gas.S	2013-03-03 15:06:08.269856857 +0100
+--- a/libs/context/src/asm/jump_x86_64_ms_pe_gas.S.orig	2013-03-03 13:42:57.753139784 +0100
++++ a/libs/context/src/asm/jump_x86_64_ms_pe_gas.S	2013-03-03 15:06:08.269856857 +0100
 @@ -0,0 +1,189 @@
 +/*
 +            Copyright Oliver Kowalke 2009.
